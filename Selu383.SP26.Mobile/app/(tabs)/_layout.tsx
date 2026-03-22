@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
+import { HomeHeader } from "@/components/headers/home-header";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import Feather from "@expo/vector-icons/Feather";
@@ -23,6 +24,11 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
+          headerShown: true,
+          headerTitle: () => <HomeHeader />,
+          headerStyle: {
+            height: 180,
+          },
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="home" color={color} />
           ),
