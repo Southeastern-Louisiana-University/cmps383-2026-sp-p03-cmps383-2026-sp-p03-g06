@@ -1,4 +1,5 @@
 import { ThemedView } from "@/components/themed-view";
+import { router } from "expo-router";
 import React from "react";
 import {
   Image,
@@ -6,6 +7,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function HomeScreen() {
@@ -26,10 +28,30 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => console.log("Button pressed")}
+          onPress={() => router.push("/rewards")}
         >
           <Text style={styles.buttonText}>Learn More</Text>
         </TouchableOpacity>
+      </ThemedView>
+      <ThemedView style={styles.secondCard}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            }}
+            style={styles.overlayImage}
+          />
+          <View style={styles.overlay}>
+            <Text style={styles.overlayText}>Quick Order</Text>
+            <Text style={styles.overlaySubText}>Reorder your favorites</Text>
+            <TouchableOpacity
+              style={styles.overlayButton}
+              onPress={() => router.push("/order")}
+            >
+              <Text style={styles.overlayButtonText}>Order Now</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ThemedView>
     </ScrollView>
   );
@@ -88,5 +110,60 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     color: "#0e5f00",
+  },
+  secondCard: {
+    margin: 10,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: "hidden",
+  },
+  imageContainer: {
+    position: "relative",
+    height: 200,
+  },
+  overlayImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+  },
+  overlayText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 8,
+  },
+  overlaySubText: {
+    fontSize: 16,
+    color: "white",
+    marginBottom: 16,
+  },
+  overlayButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  overlayButtonText: {
+    color: "#0e5f00",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });

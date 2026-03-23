@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 export function HomeHeader() {
@@ -14,13 +14,19 @@ export function HomeHeader() {
   const [search, setSearch] = useState("");
   return (
     <View style={styles.container}>
-      <ThemedText type="subtitle">
-        {getGreeting()} <Ionicons name="cafe" size={24} color="black" />
-      </ThemedText>
+      <View style={styles.topRow}>
+        <ThemedText type="subtitle">{getGreeting()}</ThemedText>
+        <TouchableOpacity
+          style={styles.cartButton}
+          onPress={() => console.log("Cart pressed")}
+        >
+          <Ionicons name="cart" size={20} color="#333" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#888" />
         <TextInput
-          placeholder="Search for coffee..."
+          placeholder="Search for your favorite coffee"
           value={search}
           onChangeText={setSearch}
           style={styles.searchInput}
@@ -33,13 +39,26 @@ export function HomeHeader() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    paddingTop: 40,
-    alignItems: "flex-start",
+    paddingTop: 60,
+    alignItems: "stretch",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#fff",
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cartButton: {
+    padding: 4,
+    borderRadius: 8,
+    backgroundColor: "#d2d1d1",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#d6d6d6",
     borderRadius: 10,
     marginTop: 12,
     width: "100%",

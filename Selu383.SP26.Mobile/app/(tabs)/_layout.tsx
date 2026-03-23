@@ -25,7 +25,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           headerShown: true,
-          headerTitle: () => <HomeHeader />,
+          header: () => <HomeHeader />,
           headerStyle: {
             height: 180,
           },
@@ -35,7 +35,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="order"
         options={{
           title: "Order",
           tabBarIcon: ({ color }) => (
