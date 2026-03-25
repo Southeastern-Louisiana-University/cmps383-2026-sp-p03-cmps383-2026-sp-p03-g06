@@ -1,98 +1,169 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { ThemedView } from "@/components/themed-view";
+import { router } from "expo-router";
+import React from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ThemedView style={styles.topCard}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={{
+            uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          }}
+          style={styles.image}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+        <Text style={styles.cardText}>Your day awaits</Text>
+        <Text style={styles.cardSubText}>
+          Explore various potential rewards and offers you can redeem with your
+          points.
+        </Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/rewards")}
+        >
+          <Text style={styles.buttonText}>Learn More</Text>
+        </TouchableOpacity>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+      <ThemedView style={styles.secondCard}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            }}
+            style={styles.overlayImage}
+          />
+          <View style={styles.overlay}>
+            <Text style={styles.overlayText}>Quick Order</Text>
+            <Text style={styles.overlaySubText}>Reorder your favorites</Text>
+            <TouchableOpacity
+              style={styles.overlayButton}
+              onPress={() => router.push("/order")}
+            >
+              <Text style={styles.overlayButtonText}>Order Now</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ThemedView>
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 2,
   },
-  stepContainer: {
-    gap: 8,
+  topCard: {
+    margin: 10,
+    paddingBottom: 20,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+  },
+  cardText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#2D2D2D",
+    textAlign: "left",
+    marginTop: 15,
+    paddingHorizontal: 20,
+  },
+  cardSubText: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: "#666666",
+    textAlign: "left",
+    marginTop: 5,
+    paddingHorizontal: 20,
+  },
+  button: {
+    marginTop: 15,
+    marginRight: 20,
+    borderRadius: 18,
+    backgroundColor: "#0e5f00",
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    alignSelf: "flex-end",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#ffffff",
+  },
+  secondCard: {
+    margin: 10,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: "hidden",
+  },
+  imageContainer: {
+    position: "relative",
+    height: 250,
+  },
+  overlayImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+  },
+  overlayText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  overlaySubText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "white",
+    marginBottom: 16,
+  },
+  overlayButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    borderRadius: 18,
+  },
+  overlayButtonText: {
+    color: "#0e5f00",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
