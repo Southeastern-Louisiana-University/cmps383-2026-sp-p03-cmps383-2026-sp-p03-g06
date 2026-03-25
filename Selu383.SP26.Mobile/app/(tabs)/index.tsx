@@ -60,7 +60,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 2,
   },
   topCard: {
     margin: 10,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   cardText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     color: "#2D2D2D",
     textAlign: "left",
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   cardSubText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "400",
     color: "#666666",
     textAlign: "left",
@@ -99,17 +99,16 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 15,
     marginRight: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#0e5f00",
+    borderRadius: 18,
+    backgroundColor: "#0e5f00",
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 40,
     alignSelf: "flex-end",
     alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
-    color: "#0e5f00",
+    color: "#ffffff",
   },
   secondCard: {
     margin: 10,
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: "relative",
-    height: 200,
+    height: 250,
   },
   overlayImage: {
     width: "100%",
@@ -152,14 +151,15 @@ const styles = StyleSheet.create({
   },
   overlaySubText: {
     fontSize: 16,
+    fontWeight: "500",
     color: "white",
     marginBottom: 16,
   },
   overlayButton: {
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingHorizontal: 40,
+    borderRadius: 18,
   },
   overlayButtonText: {
     color: "#0e5f00",
