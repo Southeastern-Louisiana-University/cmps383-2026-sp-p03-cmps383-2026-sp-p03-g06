@@ -28,9 +28,6 @@ export function HomeHeader() {
           <FontAwesome5 name="shopping-cart" size={20} color="#333" />
           <ThemedText style={styles.actionText}>View Order</ThemedText>
         </TouchableOpacity>
-
-        <FontAwesome5 name="grip-lines-vertical" size={20} color="black" />
-
         <TouchableOpacity
           style={styles.signInButton}
           onPress={() => router.push("/account")}

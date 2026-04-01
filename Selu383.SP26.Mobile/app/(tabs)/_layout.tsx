@@ -3,6 +3,7 @@ import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { HomeHeader } from "@/components/headers/home-header";
+import { LocationSelectHeader } from "@/components/headers/location-select-header";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import Feather from "@expo/vector-icons/Feather";
@@ -38,6 +39,11 @@ export default function TabLayout() {
         name="order"
         options={{
           title: "Order",
+          headerShown: true,
+          header: () => <LocationSelectHeader />,
+          headerStyle: {
+            height: 180,
+          },
           tabBarIcon: ({ color }) => (
             <Feather size={28} name="coffee" color={color} />
           ),
