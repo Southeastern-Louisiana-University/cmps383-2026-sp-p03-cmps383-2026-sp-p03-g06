@@ -2,6 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { getLocations } from "@/services/apis";
 import { Location } from "@/services/types";
+import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView from "react-native-maps";
@@ -25,7 +26,13 @@ export default function OrderScreen() {
   }
 
   const renderLocationItem = (location: Location) => (
-    <TouchableOpacity key={location.id} style={styles.locationItem}>
+    <TouchableOpacity
+      key={location.id}
+      style={styles.locationItem}
+      onPress={() => {
+        router.push("/(tabs)/orderCatalog");
+      }}
+    >
       <ThemedText style={styles.locationName}>{location.name}</ThemedText>
       <ThemedText style={styles.locationAddress}>{location.address}</ThemedText>
       <ThemedText style={styles.locationAddress}>

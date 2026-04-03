@@ -4,6 +4,7 @@ import React from "react";
 import { HapticTab } from "@/components/haptic-tab";
 import { HomeHeader } from "@/components/headers/home-header";
 import { LocationSelectHeader } from "@/components/headers/location-select-header";
+import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import Feather from "@expo/vector-icons/Feather";
@@ -81,6 +82,17 @@ export default function TabLayout() {
         name="signUp"
         options={{
           href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="orderCatalog"
+        options={{
+          href: null, // Hide from tab bar
+          headerShown: true,
+          header: () => <OrderCatalogHeader />,
+          headerStyle: {
+            height: 180,
+          },
         }}
       />
     </Tabs>
