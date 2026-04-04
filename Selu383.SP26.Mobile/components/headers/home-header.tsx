@@ -1,11 +1,14 @@
+import { useAuthentication } from "@/hooks/use-authentication";
+import { logoutUser } from "@/services/apis";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import { useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 export function HomeHeader() {
+  const { isLoggedIn } = useAuthentication();
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Ready to Caffeinate?  ";
@@ -13,7 +16,29 @@ export function HomeHeader() {
     else return "Evening Treat Awaits!  ";
   };
 
-  const [search, setSearch] = useState("");
+  const handleSignOut = async () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign Out",
+        onPress: async () => {
+          try {
+            await logoutUser();
+            // The useAuthentication hook will automatically refresh the state
+          } catch (error) {
+            console.log("Logout error:", error);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleSignIn = () => {
+    router.push("/account");
+  };
   return (
     <View style={styles.container}>
       <ThemedText type="title" style={styles.greetingMessage}>
@@ -28,13 +53,23 @@ export function HomeHeader() {
           <FontAwesome5 name="shopping-cart" size={20} color="#333" />
           <ThemedText style={styles.actionText}>View Order</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.signInButton}
-          onPress={() => router.push("/account")}
-        >
-          <Ionicons name="person" size={20} color="#333" />
-          <ThemedText style={styles.actionText}>Sign In</ThemedText>
-        </TouchableOpacity>
+
+        {isLoggedIn ? (
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#333" />
+            <ThemedText style={[styles.actionText, styles.signOutText]}>
+              Sign Out
+            </ThemedText>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+            <Ionicons name="person" size={20} color="#333" />
+            <ThemedText style={styles.actionText}>Sign In</ThemedText>
+          </TouchableOpacity>
+        )}
       </View>
       {/* <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#888" />
@@ -80,6 +115,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 16,
+  },
+  signOutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 16,
+  },
+  signOutText: {
+    color: "#333",
   },
   actionText: {
     marginLeft: 4,

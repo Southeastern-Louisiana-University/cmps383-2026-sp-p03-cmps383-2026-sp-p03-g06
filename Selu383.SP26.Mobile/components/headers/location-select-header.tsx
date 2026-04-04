@@ -13,7 +13,6 @@ export function LocationSelectHeader() {
       <View style={styles.actionContainer}>
         <TouchableOpacity
           onPress={() => {
-            // OPEN LOCATION SELECT MODAL
             setShowModal(true);
           }}
         >
@@ -22,7 +21,6 @@ export function LocationSelectHeader() {
         </TouchableOpacity>
       </View>
 
-      {/* Render modal when showModal is true */}
       <SearchLocation visible={showModal} onClose={() => setShowModal(false)} />
     </View>
   );

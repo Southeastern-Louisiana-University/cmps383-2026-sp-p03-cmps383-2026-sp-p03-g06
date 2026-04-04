@@ -3,13 +3,14 @@ import { ThemedView } from "@/components/themed-view";
 import { getLocations } from "@/services/apis";
 import { Location } from "@/services/types";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView from "react-native-maps";
 
 export default function OrderScreen() {
-  const [locations, setLocations] = React.useState<Location[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadLocations();
   }, []);
