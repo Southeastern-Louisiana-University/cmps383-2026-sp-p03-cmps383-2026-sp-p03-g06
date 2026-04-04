@@ -1,0 +1,270 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Selu383.SP26.Api.Data;
+using Selu383.SP26.Api.Extensions;
+using Selu383.SP26.Api.Features.Auth;
+using Selu383.SP26.Api.Features.Locations;
+using Selu383.SP26.Api.Features.Orders;
+
+namespace Selu383.SP26.Api.Controllers;
+
+[Route("api/orders")]
+[ApiController]
+public class OrdersController(DataContext dataContext) : ControllerBase
+{
+    [HttpGet]
+    [Authorize]
+    public ActionResult<IEnumerable<OrderDto>> GetMyOrders()
+    {
+        var userId = User.GetCurrentUserId();
+        
+        var orders = dataContext.Set<Order>()
+            .Where(x => x.CustomerId == userId)
+            .Select(x => MapOrderToDto(x))
+            .ToList();
+
+        return Ok(orders);
+    }
+
+    [HttpGet("all")]
+    [Authorize(Roles = RoleNames.Admin)]
+    public ActionResult<IEnumerable<OrderDto>> GetAllOrders()
+    {
+        var orders = dataContext.Set<Order>()
+            .Select(x => MapOrderToDto(x))
+            .ToList();
+
+        return Ok(orders);
+    }
+
+    [HttpGet("{id}")]
+    [Authorize]
+    public ActionResult<OrderDto> GetById(int id)
+    {
+        var userId = User.GetCurrentUserId();
+        
+        var order = dataContext.Set<Order>()
+            .FirstOrDefault(x => x.Id == id);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        // Check authorization: user can only see their own orders, admins can see all
+        if (order.CustomerId != userId && !User.IsInRole(RoleNames.Admin))
+        {
+            return Forbid();
+        }
+
+        return Ok(MapOrderToDto(order));
+    }
+
+    [HttpPost]
+    [Authorize]
+    public ActionResult<OrderDto> CreateOrder(CreateOrderDto dto)
+    {
+        if (dto.LocationId <= 0)
+        {
+            return BadRequest("Valid LocationId is required");
+        }
+
+        if (dto.OrderItems == null || !dto.OrderItems.Any())
+        {
+            return BadRequest("Order must contain at least one item");
+        }
+
+        // Verify location exists
+        var locationExists = dataContext.Set<Location>()
+            .Any(x => x.Id == dto.LocationId);
+
+        if (!locationExists)
+        {
+            return BadRequest("Location does not exist");
+        }
+
+        // Verify all menu items exist and get prices
+        var orderTotal = decimal.Zero;
+        var orderItemsToAdd = new List<OrderItem>();
+
+        foreach (var itemDto in dto.OrderItems)
+        {
+            if (itemDto.Quantity <= 0)
+            {
+                return BadRequest("Quantity must be greater than 0");
+            }
+
+            var menuItem = dataContext.Set<Features.MenuItem.MenuItem>()
+                .FirstOrDefault(x => x.Id == itemDto.MenuItemId);
+
+            if (menuItem == null)
+            {
+                return BadRequest($"Menu item {itemDto.MenuItemId} does not exist");
+            }
+
+            var itemTotal = menuItem.Price * itemDto.Quantity;
+            orderTotal += itemTotal;
+
+            orderItemsToAdd.Add(new OrderItem
+            {
+                MenuItemId = itemDto.MenuItemId,
+                Quantity = itemDto.Quantity,
+                UnitPrice = menuItem.Price,
+                TotalPrice = itemTotal,
+                CustomizationJson = itemDto.CustomizationJson
+            });
+        }
+
+        var userId = User.GetCurrentUserId();
+
+        var order = new Order
+        {
+            CustomerId = userId,
+            LocationId = dto.LocationId,
+            TotalPrice = orderTotal,
+            Status = "Pending",
+            CreatedAt = DateTime.Now,
+            OrderItems = orderItemsToAdd
+        };
+
+        dataContext.Set<Order>().Add(order);
+        dataContext.SaveChanges();
+
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapOrderToDto(order));
+    }
+
+    [HttpPost("guest")]
+    public ActionResult<OrderDto> CreateGuestOrder(CreateGuestOrderDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CustomerName))
+        {
+            return BadRequest("Customer name is required");
+        }
+
+        if (dto.LocationId <= 0)
+        {
+            return BadRequest("Valid LocationId is required");
+        }
+
+        if (dto.OrderItems == null || !dto.OrderItems.Any())
+        {
+            return BadRequest("Order must contain at least one item");
+        }
+
+        // Verify location exists
+        var locationExists = dataContext.Set<Location>()
+            .Any(x => x.Id == dto.LocationId);
+
+        if (!locationExists)
+        {
+            return BadRequest("Location does not exist");
+        }
+
+        // Verify all menu items exist and get prices
+        var orderTotal = decimal.Zero;
+        var orderItemsToAdd = new List<OrderItem>();
+
+        foreach (var itemDto in dto.OrderItems)
+        {
+            if (itemDto.Quantity <= 0)
+            {
+                return BadRequest("Quantity must be greater than 0");
+            }
+
+            var menuItem = dataContext.Set<Features.MenuItem.MenuItem>()
+                .FirstOrDefault(x => x.Id == itemDto.MenuItemId);
+
+            if (menuItem == null)
+            {
+                return BadRequest($"Menu item {itemDto.MenuItemId} does not exist");
+            }
+
+            var itemTotal = menuItem.Price * itemDto.Quantity;
+            orderTotal += itemTotal;
+
+            orderItemsToAdd.Add(new OrderItem
+            {
+                MenuItemId = itemDto.MenuItemId,
+                Quantity = itemDto.Quantity,
+                UnitPrice = menuItem.Price,
+                TotalPrice = itemTotal,
+                CustomizationJson = itemDto.CustomizationJson
+            });
+        }
+
+        var order = new Order
+        {
+            CustomerName = dto.CustomerName,
+            LocationId = dto.LocationId,
+            TotalPrice = orderTotal,
+            Status = "Pending",
+            CreatedAt = DateTime.Now,
+            OrderItems = orderItemsToAdd
+        };
+
+        dataContext.Set<Order>().Add(order);
+        dataContext.SaveChanges();
+
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapOrderToDto(order));
+    }
+
+    [HttpPut("{id}/status")]
+    [Authorize(Roles = RoleNames.Admin)]
+    public ActionResult<OrderDto> UpdateOrderStatus(int id, UpdateOrderStatusDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Status))
+        {
+            return BadRequest("Status is required");
+        }
+
+        var validStatuses = new[] { "Pending", "Ready", "Completed", "Cancelled" };
+        if (!validStatuses.Contains(dto.Status))
+        {
+            return BadRequest($"Invalid status. Valid values: {string.Join(", ", validStatuses)}");
+        }
+
+        var order = dataContext.Set<Order>()
+            .FirstOrDefault(x => x.Id == id);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        order.Status = dto.Status;
+
+        if (dto.Status == "Completed")
+        {
+            order.PickedUpAt = DateTime.Now;
+        }
+
+        dataContext.SaveChanges();
+
+        return Ok(MapOrderToDto(order));
+    }
+
+    private OrderDto MapOrderToDto(Order order)
+    {
+        return new OrderDto
+        {
+            Id = order.Id,
+            CustomerId = order.CustomerId,
+            CustomerName = order.CustomerName,
+            LocationId = order.LocationId,
+            TotalPrice = order.TotalPrice,
+            Status = order.Status,
+            CreatedAt = order.CreatedAt,
+            PickedUpAt = order.PickedUpAt,
+            OrderItems = order.OrderItems.Select(x => new OrderItemDto
+            {
+                Id = x.Id,
+                MenuItemId = x.MenuItemId,
+                Quantity = x.Quantity,
+                UnitPrice = x.UnitPrice,
+                TotalPrice = x.TotalPrice,
+                CustomizationJson = x.CustomizationJson
+            }).ToList()
+        };
+    }
+}

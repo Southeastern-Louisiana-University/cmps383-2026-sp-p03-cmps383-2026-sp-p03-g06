@@ -59,6 +59,55 @@ public class AuthenticationController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("register")]
+    public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.UserName))
+        {
+            return BadRequest("Username is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return BadRequest("Password is required");
+        }
+
+        // Check if username already exists
+        var existingUser = await userManager.FindByNameAsync(dto.UserName);
+        if (existingUser != null)
+        {
+            return BadRequest("Username already exists");
+        }
+
+        // Create new user
+        var newUser = new User
+        {
+            UserName = dto.UserName
+        };
+
+        var createResult = await userManager.CreateAsync(newUser, dto.Password);
+        if (!createResult.Succeeded)
+        {
+            var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+            return BadRequest($"Failed to create user: {errors}");
+        }
+
+        // Assign User role
+        var roleResult = await userManager.AddToRoleAsync(newUser, RoleNames.User);
+        if (!roleResult.Succeeded)
+        {
+            var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+            return BadRequest($"Failed to assign role: {errors}");
+        }
+
+        // Sign in the user
+        await signInManager.SignInAsync(newUser, false);
+
+        // Return user details
+        var resultDto = await GetUserDto(userManager.Users).SingleAsync(x => x.UserName == newUser.UserName);
+        return CreatedAtAction(nameof(Me), resultDto);
+    }
+
     private static IQueryable<UserDto> GetUserDto(IQueryable<User> users)
     {
         return users.Select(x => new UserDto

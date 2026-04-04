@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
+using Selu383.SP26.Api.Features.Orders;
+using Selu383.SP26.Api.Features.MenuItem;
 
 namespace Selu383.SP26.Api.Data;
 
@@ -17,6 +19,7 @@ public static class SeedHelper
         await AddUsers(serviceProvider);
 
         await AddLocations(dataContext);
+        await AddOrders(dataContext);
     }
 
     private static async Task AddUsers(IServiceProvider serviceProvider)
@@ -78,5 +81,110 @@ public static class SeedHelper
         );
 
         await dataContext.SaveChangesAsync();
+    }
+
+    private static async Task AddOrders(DataContext dataContext)
+    {
+        if (dataContext.Set<Order>().Any())
+        {
+            return;
+        }
+
+        var users = dataContext.Set<User>().Where(u => u.UserName != "galkadi").ToList();
+        var locations = dataContext.Set<Location>().ToList();
+        var menuItems = dataContext.Set<MenuItem>().ToList();
+
+        if (!users.Any() || !locations.Any() || !menuItems.Any())
+        {
+            return;
+        }
+
+        var orders = new List<Order>();
+
+        // Order 1: Bob's order - 2 items
+        if (users.FirstOrDefault(u => u.UserName == "bob") is var bob && bob != null && menuItems.Count >= 2)
+        {
+            var order1 = new Order
+            {
+                CustomerId = bob.Id,
+                LocationId = locations[0].Id,
+                Status = "Completed",
+                CreatedAt = DateTime.Now.AddDays(-5),
+                PickedUpAt = DateTime.Now.AddDays(-5).AddHours(1),
+                OrderItems = new List<OrderItem>
+                {
+                    new OrderItem
+                    {
+                        MenuItemId = menuItems[0].Id,
+                        Quantity = 2,
+                        UnitPrice = menuItems[0].Price,
+                        TotalPrice = menuItems[0].Price * 2
+                    },
+                    new OrderItem
+                    {
+                        MenuItemId = menuItems[1].Id,
+                        Quantity = 1,
+                        UnitPrice = menuItems[1].Price,
+                        TotalPrice = menuItems[1].Price
+                    }
+                }
+            };
+            order1.TotalPrice = order1.OrderItems.Sum(oi => oi.TotalPrice);
+            orders.Add(order1);
+        }
+
+        // Order 2: Sue's order - 1 item
+        if (users.FirstOrDefault(u => u.UserName == "sue") is var sue && sue != null && menuItems.Count >= 1)
+        {
+            var order2 = new Order
+            {
+                CustomerId = sue.Id,
+                LocationId = locations[1].Id,
+                Status = "Ready",
+                CreatedAt = DateTime.Now.AddHours(-2),
+                OrderItems = new List<OrderItem>
+                {
+                    new OrderItem
+                    {
+                        MenuItemId = menuItems[0].Id,
+                        Quantity = 1,
+                        UnitPrice = menuItems[0].Price,
+                        TotalPrice = menuItems[0].Price
+                    }
+                }
+            };
+            order2.TotalPrice = order2.OrderItems.Sum(oi => oi.TotalPrice);
+            orders.Add(order2);
+        }
+
+        // Order 3: Guest order
+        if (menuItems.Count >= 1)
+        {
+            var order3 = new Order
+            {
+                CustomerName = "John Guest",
+                LocationId = locations[2].Id,
+                Status = "Pending",
+                CreatedAt = DateTime.Now.AddMinutes(-30),
+                OrderItems = new List<OrderItem>
+                {
+                    new OrderItem
+                    {
+                        MenuItemId = menuItems[0].Id,
+                        Quantity = 3,
+                        UnitPrice = menuItems[0].Price,
+                        TotalPrice = menuItems[0].Price * 3
+                    }
+                }
+            };
+            order3.TotalPrice = order3.OrderItems.Sum(oi => oi.TotalPrice);
+            orders.Add(order3);
+        }
+
+        if (orders.Any())
+        {
+            dataContext.Set<Order>().AddRange(orders);
+            await dataContext.SaveChangesAsync();
+        }
     }
 }
