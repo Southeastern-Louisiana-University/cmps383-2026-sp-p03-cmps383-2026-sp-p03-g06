@@ -2,7 +2,10 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
+import { AccountHeader } from "@/components/headers/account-header";
 import { HomeHeader } from "@/components/headers/home-header";
+import { LocationSelectHeader } from "@/components/headers/location-select-header";
+import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import Feather from "@expo/vector-icons/Feather";
@@ -38,6 +41,11 @@ export default function TabLayout() {
         name="order"
         options={{
           title: "Order",
+          headerShown: true,
+          header: () => <LocationSelectHeader />,
+          headerStyle: {
+            height: 180,
+          },
           tabBarIcon: ({ color }) => (
             <Feather size={28} name="coffee" color={color} />
           ),
@@ -60,6 +68,11 @@ export default function TabLayout() {
         name="account"
         options={{
           title: "Account",
+          headerShown: true,
+          header: () => <AccountHeader />,
+          headerStyle: {
+            height: 180,
+          },
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="account" size={24} color={color} />
           ),
@@ -75,6 +88,17 @@ export default function TabLayout() {
         name="signUp"
         options={{
           href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="orderCatalog"
+        options={{
+          href: null, // Hide from tab bar
+          headerShown: true,
+          header: () => <OrderCatalogHeader />,
+          headerStyle: {
+            height: 180,
+          },
         }}
       />
     </Tabs>

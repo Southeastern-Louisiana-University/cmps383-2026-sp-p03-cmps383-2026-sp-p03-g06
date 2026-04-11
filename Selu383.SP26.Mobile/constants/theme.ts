@@ -5,8 +5,8 @@
 
 import { Platform } from "react-native";
 
-const tintColorLight = "#007AFF"; //blue
-const tintColorDark = "#007AFF"; //blue
+const tintColorLight = "#7bf1a8"; //blue
+const tintColorDark = "#7bf1a8"; //blue
 
 export const Colors = {
   light: {
@@ -37,6 +37,10 @@ export const Fonts = Platform.select({
     rounded: "ui-rounded",
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: "ui-monospace",
+    roboto: "Roboto",
+  },
+  android: {
+    roboto: "Roboto",
   },
   default: {
     sans: "normal",
