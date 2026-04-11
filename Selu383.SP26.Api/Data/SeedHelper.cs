@@ -4,6 +4,7 @@ using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
 using Selu383.SP26.Api.Features.MenuItem;
+using Selu383.SP26.Api.Features.Categories;
 
 namespace Selu383.SP26.Api.Data;
 
@@ -20,6 +21,8 @@ public static class SeedHelper
 
         await AddLocations(dataContext);
         await AddOrders(dataContext);
+        await AddCategories(dataContext);
+        await AddMenuItems(dataContext);
     }
 
     private static async Task AddUsers(IServiceProvider serviceProvider)
@@ -78,6 +81,26 @@ public static class SeedHelper
             new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
             new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
             new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
+        );
+
+        await dataContext.SaveChangesAsync();
+    }
+    private static async Task AddCategories(DataContext dataContext)
+    {
+        dataContext.Set<Category>().AddRange(
+            new Category { Name = "Lattes" },
+            new Category { Name = "Espressos" },
+            new Category { Name = "Machas"}
+        );
+
+        await dataContext.SaveChangesAsync();
+    }
+    private static async Task AddMenuItems(DataContext dataContext)
+    {
+        dataContext.Set<MenuItem>().AddRange(
+            new MenuItem {Name = "Drink 1", Description = "Drink 1 Description", Price = 9.99m,IsAvailable = true, CategoryId = 1},
+            new MenuItem {Name = "Drink 2", Description = "Drink 2 Description", Price = 12.99m, IsAvailable = true, CategoryId = 2 },
+            new MenuItem {Name = "Drink 3", Description = "Drink 3 Description", Price = 11.99m, IsAvailable = true, CategoryId = 3 }
         );
 
         await dataContext.SaveChangesAsync();
