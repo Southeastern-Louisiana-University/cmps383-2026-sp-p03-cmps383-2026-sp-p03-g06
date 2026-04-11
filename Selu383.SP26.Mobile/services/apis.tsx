@@ -1,4 +1,4 @@
-import { Location, LoginDto } from "./types";
+import { Location, LoginDto, RegisterDto } from "./types";
 const API_BASE = "https://selu383-sp26-p03-g06.azurewebsites.net";
 
 export async function getLocations() {
@@ -33,6 +33,35 @@ export async function loginUser(loginDto: LoginDto) {
         throw new Error("Invalid login credentials format");
       } else {
         throw new Error(`Login failed: ${response.status}`);
+      }
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function signUpUser(registerDto: RegisterDto) {
+  try {
+    const response = await fetch(`${API_BASE}/api/authentication/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(registerDto),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Registration failed - unauthorized");
+      } else if (response.status === 400) {
+        throw new Error("Invalid registration data format");
+      } else if (response.status === 409) {
+        throw new Error("Username already exists");
+      } else {
+        throw new Error(`Registration failed: ${response.status}`);
       }
     }
     const data = await response.json();

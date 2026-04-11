@@ -16,6 +16,11 @@ export interface LoginDto {
   password: string;
 }
 
+export interface RegisterDto {
+  userName: string;
+  password: string;
+}
+
 export interface OrderDto {
   id: number;
   locationId: number;
