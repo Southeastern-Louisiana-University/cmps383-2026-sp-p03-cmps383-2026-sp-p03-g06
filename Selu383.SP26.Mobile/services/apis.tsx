@@ -1,4 +1,10 @@
-import { Location, LoginDto, RegisterDto } from "./types";
+import {
+  CategoryDto,
+  Location,
+  LoginDto,
+  MenuItemDto,
+  RegisterDto,
+} from "./types";
 const API_BASE = "https://selu383-sp26-p03-g06.azurewebsites.net";
 
 export async function getLocations() {
@@ -110,4 +116,16 @@ export async function logoutUser() {
   } catch (error) {
     throw error;
   }
+}
+
+export async function getMenuItems() {
+  const response = await fetch(`${API_BASE}/api/menu-items`);
+  const data = await response.json();
+  return data as MenuItemDto[];
+}
+
+export async function getCategory() {
+  const response = await fetch(`${API_BASE}/api/categories`);
+  const data = await response.json();
+  return data as CategoryDto[];
 }

@@ -39,3 +39,17 @@ export interface CreateOrderDto {
   locationId: number;
   orderItems: { menuItemId: number; quantity: number }[];
 }
+
+export interface MenuItemDto {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  isAvailable: boolean;
+  categoryId: number;
+}
+
+export interface CategoryDto {
+  id: number;
+  name: string;
+}
