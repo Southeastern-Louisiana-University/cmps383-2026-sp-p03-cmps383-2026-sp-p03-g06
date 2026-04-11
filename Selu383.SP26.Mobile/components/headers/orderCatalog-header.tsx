@@ -13,11 +13,15 @@ import { ThemedText } from "../themed-text";
 interface OrderCatalogHeaderProps {
   onCategoryChange?: (categoryId: number | null) => void;
   onSearchChange?: (searchText: string) => void;
+  locationName?: string | null;
+  itemCount?: number;
 }
 
 export function OrderCatalogHeader({
   onCategoryChange,
   onSearchChange,
+  locationName,
+  itemCount,
 }: OrderCatalogHeaderProps) {
   const [filter, setFilter] = React.useState("");
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -52,6 +56,16 @@ export function OrderCatalogHeader({
   };
   return (
     <View style={styles.container}>
+      {locationName && (
+        <View style={styles.locationBar}>
+          <ThemedText style={styles.locationText}>{locationName}</ThemedText>
+          {itemCount != null && itemCount > 0 && (
+            <ThemedText style={styles.orderCountText}>
+              {itemCount.toString()} item{itemCount === 1 ? "" : "s"} in order
+            </ThemedText>
+          )}
+        </View>
+      )}
       <View style={styles.actionContainer}>
         <TextInput
           placeholder="Search for menu items..."
@@ -86,7 +100,9 @@ export function OrderCatalogHeader({
               ]}
               onPress={() => handleCategoryPress(category.id)}
             >
-              <ThemedText style={styles.filterText}>{category.name}</ThemedText>
+              <ThemedText style={styles.filterText}>
+                {category.name || "Category"}
+              </ThemedText>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -104,13 +120,31 @@ const styles = StyleSheet.create({
     borderBottomColor: "#e0e0e0",
     backgroundColor: "#fff",
   },
+  locationBar: {
+    marginTop: 20,
+    paddingHorizontal: 15,
+    borderBottomColor: "#e9ecef",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 8,
+  },
+  locationText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#0e5f00",
+  },
+  orderCountText: {
+    fontSize: 14,
+    color: "#434242",
+    fontWeight: "500",
+  },
   actionContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
+
     paddingHorizontal: 10,
-    paddingTop: 20,
   },
   searchInput: {
     width: "95%",

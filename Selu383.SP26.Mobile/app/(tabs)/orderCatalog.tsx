@@ -1,13 +1,17 @@
 import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
+import { ViewCart } from "@/components/modals/ViewCart";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
@@ -17,7 +21,26 @@ export default function OrderCatalogScreen() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showCart, setShowCart] = useState(false);
+  //state for location and orderContext
+  const { selectedLocationId, locationName, addOrderItem, itemCount } =
+    useOrder();
 
+  //if no location selected, route to locationSelection
+  useEffect(() => {
+    if (selectedLocationId === null) {
+      router.push("/(tabs)/order");
+    }
+  }, [selectedLocationId]);
+
+  const handleAddToOrder = (menuItem: MenuItemDto) => {
+    addOrderItem({
+      menuItemId: menuItem.id,
+      quantity: 1,
+      customizationJson: undefined, //THIS IS WHERE CUSTOMIZATION GOES apparently..
+    });
+  };
+  //hydrate catalog
   useEffect(() => {
     fetchMenuItems();
   }, []);
@@ -32,37 +55,49 @@ export default function OrderCatalogScreen() {
       setLoading(false);
     }
   };
-
+  //state for category filters in header
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategory(categoryId);
   };
-
+  //state for search filter in header
   const handleSearchChange = (searchText: string) => {
     setSearchQuery(searchText);
   };
-
-  // Filter menu items based on selected category and search query
+  //filters the menu based on the filters in header, if no filters = all items show
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesCategory =
       selectedCategory === null || item.categoryId === selectedCategory;
     const matchesSearch =
       searchQuery === "" ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
+  //card renderer for the items
   const renderMenuItem = ({ item }: { item: MenuItemDto }) => (
     <ThemedView style={styles.cardContainer}>
       <ThemedView style={styles.imageContainer}>
         <Image
-          source={{ uri: "https://via.placeholder.com/150" }}
+          source={{
+            uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          }}
           style={styles.itemImage}
         />
       </ThemedView>
-      <ThemedText style={styles.catalogItemText}>{item.name}</ThemedText>
-      <TouchableOpacity style={styles.customizeButton} onPress={() => {}}>
-        <ThemedText style={styles.customizeButtonText}>Customize</ThemedText>
+      <ThemedText style={styles.catalogItemText}>
+        {item.name || "Unknown Item"}
+      </ThemedText>
+      {/* <ThemedText style={styles.itemPrice}>${item.price.toFixed(2)}</ThemedText>
+      {item.description && (
+        <ThemedText style={styles.itemDescription}>
+          {item.description}
+        </ThemedText>
+      )} */}
+      <TouchableOpacity
+        style={styles.customizeButton}
+        onPress={() => handleAddToOrder(item)}
+      >
+        <ThemedText style={styles.customizeButtonText}>Add to Order</ThemedText>
       </TouchableOpacity>
     </ThemedView>
   );
@@ -83,6 +118,8 @@ export default function OrderCatalogScreen() {
       <OrderCatalogHeader
         onCategoryChange={handleCategoryChange}
         onSearchChange={handleSearchChange}
+        locationName={locationName}
+        itemCount={itemCount}
       />
       <FlatList
         data={filteredMenuItems}
@@ -93,6 +130,36 @@ export default function OrderCatalogScreen() {
         contentContainerStyle={styles.listContainer}
         columnWrapperStyle={styles.row}
       />
+
+      {/* Floating View Cart Button */}
+      {itemCount > 0 && (
+        <TouchableOpacity
+          style={styles.viewCartButton}
+          onPress={() => setShowCart(true)}
+        >
+          <ThemedText style={styles.viewCartButtonText}>
+            View Cart ({itemCount.toString()})
+          </ThemedText>
+        </TouchableOpacity>
+      )}
+
+      {/*cart modal controls*/}
+      <Modal
+        visible={showCart}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowCart(false)}
+      >
+        <ThemedView style={styles.modalHeader}>
+          <TouchableOpacity
+            onPress={() => setShowCart(false)}
+            style={styles.closeButton}
+          >
+            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+        <ViewCart />
+      </Modal>
     </ThemedView>
   );
 }
@@ -100,7 +167,6 @@ export default function OrderCatalogScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
     backgroundColor: "#fff",
   },
   loadingContainer: {
@@ -114,7 +180,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 20,
-    paddingTop: 20,
+    paddingHorizontal: 10,
   },
   row: {
     justifyContent: "flex-start",
@@ -142,7 +208,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 5,
+    marginBottom: 12,
   },
   itemPrice: {
     textAlign: "center",
@@ -168,5 +234,46 @@ const styles = StyleSheet.create({
     color: "#434242",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  viewCartButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#0e5f00",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  viewCartButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 15,
+    paddingTop: 20,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#666",
   },
 });

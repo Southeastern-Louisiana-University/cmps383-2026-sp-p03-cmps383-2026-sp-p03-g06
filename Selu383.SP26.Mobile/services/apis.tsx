@@ -1,5 +1,6 @@
 import {
   CategoryDto,
+  CreateOrderItemDto,
   Location,
   LoginDto,
   MenuItemDto,
@@ -9,6 +10,9 @@ const API_BASE = "https://selu383-sp26-p03-g06.azurewebsites.net";
 
 export async function getLocations() {
   const response = await fetch(`${API_BASE}/api/locations`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch locations: ${response.status}`);
+  }
   const data = await response.json();
   return data as Location[];
 }
@@ -120,12 +124,43 @@ export async function logoutUser() {
 
 export async function getMenuItems() {
   const response = await fetch(`${API_BASE}/api/menu-items`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch menu items: ${response.status}`);
+  }
   const data = await response.json();
   return data as MenuItemDto[];
 }
 
 export async function getCategory() {
   const response = await fetch(`${API_BASE}/api/categories`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch categories: ${response.status}`);
+  }
   const data = await response.json();
   return data as CategoryDto[];
+}
+
+export async function createOrder(
+  locationId: number,
+  orderItems: CreateOrderItemDto[],
+) {
+  try {
+    const response = await fetch(`${API_BASE}/api/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ locationId, orderItems }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create order: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
 }

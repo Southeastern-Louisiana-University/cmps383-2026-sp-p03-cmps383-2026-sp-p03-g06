@@ -31,13 +31,8 @@ export interface OrderItemsDto {
   id: number;
   menuItemId: number;
   quantity: number;
-  price: number;
+  unitPrice: number;
   totalPrice: number;
-}
-
-export interface CreateOrderDto {
-  locationId: number;
-  orderItems: { menuItemId: number; quantity: number }[];
 }
 
 export interface MenuItemDto {
@@ -52,4 +47,15 @@ export interface MenuItemDto {
 export interface CategoryDto {
   id: number;
   name: string;
+}
+
+export interface CreateOrderDto {
+  locationId: number;
+  orderItems: CreateOrderItemDto[];
+}
+
+export interface CreateOrderItemDto {
+  menuItemId: number;
+  quantity: number;
+  customizationJson?: string;
 }

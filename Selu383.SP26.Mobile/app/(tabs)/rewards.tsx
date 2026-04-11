@@ -11,11 +11,11 @@ export default function RewardsScreen() {
         <ThemedText type="title">Lion Rewards</ThemedText>
         <ThemedView style={styles.rewardsCounterContainer}>
           <ThemedText style={styles.rewardsText}>Points</ThemedText>
-          <ThemedText style={styles.rewardsTextPoints}>50/100</ThemedText>
+          <ThemedText style={styles.rewardsTextPoints}>70/100</ThemedText>
           <ThemedView style={styles.rewardsBarContainer}>
             <LinearGradient
               style={styles.rewardsBarMeter}
-              colors={["#7bf1a8", "#6fe39a"]}
+              colors={["#395a46", "#6fe39a"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             />

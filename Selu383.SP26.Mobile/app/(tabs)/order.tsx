@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useOrder } from "@/contexts/OrderContext";
 import { getLocations } from "@/services/apis";
 import { Location } from "@/services/types";
 import { router } from "expo-router";
@@ -10,6 +11,7 @@ import MapView from "react-native-maps";
 export default function OrderScreen() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+  const { setLocation } = useOrder();
 
   useEffect(() => {
     loadLocations();
@@ -31,11 +33,16 @@ export default function OrderScreen() {
       key={location.id}
       style={styles.locationItem}
       onPress={() => {
+        setLocation(location.id, location.name || "Unknown Location");
         router.push("/(tabs)/orderCatalog");
       }}
     >
-      <ThemedText style={styles.locationName}>{location.name}</ThemedText>
-      <ThemedText style={styles.locationAddress}>{location.address}</ThemedText>
+      <ThemedText style={styles.locationName}>
+        {location.name || "Unknown Location"}
+      </ThemedText>
+      <ThemedText style={styles.locationAddress}>
+        {location.address || "Address not available"}
+      </ThemedText>
       <ThemedText style={styles.locationAddress}>
         HOURS OF OPERATION GO HERE
       </ThemedText>
