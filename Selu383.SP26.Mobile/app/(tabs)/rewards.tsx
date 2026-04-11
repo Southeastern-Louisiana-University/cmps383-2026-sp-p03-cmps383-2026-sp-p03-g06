@@ -9,17 +9,18 @@ export default function RewardsScreen() {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.rewardsContainer}>
         <ThemedText type="title">Lion Rewards</ThemedText>
-        <LinearGradient
-          colors={["#7bf1a8", "#30d158", "#00a338"]}
-          style={styles.rewardsCounterContainer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        <ThemedView style={styles.rewardsCounterContainer}>
           <ThemedText style={styles.rewardsText}>Points</ThemedText>
+          <ThemedText style={styles.rewardsTextPoints}>50/100</ThemedText>
           <ThemedView style={styles.rewardsBarContainer}>
-            <ThemedView style={styles.rewardsBarMeter} />
+            <LinearGradient
+              style={styles.rewardsBarMeter}
+              colors={["#7bf1a8", "#6fe39a"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
           </ThemedView>
-        </LinearGradient>
+        </ThemedView>
         <ThemedText style={styles.rewardsMenuText}>Rewards Menu</ThemedText>
         <ThemedView style={styles.rewardsCardsContainer}>
           <Image
@@ -52,31 +53,37 @@ const styles = StyleSheet.create({
     height: 220,
     alignItems: "center",
     paddingTop: 50,
-    // Cool shadow and elevation effects
     shadowColor: "#000",
     shadowOffset: {
-      width: 0,
-      height: 8,
+      width: 10,
+      height: 20,
     },
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 10,
   },
   rewardsText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 16,
+    fontWeight: "300",
+    color: "#434242",
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
+  },
+  rewardsTextPoints: {
+    fontSize: 20,
+    marginTop: 20,
+    fontWeight: "bold",
+    color: "#434242",
   },
   rewardsTextContainer: {
     fontSize: 16,
   },
   rewardsBarContainer: {
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-    borderRadius: 5,
+    borderColor: "#434242",
+    backgroundColor: "#434242",
+    borderRadius: 12,
     width: "80%",
     height: 20,
     marginTop: 40,
@@ -84,10 +91,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   rewardsBarMeter: {
-    backgroundColor: "rgba(225, 196, 33, 0.8)",
-    height: 12,
+    height: 14,
     width: "70%",
-    borderRadius: 3,
+    borderRadius: 12,
   },
   rewardsMenuText: {
     fontSize: 20,
@@ -96,6 +102,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textAlign: "center",
     fontWeight: "bold",
+    color: "#434242",
   },
   rewardsCardsContainer: {
     borderRadius: 10,

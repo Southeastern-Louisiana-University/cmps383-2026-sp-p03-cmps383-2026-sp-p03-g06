@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   signInButton: {
     width: "90%",
     marginTop: 20,
-    backgroundColor: "#0e5f00",
+    backgroundColor: "#7bf1a8",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 18,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   signInButtonText: {
-    color: "#fff",
+    color: "#434242",
     fontWeight: "500",
     fontSize: 16,
   },
@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     fontSize: 14,
-    color: "#666",
+    color: "#434242",
   },
   signUpLink: {
-    color: "#0e5f00",
+    color: "#7bf1a8",
     fontWeight: "bold",
   },
 });

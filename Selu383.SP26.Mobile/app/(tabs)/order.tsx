@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   locationItem: {
     backgroundColor: "#f8f9fa",
     borderRadius: 8,
-    padding: 45,
+    padding: 35,
     borderColor: "#e9ecef",
     borderWidth: 1,
   },
