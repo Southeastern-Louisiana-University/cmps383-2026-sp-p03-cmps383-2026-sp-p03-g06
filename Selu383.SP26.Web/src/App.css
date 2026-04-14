@@ -1,8 +1,17 @@
+body {
+    display: block !important;
+}
+
 #root {
-    max-width: 900px;
     margin: 0 auto;
     background: white;
     min-height: 100vh;
-    padding: 0 24px;
+    padding: 0;
     box-sizing: border-box;
+}
+
+.page-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;    
 }

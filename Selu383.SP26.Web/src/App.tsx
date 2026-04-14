@@ -8,16 +8,16 @@ import "./App.css";
 
 export default function App() {
     return (
-        <>
+        <BrowserRouter>
             <HeaderMegaMenu />
-            <BrowserRouter>
+            <div className="page-content">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/order" element={<OrderPage />} />
                     <Route path="/rewards" element={<RewardsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                 </Routes>
-            </BrowserRouter>
-        </>
+            </div>
+        </BrowserRouter>
     );
 }
