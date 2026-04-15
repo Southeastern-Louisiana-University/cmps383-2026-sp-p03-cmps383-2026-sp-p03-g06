@@ -1,0 +1,36 @@
+export interface Location {
+  id: number;
+  name: string;
+  address: string;
+  tableCount: number;
+  managerId?: number | null;
+}
+
+export interface SearchLocationProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+export interface LoginDto {
+  userName: string;
+  password: string;
+}
+
+export interface OrderDto {
+  id: number;
+  locationId: number;
+  orderItems: OrderItemsDto[];
+}
+
+export interface OrderItemsDto {
+  id: number;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+  totalPrice: number;
+}
+
+export interface CreateOrderDto {
+  locationId: number;
+  orderItems: { menuItemId: number; quantity: number }[];
+}
