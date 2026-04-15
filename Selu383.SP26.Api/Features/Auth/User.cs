@@ -7,6 +7,7 @@ public class User : IdentityUser<int>
     public string? Address { get; set; }
     
     public int? PreferredLocationId { get; set; }
+    public int RewardPoints { get; set; }
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

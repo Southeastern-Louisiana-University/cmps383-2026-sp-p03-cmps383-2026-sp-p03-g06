@@ -7,6 +7,7 @@ using Selu383.SP26.Api.Features.Categories;
 using Selu383.SP26.Api.Features.MenuItem;
 using Selu383.SP26.Api.Features.Orders;
 using System.Data;
+using Selu383.SP26.Api.Features.Rewards;
 
 namespace Selu383.SP26.Api.Data;
 
