@@ -16,6 +16,11 @@ export interface LoginDto {
   password: string;
 }
 
+export interface RegisterDto {
+  userName: string;
+  password: string;
+}
+
 export interface OrderDto {
   id: number;
   locationId: number;
@@ -26,11 +31,31 @@ export interface OrderItemsDto {
   id: number;
   menuItemId: number;
   quantity: number;
-  price: number;
+  unitPrice: number;
   totalPrice: number;
+}
+
+export interface MenuItemDto {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  isAvailable: boolean;
+  categoryId: number;
+}
+
+export interface CategoryDto {
+  id: number;
+  name: string;
 }
 
 export interface CreateOrderDto {
   locationId: number;
-  orderItems: { menuItemId: number; quantity: number }[];
+  orderItems: CreateOrderItemDto[];
+}
+
+export interface CreateOrderItemDto {
+  menuItemId: number;
+  quantity: number;
+  customizationJson?: string;
 }
