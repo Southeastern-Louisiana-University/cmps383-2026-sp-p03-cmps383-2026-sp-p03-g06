@@ -59,3 +59,17 @@ export interface CreateOrderItemDto {
   quantity: number;
   customizationJson?: string;
 }
+
+export interface RewardOfferingDto {
+  id: number;
+  name: string;
+  description: string;
+  pointsRequired: number;
+  isActive: boolean;
+}
+
+export interface UserRewardsDto {
+  id: string;
+  userName: string;
+  rewardPoints: number;
+}

@@ -3,11 +3,11 @@ import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
@@ -24,6 +24,7 @@ export function ViewCart() {
     orderItems,
     selectedLocationId,
     locationName,
+    locationAddress,
     updateOrderItemQuantity,
     removeOrderItem,
     clearOrder,
@@ -107,16 +108,16 @@ export function ViewCart() {
     Alert.alert("Checkout", "Checkout flow will be implemented next!");
   };
 
-  const handleClearCart = () => {
-    Alert.alert(
-      "Clear Cart",
-      "Are you sure you want to remove all items from your cart?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Clear", style: "destructive", onPress: clearOrder },
-      ],
-    );
-  };
+  // const handleClearCart = () => {
+  //   Alert.alert(
+  //     "Clear Cart",
+  //     "Are you sure you want to remove all items from your cart?",
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       { text: "Clear", style: "destructive", onPress: clearOrder },
+  //     ],
+  //   );
+  // };
 
   if (loading) {
     return (
@@ -148,9 +149,14 @@ export function ViewCart() {
         {locationName ? (
           <ThemedText style={styles.locationText}>{locationName}</ThemedText>
         ) : null}
-        <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
+        {locationAddress ? (
+          <ThemedText style={styles.locationAddress}>
+            {locationAddress}
+          </ThemedText>
+        ) : null}
+        {/* <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
           <ThemedText style={styles.clearButtonText}>Clear Cart</ThemedText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ThemedView>
 
       {/*Cart Items*/}
@@ -181,10 +187,6 @@ export function ViewCart() {
               {item.customizationJson ? (
                 <ThemedText style={styles.customization}>Customized</ThemedText>
               ) : null}
-
-              <ThemedText style={styles.itemPrice}>
-                ${(item.menuItem?.price || 0).toFixed(2)} each
-              </ThemedText>
             </ThemedView>
 
             <ThemedView style={styles.quantityControls}>
@@ -283,6 +285,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   locationText: {
+    fontSize: 14,
+    color: "#0e5f00",
+    fontWeight: "600",
+  },
+  locationAddress: {
     fontSize: 14,
     color: "#0e5f00",
     fontWeight: "600",
@@ -387,20 +394,24 @@ const styles = StyleSheet.create({
   },
   itemTotalContainer: {
     alignItems: "flex-end",
+    minWidth: 80,
   },
   itemTotal: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#0e5f00",
-    marginBottom: 5,
+    marginBottom: 8,
+    textAlign: "right",
   },
   removeButton: {
-    padding: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   removeButtonText: {
     fontSize: 12,
     color: "#ff6b6b",
     fontWeight: "600",
+    textAlign: "right",
   },
   summary: {
     padding: 20,
