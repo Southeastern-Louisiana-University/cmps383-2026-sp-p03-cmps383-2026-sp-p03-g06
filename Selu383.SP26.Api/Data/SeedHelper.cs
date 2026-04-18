@@ -20,12 +20,18 @@ public static class SeedHelper
 
         await AddRoles(serviceProvider);
         await AddUsers(serviceProvider);
+
         await AddRewards(dataContext);
 
-        await AddLocations(dataContext);
-        await AddOrders(dataContext);
         await AddCategories(dataContext);
         await AddMenuItems(dataContext);
+
+        await AddLocations(dataContext);
+
+        await AddOrders(dataContext);
+
+
+
     }
 
     private static async Task AddUsers(IServiceProvider serviceProvider)
@@ -80,10 +86,10 @@ public static class SeedHelper
 
     private static async Task AddLocations(DataContext dataContext)
     {
-        if (dataContext.Set<Location>().Any())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<Location>().ToListAsync();
+        dataContext.Set<Location>().RemoveRange(existing);
+
+
         dataContext.Set<Location>().AddRange(
             new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
             new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
@@ -94,10 +100,8 @@ public static class SeedHelper
     }
     private static async Task AddCategories(DataContext dataContext)
     {
-        if (dataContext.Set<Category>().Any())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<Category>().ToListAsync();
+        dataContext.Set<Category>().RemoveRange(existing);
 
         dataContext.Set<Category>().AddRange(
             new Category { Name = "Drinks" },
@@ -110,10 +114,10 @@ public static class SeedHelper
     }
     private static async Task AddMenuItems(DataContext dataContext)
     {
-        if (dataContext.Set<MenuItem>().Any())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<MenuItem>().ToListAsync();
+        dataContext.Set<MenuItem>().RemoveRange(existing);
+
+
         dataContext.Set<MenuItem>().AddRange(
             new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = 1},
             new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = 1 },
@@ -146,14 +150,6 @@ public static class SeedHelper
 
 
 
-
-
-
-
-
-
-
-
             );
 
         await dataContext.SaveChangesAsync();
@@ -161,12 +157,10 @@ public static class SeedHelper
 
     private static async Task AddRewards(DataContext dataContext)
 {
-    if (dataContext.Set<RewardOffering>().Any())
-    {
-        return;
-    }
+        var existing = await dataContext.Set<RewardOffering>().ToListAsync();
+        dataContext.Set<RewardOffering>().RemoveRange(existing);
 
-    dataContext.Set<RewardOffering>().AddRange(
+        dataContext.Set<RewardOffering>().AddRange(
         new RewardOffering
         {
             Name = "Free Drip Coffee",
@@ -195,10 +189,9 @@ public static class SeedHelper
 
     private static async Task AddOrders(DataContext dataContext)
     {
-        if (dataContext.Set<Order>().Any())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<Order>().ToListAsync();
+        dataContext.Set<Order>().RemoveRange(existing);
+
 
         var users = dataContext.Set<User>().Where(u => u.UserName != "galkadi").ToList();
         var locations = dataContext.Set<Location>().ToList();
