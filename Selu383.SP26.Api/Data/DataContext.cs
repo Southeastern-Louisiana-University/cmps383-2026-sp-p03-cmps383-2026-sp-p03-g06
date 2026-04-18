@@ -23,6 +23,7 @@ public class DataContext : IdentityDbContext<User, Role, int, IdentityUserClaim<
     public DbSet<MenuItem> MenuItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<RewardOffering> RewardOfferings {get; set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 namespace Selu383.SP26.Api.Features.Rewards;
 
 public class RewardOfferingConfiguration : IEntityTypeConfiguration<RewardOffering>

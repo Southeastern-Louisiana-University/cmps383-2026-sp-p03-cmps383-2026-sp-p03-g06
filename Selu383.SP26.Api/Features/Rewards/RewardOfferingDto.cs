@@ -1,5 +1,4 @@
 namespace Selu383.SP26.Api.Features.Rewards;
-
 public class RewardOfferingDto
 {
     public int Id { get; set; }
