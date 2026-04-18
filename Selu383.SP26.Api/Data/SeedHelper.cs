@@ -4,6 +4,8 @@ using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
 using Selu383.SP26.Api.Features.MenuItem;
+using Selu383.SP26.Api.Migrations;
+using Selu383.SP26.Api.Features.Rewards;
 using Selu383.SP26.Api.Features.Categories;
 
 namespace Selu383.SP26.Api.Data;
@@ -18,6 +20,7 @@ public static class SeedHelper
 
         await AddRoles(serviceProvider);
         await AddUsers(serviceProvider);
+        await AddRewards(dataContext);
 
         await AddLocations(dataContext);
         await AddOrders(dataContext);
@@ -105,6 +108,40 @@ public static class SeedHelper
 
         await dataContext.SaveChangesAsync();
     }
+
+    private static async Task AddRewards(DataContext dataContext)
+{
+    if (dataContext.Set<RewardOffering>().Any())
+    {
+        return;
+    }
+
+    dataContext.Set<RewardOffering>().AddRange(
+        new RewardOffering
+        {
+            Name = "Free Drip Coffee",
+            Description = "Redeem for one free drip coffee.",
+            PointsRequired = 25,
+            IsActive = true
+        },
+        new RewardOffering
+        {
+            Name = "Free Pastry",
+            Description = "Redeem for one free pastry item.",
+            PointsRequired = 40,
+            IsActive = true
+        },
+        new RewardOffering
+        {
+            Name = "Free Specialty Drink",
+            Description = "Redeem for one free specialty drink.",
+            PointsRequired = 75,
+            IsActive = true
+        }
+    );
+
+    await dataContext.SaveChangesAsync();
+}
 
     private static async Task AddOrders(DataContext dataContext)
     {

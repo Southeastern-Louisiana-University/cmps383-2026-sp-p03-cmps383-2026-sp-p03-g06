@@ -6,13 +6,13 @@ using Selu383.SP26.Api.Extensions;
 using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
+using Microsoft.AspNetCore.Identity;
 
 namespace Selu383.SP26.Api.Controllers;
 
 [Route("api/orders")]
 [ApiController]
-public class OrdersController(DataContext dataContext) : ControllerBase
-{
+public class OrdersController(DataContext dataContext, UserManager<User> userManager) : ControllerBase{
     [HttpGet]
     [Authorize]
     public ActionResult<IEnumerable<OrderDto>> GetMyOrders()
@@ -117,6 +117,10 @@ public class OrdersController(DataContext dataContext) : ControllerBase
         }
 
         var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         var order = new Order
         {
@@ -130,6 +134,13 @@ public class OrdersController(DataContext dataContext) : ControllerBase
 
         dataContext.Set<Order>().Add(order);
         dataContext.SaveChanges();
+
+        var user = userManager.FindByIdAsync(userId.ToString()).Result;
+        if (user != null)
+        {
+            user.RewardPoints += (int)Math.Floor(order.TotalPrice * 10);
+            userManager.UpdateAsync(user).Wait();
+        }
 
         return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapOrderToDto(order));
     }
