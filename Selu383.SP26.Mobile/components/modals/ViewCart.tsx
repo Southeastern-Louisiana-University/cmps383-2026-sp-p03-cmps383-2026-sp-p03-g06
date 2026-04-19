@@ -178,12 +178,6 @@ export function ViewCart() {
                 {item.menuItem?.name || "Unknown Item"}
               </ThemedText>
 
-              {item.menuItem?.description ? (
-                <ThemedText style={styles.itemDescription}>
-                  {item.menuItem.description}
-                </ThemedText>
-              ) : null}
-
               {item.customizationJson ? (
                 <ThemedText style={styles.customization}>Customized</ThemedText>
               ) : null}
