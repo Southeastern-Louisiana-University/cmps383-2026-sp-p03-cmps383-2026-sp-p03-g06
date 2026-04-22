@@ -91,9 +91,27 @@ public static class SeedHelper
 
 
         dataContext.Set<Location>().AddRange(
-            new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
-            new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
-            new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
+            new Location
+            {
+                Name = "Location 1",
+                Address = "123 Main St",
+                TableCount = 10,
+                HoursOfOperation = "Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:00 AM - 8:00 PM"
+            },
+            new Location
+            {
+                Name = "Location 2",
+                Address = "456 Oak Ave",
+                TableCount = 20,
+                HoursOfOperation = "Mon-Sun: 6:00 AM - 10:00 PM"
+            },
+            new Location
+            {
+                Name = "Location 3",
+                Address = "789 Pine Ln",
+                TableCount = 15,
+                HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed"
+            }
         );
 
         await dataContext.SaveChangesAsync();
