@@ -122,13 +122,21 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             return Unauthorized();
         }
 
+        var first = dto.CheckoutFirstName.Trim();
+        var last = dto.CheckoutLastName.Trim();
+
         var order = new Order
         {
             CustomerId = userId,
+            CustomerName = $"{first} {last}".Trim(),
             LocationId = dto.LocationId,
             TotalPrice = orderTotal,
             Status = "Pending",
             CreatedAt = DateTime.Now,
+            CheckoutFirstName = first,
+            CheckoutLastName = last,
+            CheckoutEmail = dto.CheckoutEmail.Trim(),
+            CheckoutPhoneNumber = dto.CheckoutPhoneNumber.Trim(),
             OrderItems = orderItemsToAdd
         };
 
@@ -148,11 +156,6 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
     [HttpPost("guest")]
     public ActionResult<OrderDto> CreateGuestOrder(CreateGuestOrderDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.CustomerName))
-        {
-            return BadRequest("Customer name is required");
-        }
-
         if (dto.LocationId <= 0)
         {
             return BadRequest("Valid LocationId is required");
@@ -204,9 +207,16 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             });
         }
 
+        var guestFirst = dto.CheckoutFirstName.Trim();
+        var guestLast = dto.CheckoutLastName.Trim();
+
         var order = new Order
         {
-            CustomerName = dto.CustomerName,
+            CustomerName = $"{guestFirst} {guestLast}".Trim(),
+            CheckoutFirstName = guestFirst,
+            CheckoutLastName = guestLast,
+            CheckoutEmail = dto.CheckoutEmail.Trim(),
+            CheckoutPhoneNumber = dto.CheckoutPhoneNumber.Trim(),
             LocationId = dto.LocationId,
             TotalPrice = orderTotal,
             Status = "Pending",
@@ -262,6 +272,10 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             Id = order.Id,
             CustomerId = order.CustomerId,
             CustomerName = order.CustomerName,
+            CheckoutFirstName = order.CheckoutFirstName,
+            CheckoutLastName = order.CheckoutLastName,
+            CheckoutEmail = order.CheckoutEmail,
+            CheckoutPhoneNumber = order.CheckoutPhoneNumber,
             LocationId = order.LocationId,
             TotalPrice = order.TotalPrice,
             Status = order.Status,

@@ -51,6 +51,10 @@ export interface CategoryDto {
 
 export interface CreateOrderDto {
   locationId: number;
+  checkoutFirstName: string;
+  checkoutLastName: string;
+  checkoutEmail: string;
+  checkoutPhoneNumber: string;
   orderItems: CreateOrderItemDto[];
 }
 

@@ -153,7 +153,7 @@ public static class SeedHelper
             new MenuItem { Name = "Banana Foster", Description = "Bananas with cinnamon in a crepe, topped with a generous drizzle of caramel sauce.", Price = 8.95m, IsAvailable = true, CategoryId = 2 },
 
             new MenuItem { Name = "Matt's Scrambled Eggs", Description = "Scrambled eggs and melted mozzarella cheese wrapped in a crepe.", Price = 5.00m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Meanie Mushroom", Description = "SautÈed mushrooms, mozzarella, tomato, and bacon inside a delicate crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
+            new MenuItem { Name = "Meanie Mushroom", Description = "Sautùed mushrooms, mozzarella, tomato, and bacon inside a delicate crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
             new MenuItem { Name = "Turkey Club", Description = "Sliced turkey, bacon, spinach, and tomato wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
             new MenuItem { Name = "Green Machine", Description = "Spinach, artichokes, and mozzarella cheese inside a fresh crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 3 },
             new MenuItem { Name = "Perfect Pair", Description = "A unique combination of bacon and Nutella wrapped in a crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 3 },
@@ -161,7 +161,7 @@ public static class SeedHelper
             new MenuItem { Name = "Farmers Market Crepe", Description = "Turkey, spinach, and mozzarella wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
 
             new MenuItem { Name = "Travis Special", Description = "Cream cheese, salmon, spinach, and a fried egg served on a freshly toasted bagel.", Price = 14.00m, IsAvailable = true, CategoryId = 4 },
-            new MenuItem { Name = "CrËme Brulagel", Description = "A toasted bagel with a caramelized sugar crust inspired by crËme br˚lÈe, served with creamcheese.", Price = 8.00m, IsAvailable = true, CategoryId = 4 },
+            new MenuItem { Name = "Crùme Brulagel", Description = "A toasted bagel with a caramelized sugar crust inspired by crùme brùlùe, served with creamcheese.", Price = 8.00m, IsAvailable = true, CategoryId = 4 },
             new MenuItem { Name = "The Fancy One", Description = "Smoked salmon, cream cheese, and fresh dill on a toasted bagel.", Price = 13.00m, IsAvailable = true, CategoryId = 4 },
             new MenuItem { Name = "Breakfast Bagel", Description = "A toasted bagel with your choice of ham, bacon, or sausage, a fried egg, and cheddar cheese.", Price = 9.50m, IsAvailable = true, CategoryId = 4 },
             new MenuItem { Name = "The Classic", Description = "A toasted bagel with cream cheeese", Price = 5.25m, IsAvailable = true, CategoryId = 4 }
@@ -228,6 +228,11 @@ public static class SeedHelper
             var order1 = new Order
             {
                 CustomerId = bob.Id,
+                CustomerName = "Bob Smith",
+                CheckoutFirstName = "Bob",
+                CheckoutLastName = "Smith",
+                CheckoutEmail = "bob@example.com",
+                CheckoutPhoneNumber = "9855550100",
                 LocationId = locations[0].Id,
                 Status = "Completed",
                 CreatedAt = DateTime.Now.AddDays(-5),
@@ -260,6 +265,11 @@ public static class SeedHelper
             var order2 = new Order
             {
                 CustomerId = sue.Id,
+                CustomerName = "Sue Jones",
+                CheckoutFirstName = "Sue",
+                CheckoutLastName = "Jones",
+                CheckoutEmail = "sue@example.com",
+                CheckoutPhoneNumber = "9855550101",
                 LocationId = locations[1].Id,
                 Status = "Ready",
                 CreatedAt = DateTime.Now.AddHours(-2),
@@ -284,6 +294,10 @@ public static class SeedHelper
             var order3 = new Order
             {
                 CustomerName = "John Guest",
+                CheckoutFirstName = "John",
+                CheckoutLastName = "Guest",
+                CheckoutEmail = "john.guest@example.com",
+                CheckoutPhoneNumber = "9855550199",
                 LocationId = locations[2].Id,
                 Status = "Pending",
                 CreatedAt = DateTime.Now.AddMinutes(-30),
