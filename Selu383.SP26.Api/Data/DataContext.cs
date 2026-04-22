@@ -8,6 +8,7 @@ using Selu383.SP26.Api.Features.MenuItem;
 using Selu383.SP26.Api.Features.Orders;
 using System.Data;
 using Selu383.SP26.Api.Features.Rewards;
+using Selu383.SP26.Api.Features.Payments;
 
 namespace Selu383.SP26.Api.Data;
 
@@ -24,6 +25,7 @@ public class DataContext : IdentityDbContext<User, Role, int, IdentityUserClaim<
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<RewardOffering> RewardOfferings {get; set;}
+    public DbSet<SavedPaymentMethod> SavedPaymentMethods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
