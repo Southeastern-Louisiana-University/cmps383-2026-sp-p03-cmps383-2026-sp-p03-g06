@@ -110,6 +110,47 @@ public class LocationsController(DataContext dataContext) : ControllerBase
         return Ok(dto);
     }
 
+    [HttpGet("{id}/pickup-times")]
+    public ActionResult<IEnumerable<PickupTimeDto>> GetPickupTimes(int id)
+    {
+        var location = dataContext.Set<Location>()
+            .FirstOrDefault(x => x.Id == id);
+
+        if (location == null)
+        {
+            return NotFound();
+        }
+
+        var now = DateTime.Now;
+        var slots = new List<PickupTimeDto>();
+
+        // ASAP slot — ready in 15 minutes
+        var asapTime = now.AddMinutes(15);
+        slots.Add(new PickupTimeDto
+        {
+            Label = "ASAP (~15 min)",
+            Time = asapTime,
+            IsAsap = true,
+        });
+
+        // Scheduled slots every 15 minutes for the next 3 hours
+        var slotStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0)
+            .AddMinutes(30 - now.Minute % 15); // round up to next 15-min mark
+
+        for (int i = 0; i < 12; i++)
+        {
+            var slotTime = slotStart.AddMinutes(i * 15);
+            slots.Add(new PickupTimeDto
+            {
+                Label = slotTime.ToString("h:mm tt"),
+                Time = slotTime,
+                IsAsap = false,
+            });
+        }
+
+        return Ok(slots);
+    }
+
     [HttpDelete("{id}")]
     [Authorize]
     public ActionResult Delete(int id)
