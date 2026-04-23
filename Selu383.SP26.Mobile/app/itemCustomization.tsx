@@ -1,29 +1,110 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useOrder } from "@/contexts/OrderContext";
-import { MenuItemDto } from "@/services/types";
+import {
+  CheeseOption,
+  DrinkCustomization,
+  DrinkSize,
+  FillingOption,
+  MenuItemDto,
+  MilkType,
+  ProteinOption,
+  ShotOption,
+  TemperatureOption,
+  ToppingOption,
+  VeggyOption,
+} from "@/services/types";
+import {
+  calculateCartItemTotal,
+  CHEESE_OPTIONS,
+  DRINK_SIZES,
+  FILLING_OPTIONS,
+  MILK_OPTIONS,
+  PROTEIN_OPTIONS,
+  SHOT_OPTIONS,
+  TEMPERATURE_OPTIONS,
+  TOPPING_OPTIONS,
+  VEGGY_OPTIONS,
+} from "@/utils/pricing";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Image, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ItemCustomizationScreen() {
   const params = useLocalSearchParams();
   const { addOrderItem } = useOrder();
 
   const menuItem: MenuItemDto = JSON.parse(params.item as string);
+  const [categoryName, setCategoryName] = useState("");
+  //Category customization visibility
+  const showSizeOptions = [29].includes(menuItem.categoryId);
+  const showMilkOptions = [29].includes(menuItem.categoryId);
+  const showShotOptions = [29].includes(menuItem.categoryId);
+  const showTemperatureOptions = [30, 31, 32].includes(menuItem.categoryId);
+
+  //Crepes option filters based on categoryID
+  const showFillingOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showToppingOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showProteinOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showCheeseOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showVeggyOptions = [30, 31, 32].includes(menuItem.categoryId);
 
   const [quantity, setQuantity] = useState(1);
+  const [selectedMilk, setSelectedMilk] = useState<MilkType>("whole");
+  const [selectedSize, setSelectedSize] = useState<DrinkSize>("small");
+  const [selectedShot, setSelectedShot] = useState<ShotOption>(0);
+  const [selectedTemperature, setSelectedTemperature] =
+    useState<TemperatureOption>("hot");
+  const [selectedFilling, setSelectedFilling] = useState<FillingOption>("none");
+  const [selectedTopping, setSelectedTopping] = useState<ToppingOption>("none");
+  const [selectedProtein, setSelectedProtein] = useState<ProteinOption>("none");
+  const [selectedCheese, setSelectedCheese] = useState<CheeseOption>("none");
+  const [selectedVeggy, setSelectedVeggy] = useState<VeggyOption>("none");
 
   const calculatePrice = () => {
-    return menuItem.price * quantity;
+    const customization: DrinkCustomization = {
+      milkType: selectedMilk,
+      drinkSize: selectedSize,
+      shotCount: selectedShot,
+      temperature: selectedTemperature,
+      filling: selectedFilling,
+      topping: selectedTopping,
+      protein: selectedProtein,
+      cheese: selectedCheese,
+      veggy: selectedVeggy,
+    };
+
+    return calculateCartItemTotal({
+      basePrice: menuItem.price,
+      quantity,
+      customizationJson: JSON.stringify(customization),
+    });
   };
 
   const handleAddToOrder = () => {
+    const customization: DrinkCustomization = {
+      milkType: selectedMilk,
+      drinkSize: selectedSize,
+      shotCount: selectedShot,
+      temperature: selectedTemperature,
+      filling: selectedFilling,
+      topping: selectedTopping,
+      protein: selectedProtein,
+      cheese: selectedCheese,
+      veggy: selectedVeggy,
+    };
+
     addOrderItem({
       menuItemId: menuItem.id,
       quantity: quantity,
-      customizationJson: undefined,
+      customizationJson: JSON.stringify(customization),
     });
 
     router.back();
@@ -33,21 +114,21 @@ export default function ItemCustomizationScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <ThemedView style={styles.container}>
+        <ThemedView style={styles.fixedHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ThemedText style={styles.backButtonText}>
+              <AntDesign name="arrow-left" size={24} color="black" />
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
-          <ThemedView style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <ThemedText style={styles.backButtonText}>
-                <AntDesign name="arrow-left" size={24} color="black" />
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-
           <ThemedView style={styles.itemHeader}>
             <Image
               source={{
@@ -60,7 +141,7 @@ export default function ItemCustomizationScreen() {
               {menuItem.description || "Delicious coffee beverage"}
             </ThemedText>
             <ThemedText style={styles.itemPrice}>
-              ${menuItem.price.toFixed(2)}
+              ${calculatePrice().toFixed(2)}
             </ThemedText>
           </ThemedView>
 
@@ -85,6 +166,323 @@ export default function ItemCustomizationScreen() {
               </TouchableOpacity>
             </ThemedView>
           </ThemedView>
+
+          {/* Drink Size */}
+          {showSizeOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Drink Size</ThemedText>
+              <View style={styles.optionsGrid}>
+                {DRINK_SIZES.map((size) => (
+                  <TouchableOpacity
+                    key={size.value}
+                    style={[
+                      styles.optionButton,
+                      selectedSize === size.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedSize(size.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedSize === size.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {size.label}
+                    </ThemedText>
+                    {size.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${size.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Milk Type*/}
+          {showMilkOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Milk Type</ThemedText>
+              <View style={styles.optionsGrid}>
+                {MILK_OPTIONS.map((milk) => (
+                  <TouchableOpacity
+                    key={milk.value}
+                    style={[
+                      styles.optionButton,
+                      selectedMilk === milk.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedMilk(milk.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedMilk === milk.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {milk.label}
+                    </ThemedText>
+                    {milk.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${milk.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Espresso Shots*/}
+          {showShotOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>
+                Espresso Shots
+              </ThemedText>
+              <View style={styles.optionsGrid}>
+                {SHOT_OPTIONS.map((shot) => (
+                  <TouchableOpacity
+                    key={shot.value}
+                    style={[
+                      styles.optionButton,
+                      selectedShot === shot.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedShot(shot.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedShot === shot.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {shot.label}
+                    </ThemedText>
+                    {shot.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${shot.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Temperature Selection*/}
+          {showTemperatureOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Temperature</ThemedText>
+              <View style={styles.optionsGrid}>
+                {TEMPERATURE_OPTIONS.map((temp) => (
+                  <TouchableOpacity
+                    key={temp.value}
+                    style={[
+                      styles.optionButton,
+                      selectedTemperature === temp.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedTemperature(temp.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedTemperature === temp.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {temp.label}
+                    </ThemedText>
+                    {temp.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${temp.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Filling Selection */}
+          {showFillingOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Fillings</ThemedText>
+              <View style={styles.optionsGrid}>
+                {FILLING_OPTIONS.map((filling) => (
+                  <TouchableOpacity
+                    key={filling.value}
+                    style={[
+                      styles.optionButton,
+                      selectedFilling === filling.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedFilling(filling.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedFilling === filling.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {filling.label}
+                    </ThemedText>
+                    {filling.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${filling.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Toppings */}
+          {showToppingOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Toppings</ThemedText>
+              <View style={styles.optionsGrid}>
+                {TOPPING_OPTIONS.map((topping) => (
+                  <TouchableOpacity
+                    key={topping.value}
+                    style={[
+                      styles.optionButton,
+                      selectedTopping === topping.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedTopping(topping.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedTopping === topping.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {topping.label}
+                    </ThemedText>
+                    {topping.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${topping.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Proteins */}
+          {showProteinOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Proteins</ThemedText>
+              <View style={styles.optionsGrid}>
+                {PROTEIN_OPTIONS.map((protein) => (
+                  <TouchableOpacity
+                    key={protein.value}
+                    style={[
+                      styles.optionButton,
+                      selectedProtein === protein.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedProtein(protein.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedProtein === protein.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {protein.label}
+                    </ThemedText>
+                    {protein.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${protein.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Cheeses */}
+          {showCheeseOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Cheeses</ThemedText>
+              <View style={styles.optionsGrid}>
+                {CHEESE_OPTIONS.map((cheese) => (
+                  <TouchableOpacity
+                    key={cheese.value}
+                    style={[
+                      styles.optionButton,
+                      selectedCheese === cheese.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedCheese(cheese.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedCheese === cheese.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {cheese.label}
+                    </ThemedText>
+                    {cheese.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${cheese.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
+
+          {/* Veggies */}
+          {showVeggyOptions && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Vegetables</ThemedText>
+              <View style={styles.optionsGrid}>
+                {VEGGY_OPTIONS.map((veggy) => (
+                  <TouchableOpacity
+                    key={veggy.value}
+                    style={[
+                      styles.optionButton,
+                      selectedVeggy === veggy.value &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setSelectedVeggy(veggy.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionText,
+                        selectedVeggy === veggy.value &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {veggy.label}
+                    </ThemedText>
+                    {veggy.price > 0 && (
+                      <ThemedText style={styles.optionPrice}>
+                        +${veggy.price.toFixed(2)}
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ThemedView>
+          )}
         </ScrollView>
 
         {/* Floating Add to Cart Button */}
@@ -120,6 +518,16 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+  },
+  fixedHeader: {
+    flexDirection: "row",
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#fff",
+    zIndex: 10,
   },
   backButton: {
     width: 40,
@@ -235,5 +643,37 @@ const styles = StyleSheet.create({
     color: "#434242",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  optionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  optionButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    backgroundColor: "#f8f9fa",
+    minWidth: "30%",
+    alignItems: "center",
+  },
+  optionButtonSelected: {
+    borderColor: "#7bf1a8",
+    backgroundColor: "#e8f9ea",
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#434242",
+  },
+  optionTextSelected: {
+    fontWeight: "600",
+    color: "#2d5a3d",
+  },
+  optionPrice: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
   },
 });

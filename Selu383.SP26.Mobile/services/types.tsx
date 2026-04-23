@@ -4,6 +4,40 @@ export interface Location {
   address: string;
   tableCount: number;
   managerId?: number | null;
+  hoursOfOperation?: string | null;
+}
+
+// Drink customization types
+export type MilkType = "whole" | "skim" | "oat" | "almond" | "soy" | "none";
+export type DrinkSize = "small" | "medium" | "large";
+export type ShotOption = 0 | 1 | 2 | 3 | 4 | 5;
+export type TemperatureOption = "hot" | "warm" | "chilled";
+export type FillingOption =
+  | "none"
+  | "chocolate"
+  | "strawberry"
+  | "vanilla"
+  | "caramel";
+export type ToppingOption =
+  | "none"
+  | "whippedCream"
+  | "powderedSugar"
+  | "freshFruit";
+export type ProteinOption = "none" | "bacon" | "ham" | "egg";
+export type CheeseOption = "none" | "cheddar" | "swiss" | "provolone";
+export type VeggyOption = "none" | "spinach" | "mushroom" | "tomato";
+
+export interface DrinkCustomization {
+  milkType?: MilkType;
+  drinkSize?: DrinkSize;
+  shotCount?: ShotOption;
+  temperature?: TemperatureOption;
+  filling?: FillingOption;
+  topping?: ToppingOption;
+  protein?: ProteinOption;
+  cheese?: CheeseOption;
+  veggy?: VeggyOption;
+  addOns?: string[];
 }
 
 export interface SearchLocationProps {
@@ -57,6 +91,14 @@ export interface CreateOrderDto {
   checkoutPhoneNumber: string;
   orderItems: CreateOrderItemDto[];
 }
+export interface CreateGuestOrderDto {
+  checkoutFirstName: string;
+  checkoutLastName: string;
+  checkoutEmail: string;
+  checkoutPhoneNumber: string;
+  locationId: number;
+  orderItems: CreateOrderItemDto[];
+}
 
 export interface CreateOrderItemDto {
   menuItemId: number;
@@ -76,4 +118,20 @@ export interface UserRewardsDto {
   id: string;
   userName: string;
   rewardPoints: number;
+}
+
+export type CreatePaymentSheetDto = {
+  locationId: number;
+  orderItems: CreateOrderItemDto[];
+  checkoutFirstName: string;
+  checkoutLastName: string;
+  checkoutEmail: string;
+  checkoutPhoneNumber: string;
+};
+
+export interface PaymentSheetResponseDto {
+  paymentIntent: string;
+  ephemeralKey: string;
+  customer: string;
+  publishableKey: string;
 }

@@ -1,6 +1,7 @@
 import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
+import { calculateCartItemTotal } from "@/utils/pricing";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -19,7 +20,11 @@ interface CartItemWithDetails {
   menuItem?: MenuItemDto;
 }
 
-export function ViewCart() {
+interface ViewCartProps {
+  onCheckout: () => void;
+}
+
+export function ViewCart({ onCheckout }: ViewCartProps) {
   const {
     orderItems,
     selectedLocationId,
@@ -27,7 +32,6 @@ export function ViewCart() {
     locationAddress,
     updateOrderItemQuantity,
     removeOrderItem,
-    clearOrder,
     itemCount,
   } = useOrder();
 
@@ -71,15 +75,22 @@ export function ViewCart() {
     setCartItemsWithDetails(itemsWithDetails);
   };
 
-  const handleQuantityChange = (menuItemId: number, newQuantity: number) => {
+  const handleQuantityChange = (
+    menuItemId: number,
+    customizationJson: string | undefined,
+    newQuantity: number,
+  ) => {
     if (newQuantity <= 0) {
-      handleRemoveItem(menuItemId);
+      handleRemoveItem(menuItemId, customizationJson);
     } else {
-      updateOrderItemQuantity(menuItemId, newQuantity);
+      updateOrderItemQuantity(menuItemId, customizationJson, newQuantity);
     }
   };
 
-  const handleRemoveItem = (menuItemId: number) => {
+  const handleRemoveItem = (
+    menuItemId: number,
+    customizationJson: string | undefined,
+  ) => {
     Alert.alert(
       "Remove Item",
       "Are you sure you want to remove this item from your order?",
@@ -88,14 +99,18 @@ export function ViewCart() {
         {
           text: "Remove",
           style: "destructive",
-          onPress: () => removeOrderItem(menuItemId),
+          onPress: () => removeOrderItem(menuItemId, customizationJson),
         },
       ],
     );
   };
 
   const calculateItemTotal = (item: CartItemWithDetails): number => {
-    return (item.menuItem?.price || 0) * item.quantity;
+    return calculateCartItemTotal({
+      basePrice: item.menuItem?.price || 0,
+      quantity: item.quantity,
+      customizationJson: item.customizationJson,
+    });
   };
 
   const calculateOrderTotal = (): number => {
@@ -105,7 +120,7 @@ export function ViewCart() {
   };
   //PUT CHECKOUT IMPLEMETATION HERE, PLACEHOLDER
   const handleCheckout = () => {
-    Alert.alert("Checkout", "Checkout flow will be implemented next!");
+    onCheckout();
   };
 
   // const handleClearCart = () => {
@@ -187,7 +202,11 @@ export function ViewCart() {
               <TouchableOpacity
                 style={styles.quantityButton}
                 onPress={() =>
-                  handleQuantityChange(item.menuItemId, item.quantity - 1)
+                  handleQuantityChange(
+                    item.menuItemId,
+                    item.customizationJson,
+                    item.quantity - 1,
+                  )
                 }
               >
                 <ThemedText style={styles.quantityButtonText}>-</ThemedText>
@@ -200,7 +219,11 @@ export function ViewCart() {
               <TouchableOpacity
                 style={styles.quantityButton}
                 onPress={() =>
-                  handleQuantityChange(item.menuItemId, item.quantity + 1)
+                  handleQuantityChange(
+                    item.menuItemId,
+                    item.customizationJson,
+                    item.quantity - 1,
+                  )
                 }
               >
                 <ThemedText style={styles.quantityButtonText}>+</ThemedText>
@@ -214,7 +237,9 @@ export function ViewCart() {
 
               <TouchableOpacity
                 style={styles.removeButton}
-                onPress={() => handleRemoveItem(item.menuItemId)}
+                onPress={() =>
+                  handleRemoveItem(item.menuItemId, item.customizationJson)
+                }
               >
                 <ThemedText style={styles.removeButtonText}>Remove</ThemedText>
               </TouchableOpacity>

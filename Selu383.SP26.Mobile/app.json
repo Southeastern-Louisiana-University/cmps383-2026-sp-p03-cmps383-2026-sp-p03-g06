@@ -40,7 +40,14 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.selu383.mobile",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

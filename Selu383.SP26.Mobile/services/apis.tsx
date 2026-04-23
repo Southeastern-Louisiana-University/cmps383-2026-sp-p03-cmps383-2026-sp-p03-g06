@@ -1,10 +1,13 @@
 import {
   CategoryDto,
+  CreateGuestOrderDto,
   CreateOrderDto,
   CreateOrderItemDto,
+  CreatePaymentSheetDto,
   Location,
   LoginDto,
   MenuItemDto,
+  PaymentSheetResponseDto,
   RegisterDto,
   RewardOfferingDto,
   UserRewardsDto,
@@ -181,6 +184,29 @@ export async function createOrder(
     throw error;
   }
 }
+export async function createGuestOrder(
+  createGuestOrderDto: CreateGuestOrderDto,
+) {
+  try {
+    const response = await fetch(`${API_BASE}/api/orders/guest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(createGuestOrderDto),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create guest order: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
 
 export async function getRewardOfferings() {
   try {
@@ -217,4 +243,26 @@ export async function getMyRewards() {
   } catch (error) {
     throw error;
   }
+}
+
+export async function createPaymentSheet(
+  dto: CreatePaymentSheetDto,
+): Promise<PaymentSheetResponseDto> {
+  const response = await fetch(
+    `${API_BASE}/api/payments/create-payment-sheet`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(dto),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to create payment sheet: ${response.status}`);
+  }
+
+  return response.json();
 }
