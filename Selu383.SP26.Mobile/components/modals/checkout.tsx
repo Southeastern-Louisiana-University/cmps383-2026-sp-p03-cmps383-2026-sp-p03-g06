@@ -2,16 +2,21 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useOrder } from "@/contexts/OrderContext";
 import { useAuthentication } from "@/hooks/use-authentication";
-import { createGuestOrder, createOrder } from "@/services/apis";
+import {
+  createGuestOrder,
+  createOrder,
+  createPaymentSheet,
+} from "@/services/apis";
+import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface CheckoutProps {
@@ -19,7 +24,9 @@ interface CheckoutProps {
 }
 
 export function Checkout({ onSignIn }: CheckoutProps) {
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isLoggedIn, loading } = useAuthentication();
+
   const {
     selectedLocationId,
     locationName,
@@ -34,10 +41,6 @@ export function Checkout({ onSignIn }: CheckoutProps) {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,16 +80,42 @@ export function Checkout({ onSignIn }: CheckoutProps) {
       return;
     }
 
-    if (!cardNumber.trim() || !expiry.trim() || !cvc.trim()) {
-      Alert.alert(
-        "Missing Payment Info",
-        "Please complete the payment fields.",
-      );
-      return;
-    }
-
     try {
       setSubmitting(true);
+
+      const paymentSheetParams = await createPaymentSheet({
+        locationId: selectedLocationId,
+        orderItems,
+        checkoutFirstName: firstName.trim(),
+        checkoutLastName: lastName.trim(),
+        checkoutEmail: email.trim(),
+        checkoutPhoneNumber: phoneNumber.trim(),
+      });
+
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: "Lion Rewards Cafe",
+        customerId: paymentSheetParams.customer,
+        customerEphemeralKeySecret: paymentSheetParams.ephemeralKey,
+        paymentIntentClientSecret: paymentSheetParams.paymentIntent,
+        defaultBillingDetails: {
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: email.trim(),
+          phone: phoneNumber.trim(),
+        },
+        allowsDelayedPaymentMethods: false,
+      });
+
+      if (initError) {
+        Alert.alert("Payment Setup Failed", initError.message);
+        return;
+      }
+
+      const { error: paymentError } = await presentPaymentSheet();
+
+      if (paymentError) {
+        Alert.alert("Payment Failed", paymentError.message);
+        return;
+      }
 
       if (isLoggedIn) {
         await createOrder(selectedLocationId, orderItems, {
@@ -107,13 +136,13 @@ export function Checkout({ onSignIn }: CheckoutProps) {
       }
 
       clearOrder();
-      Alert.alert("Success", "Your order has been placed.");
+      Alert.alert("Success", "Payment complete and order placed.");
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Something went wrong placing your order.";
-      Alert.alert("Order Failed", message);
+          : "Something went wrong during checkout.";
+      Alert.alert("Checkout Failed", message);
     } finally {
       setSubmitting(false);
     }
@@ -221,28 +250,14 @@ export function Checkout({ onSignIn }: CheckoutProps) {
 
             <ThemedText style={styles.sectionTitle}>Payment</ThemedText>
 
-            <TextInput
-              placeholder="Card Number"
-              style={styles.input}
-              value={cardNumber}
-              onChangeText={setCardNumber}
-              keyboardType="number-pad"
-            />
-            <View style={styles.row}>
-              <TextInput
-                placeholder="MM/YY"
-                style={[styles.input, styles.halfInput]}
-                value={expiry}
-                onChangeText={setExpiry}
-              />
-              <TextInput
-                placeholder="CVC"
-                style={[styles.input, styles.halfInput]}
-                value={cvc}
-                onChangeText={setCvc}
-                keyboardType="number-pad"
-              />
-            </View>
+            <ThemedView style={styles.summaryCard}>
+              <ThemedText style={styles.summaryText}>
+                Payment will be collected securely after you tap Place Order.
+              </ThemedText>
+              <ThemedText style={styles.summarySubtext}>
+                You will enter your card details in Stripe&apos;s payment sheet.
+              </ThemedText>
+            </ThemedView>
 
             <ThemedText style={styles.sectionTitle}>Order Summary</ThemedText>
 
@@ -264,7 +279,7 @@ export function Checkout({ onSignIn }: CheckoutProps) {
               disabled={submitting}
             >
               <ThemedText style={styles.primaryButtonText}>
-                {submitting ? "Placing Order..." : "Place Order"}
+                {submitting ? "Processing..." : "Place Order"}
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -318,13 +333,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     backgroundColor: "#f8f9fa",
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  halfInput: {
-    flex: 1,
   },
   primaryButton: {
     marginTop: 20,

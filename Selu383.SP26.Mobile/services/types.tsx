@@ -119,3 +119,19 @@ export interface UserRewardsDto {
   userName: string;
   rewardPoints: number;
 }
+
+export type CreatePaymentSheetDto = {
+  locationId: number;
+  orderItems: CreateOrderItemDto[];
+  checkoutFirstName: string;
+  checkoutLastName: string;
+  checkoutEmail: string;
+  checkoutPhoneNumber: string;
+};
+
+export interface PaymentSheetResponseDto {
+  paymentIntent: string;
+  ephemeralKey: string;
+  customer: string;
+  publishableKey: string;
+}

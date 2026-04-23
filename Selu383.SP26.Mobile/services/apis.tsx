@@ -3,9 +3,11 @@ import {
   CreateGuestOrderDto,
   CreateOrderDto,
   CreateOrderItemDto,
+  CreatePaymentSheetDto,
   Location,
   LoginDto,
   MenuItemDto,
+  PaymentSheetResponseDto,
   RegisterDto,
   RewardOfferingDto,
   UserRewardsDto,
@@ -241,4 +243,26 @@ export async function getMyRewards() {
   } catch (error) {
     throw error;
   }
+}
+
+export async function createPaymentSheet(
+  dto: CreatePaymentSheetDto,
+): Promise<PaymentSheetResponseDto> {
+  const response = await fetch(
+    `${API_BASE}/api/payments/create-payment-sheet`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(dto),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to create payment sheet: ${response.status}`);
+  }
+
+  return response.json();
 }
