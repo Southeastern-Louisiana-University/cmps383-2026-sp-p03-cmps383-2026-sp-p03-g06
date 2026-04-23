@@ -2,21 +2,27 @@ import { CreateOrderItemDto } from "@/services/types";
 import React, { createContext, useCallback, useContext, useState } from "react";
 
 interface OrderContextData {
-  //state for location and items
   selectedLocationId: number | null;
   orderItems: CreateOrderItemDto[];
   locationName: string | null;
   locationAddress: string | null;
 
-  //actions
   setLocation: (
     locationId: number,
     locationName: string,
     locationAddress: string,
   ) => void;
+
   addOrderItem: (item: CreateOrderItemDto) => void;
-  removeOrderItem: (menuItemId: number) => void;
-  updateOrderItemQuantity: (menuItemId: number, quantity: number) => void;
+
+  removeOrderItem: (menuItemId: number, customizationJson?: string) => void;
+
+  updateOrderItemQuantity: (
+    menuItemId: number,
+    customizationJson: string | undefined,
+    quantity: number,
+  ) => void;
+
   clearOrder: () => void;
 
   orderTotal: number;
@@ -62,28 +68,43 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const removeOrderItem = useCallback((menuItemId: number) => {
-    setOrderItems((currentItems) =>
-      currentItems.filter((item) => item.menuItemId !== menuItemId),
-    );
-  }, []);
+  const removeOrderItem = useCallback(
+    (menuItemId: number, customizationJson?: string) => {
+      setOrderItems((currentItems) =>
+        currentItems.filter(
+          (item) =>
+            !(
+              item.menuItemId === menuItemId &&
+              item.customizationJson === customizationJson
+            ),
+        ),
+      );
+    },
+    [],
+  );
 
   const updateOrderItemQuantity = useCallback(
-    (menuItemId: number, quantity: number) => {
+    (
+      menuItemId: number,
+      customizationJson: string | undefined,
+      quantity: number,
+    ) => {
       if (quantity <= 0) {
-        removeOrderItem(menuItemId);
+        removeOrderItem(menuItemId, customizationJson);
         return;
       }
 
       setOrderItems((currentItems) =>
         currentItems.map((item) =>
-          item.menuItemId === menuItemId ? { ...item, quantity } : item,
+          item.menuItemId === menuItemId &&
+          item.customizationJson === customizationJson
+            ? { ...item, quantity }
+            : item,
         ),
       );
     },
     [removeOrderItem],
   );
-
   const clearOrder = useCallback(() => {
     setSelectedLocationId(null);
     setLocationName(null);

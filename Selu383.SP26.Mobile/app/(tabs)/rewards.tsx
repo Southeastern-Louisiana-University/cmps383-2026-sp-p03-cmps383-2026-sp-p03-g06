@@ -4,8 +4,8 @@ import { useAuthentication } from "@/hooks/use-authentication";
 import { getMyRewards, getRewardOfferings } from "@/services/apis";
 import { RewardOfferingDto, UserRewardsDto } from "@/services/types";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function RewardsScreen() {
@@ -16,39 +16,43 @@ export default function RewardsScreen() {
   const [loading, setLoading] = useState(true);
   const { isLoggedIn, loading: authLoading } = useAuthentication();
 
-  useEffect(() => {
-    if (!isLoggedIn || authLoading) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        // Fetch both offerings and user rewards
-        const [offerings, myRewards] = await Promise.all([
-          getRewardOfferings(),
-          getMyRewards(),
-        ]);
-
-        if (Array.isArray(offerings)) {
-          setRewardOfferings(offerings);
-        } else if (offerings) {
-          setRewardOfferings([offerings]);
-        } else {
-          setRewardOfferings([]);
-        }
-
-        setUserRewards(myRewards);
-      } catch (error) {
-        console.error("Failed to fetch rewards data:", error);
-        setRewardOfferings([]);
-        setUserRewards(null);
-      } finally {
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoggedIn || authLoading) {
         setLoading(false);
+        return;
       }
-    };
-    fetchData();
-  }, [isLoggedIn, authLoading]);
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+
+          const [offerings, myRewards] = await Promise.all([
+            getRewardOfferings(),
+            getMyRewards(),
+          ]);
+
+          if (Array.isArray(offerings)) {
+            setRewardOfferings(offerings);
+          } else if (offerings) {
+            setRewardOfferings([offerings]);
+          } else {
+            setRewardOfferings([]);
+          }
+
+          setUserRewards(myRewards);
+        } catch (error) {
+          console.error("Failed to fetch rewards data:", error);
+          setRewardOfferings([]);
+          setUserRewards(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    }, [isLoggedIn, authLoading]),
+  );
   return (
     <ThemedView style={styles.container}>
       {authLoading ? (

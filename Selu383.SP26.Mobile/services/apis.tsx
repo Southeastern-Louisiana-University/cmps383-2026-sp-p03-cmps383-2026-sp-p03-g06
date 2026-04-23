@@ -1,5 +1,6 @@
 import {
   CategoryDto,
+  CreateGuestOrderDto,
   CreateOrderDto,
   CreateOrderItemDto,
   Location,
@@ -173,6 +174,29 @@ export async function createOrder(
 
     if (!response.ok) {
       throw new Error(`Failed to create order: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function createGuestOrder(
+  createGuestOrderDto: CreateGuestOrderDto,
+) {
+  try {
+    const response = await fetch(`${API_BASE}/api/orders/guest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(createGuestOrderDto),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create guest order: ${response.status}`);
     }
 
     const data = await response.json();

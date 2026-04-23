@@ -49,6 +49,8 @@ export function OrderCatalogHeader({
 
   const handleCategoryPress = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
+    console.log("Pressed categoryId:", categoryId);
+
     onCategoryChange?.(categoryId);
   };
 
