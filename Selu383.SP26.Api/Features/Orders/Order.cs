@@ -8,6 +8,14 @@ public class Order
 
     public string? CustomerName { get; set; }
 
+    public string? CheckoutFirstName { get; set; }
+
+    public string? CheckoutLastName { get; set; }
+
+    public string? CheckoutEmail { get; set; }
+
+    public string? CheckoutPhoneNumber { get; set; }
+
     public int LocationId { get; set; }
 
     public decimal TotalPrice { get; set; }
