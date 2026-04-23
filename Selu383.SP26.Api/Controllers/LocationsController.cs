@@ -23,6 +23,7 @@ public class LocationsController(DataContext dataContext) : ControllerBase
                 Address = x.Address,
                 TableCount = x.TableCount,
                 ManagerId = x.ManagerId,
+                HoursOfOperation = x.HoursOfOperation,
             });
     }
 
@@ -44,6 +45,7 @@ public class LocationsController(DataContext dataContext) : ControllerBase
             Address = result.Address,
             TableCount = result.TableCount,
             ManagerId = result.ManagerId,
+            HoursOfOperation = result.HoursOfOperation,
         });
     }
 
@@ -61,7 +63,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
             Name = dto.Name,
             Address = dto.Address,
             TableCount = dto.TableCount,
-            ManagerId = dto.ManagerId
+            ManagerId = dto.ManagerId,
+            HoursOfOperation = dto.HoursOfOperation,
         };
 
         dataContext.Set<Location>().Add(location);
@@ -98,12 +101,54 @@ public class LocationsController(DataContext dataContext) : ControllerBase
         location.Address = dto.Address;
         location.TableCount = dto.TableCount;
         location.ManagerId = dto.ManagerId;
+        location.HoursOfOperation = dto.HoursOfOperation;
 
         dataContext.SaveChanges();
 
         dto.Id = location.Id;
 
         return Ok(dto);
+    }
+
+    [HttpGet("{id}/pickup-times")]
+    public ActionResult<IEnumerable<PickupTimeDto>> GetPickupTimes(int id)
+    {
+        var location = dataContext.Set<Location>()
+            .FirstOrDefault(x => x.Id == id);
+
+        if (location == null)
+        {
+            return NotFound();
+        }
+
+        var now = DateTime.Now;
+        var slots = new List<PickupTimeDto>();
+
+        // ASAP slot — ready in 15 minutes
+        var asapTime = now.AddMinutes(15);
+        slots.Add(new PickupTimeDto
+        {
+            Label = "ASAP (~15 min)",
+            Time = asapTime,
+            IsAsap = true,
+        });
+
+        // Scheduled slots every 15 minutes for the next 3 hours
+        var slotStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0)
+            .AddMinutes(30 - now.Minute % 15); // round up to next 15-min mark
+
+        for (int i = 0; i < 12; i++)
+        {
+            var slotTime = slotStart.AddMinutes(i * 15);
+            slots.Add(new PickupTimeDto
+            {
+                Label = slotTime.ToString("h:mm tt"),
+                Time = slotTime,
+                IsAsap = false,
+            });
+        }
+
+        return Ok(slots);
     }
 
     [HttpDelete("{id}")]

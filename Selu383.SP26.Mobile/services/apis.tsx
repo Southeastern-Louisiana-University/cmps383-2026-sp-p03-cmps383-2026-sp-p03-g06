@@ -1,5 +1,6 @@
 import {
   CategoryDto,
+  CreateOrderDto,
   CreateOrderItemDto,
   Location,
   LoginDto,
@@ -145,15 +146,29 @@ export async function getCategory() {
 export async function createOrder(
   locationId: number,
   orderItems: CreateOrderItemDto[],
+  checkout: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+  },
 ) {
   try {
+    const body: CreateOrderDto = {
+      locationId,
+      checkoutFirstName: checkout.firstName,
+      checkoutLastName: checkout.lastName,
+      checkoutEmail: checkout.email,
+      checkoutPhoneNumber: checkout.phoneNumber,
+      orderItems,
+    };
     const response = await fetch(`${API_BASE}/api/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ locationId, orderItems }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
