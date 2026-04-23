@@ -6,6 +6,8 @@ import {
   LoginDto,
   MenuItemDto,
   RegisterDto,
+  RewardOfferingDto,
+  UserRewardsDto,
 } from "./types";
 const API_BASE = "https://selu383-sp26-p03-g06.azurewebsites.net";
 
@@ -175,6 +177,43 @@ export async function createOrder(
 
     const data = await response.json();
     return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getRewardOfferings() {
+  try {
+    const response = await fetch(`${API_BASE}/api/Rewards/offerings`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reward offerings: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data as RewardOfferingDto[];
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMyRewards() {
+  try {
+    const response = await fetch(`${API_BASE}/api/Rewards/me`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Not authenticated");
+      }
+      throw new Error(`Failed to fetch user rewards: ${response.status}`);
+    }
+    const data = await response.json();
+    return data as UserRewardsDto;
   } catch (error) {
     throw error;
   }

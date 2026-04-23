@@ -33,7 +33,11 @@ export default function OrderScreen() {
       key={location.id}
       style={styles.locationItem}
       onPress={() => {
-        setLocation(location.id, location.name || "Unknown Location");
+        setLocation(
+          location.id,
+          location.name,
+          location.address || "Unknown Location",
+        );
         router.push("/(tabs)/orderCatalog");
       }}
     >

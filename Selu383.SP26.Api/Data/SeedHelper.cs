@@ -137,34 +137,34 @@ public static class SeedHelper
 
 
         dataContext.Set<MenuItem>().AddRange(
-            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = 1},
-            new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = 1 },
-            new MenuItem {Name = "Roaring Frappe", Description = "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.", Price = 6.20m, IsAvailable = true, CategoryId = 1 },
-            new MenuItem { Name = "Black & White Cold Brew", Description = "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk.", Price = 5.15m, IsAvailable = true, CategoryId = 1 },
-            new MenuItem { Name = "Strawberry Limeade", Description = "Fresh lime juice blended with strawberry puree for a refreshing, tangy drink.", Price = 5.00m, IsAvailable = true, CategoryId = 1 },
-            new MenuItem { Name = "Shaken Lemonade", Description = "Fresh lemon juice and simple syrup vigorously shaken for a bright, refreshing lemonade.", Price = 5.00m, IsAvailable = true, CategoryId = 1 },
+            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = 29},
+            new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = 29 },
+            new MenuItem {Name = "Roaring Frappe", Description = "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.", Price = 6.20m, IsAvailable = true, CategoryId = 29 },
+            new MenuItem { Name = "Black & White Cold Brew", Description = "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk.", Price = 5.15m, IsAvailable = true, CategoryId = 29 },
+            new MenuItem { Name = "Strawberry Limeade", Description = "Fresh lime juice blended with strawberry puree for a refreshing, tangy drink.", Price = 5.00m, IsAvailable = true, CategoryId = 29 },
+            new MenuItem { Name = "Shaken Lemonade", Description = "Fresh lemon juice and simple syrup vigorously shaken for a bright, refreshing lemonade.", Price = 5.00m, IsAvailable = true, CategoryId = 29 },
 
-            new MenuItem { Name = "Mannino Honey Crepe", Description = "A sweet crepe drizzled with Mannino honey and topped with mixed berries.", Price = 10.00m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Downtowner", Description = "Strawberries and bananas wrapped in a crepe, finished with Nutella and Hershey's chocolate sauce.", Price = 10.75m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Funky Monkey", Description = "Nutella and bananas wrapped in a crepe, served with whipped cream.", Price = 10.00m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Le S'mores", Description = "Marshmallow cream and chocolate sauce inside a crepe, topped with graham cracker crumbs.", Price = 9.50m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Strawberry Fields", Description = "Fresh strawberries with Hershey's chocolate drizzle and a dusting of powdered sugar.", Price = 10.00m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Bonjour", Description = "A sweet crepe filled with syrup and cinnamon, finished with powdered sugar.", Price = 8.50m, IsAvailable = true, CategoryId = 2 },
-            new MenuItem { Name = "Banana Foster", Description = "Bananas with cinnamon in a crepe, topped with a generous drizzle of caramel sauce.", Price = 8.95m, IsAvailable = true, CategoryId = 2 },
+            new MenuItem { Name = "Mannino Honey Crepe", Description = "A sweet crepe drizzled with Mannino honey and topped with mixed berries.", Price = 10.00m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Downtowner", Description = "Strawberries and bananas wrapped in a crepe, finished with Nutella and Hershey's chocolate sauce.", Price = 10.75m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Funky Monkey", Description = "Nutella and bananas wrapped in a crepe, served with whipped cream.", Price = 10.00m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Le S'mores", Description = "Marshmallow cream and chocolate sauce inside a crepe, topped with graham cracker crumbs.", Price = 9.50m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Strawberry Fields", Description = "Fresh strawberries with Hershey's chocolate drizzle and a dusting of powdered sugar.", Price = 10.00m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Bonjour", Description = "A sweet crepe filled with syrup and cinnamon, finished with powdered sugar.", Price = 8.50m, IsAvailable = true, CategoryId = 30 },
+            new MenuItem { Name = "Banana Foster", Description = "Bananas with cinnamon in a crepe, topped with a generous drizzle of caramel sauce.", Price = 8.95m, IsAvailable = true, CategoryId = 30 },
 
-            new MenuItem { Name = "Matt's Scrambled Eggs", Description = "Scrambled eggs and melted mozzarella cheese wrapped in a crepe.", Price = 5.00m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Meanie Mushroom", Description = "Sautùed mushrooms, mozzarella, tomato, and bacon inside a delicate crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Turkey Club", Description = "Sliced turkey, bacon, spinach, and tomato wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Green Machine", Description = "Spinach, artichokes, and mozzarella cheese inside a fresh crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Perfect Pair", Description = "A unique combination of bacon and Nutella wrapped in a crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Crepe Fromage", Description = "A savory crepe filled with a blend of cheeses.", Price = 8.00m, IsAvailable = true, CategoryId = 3 },
-            new MenuItem { Name = "Farmers Market Crepe", Description = "Turkey, spinach, and mozzarella wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 3 },
+            new MenuItem { Name = "Matt's Scrambled Eggs", Description = "Scrambled eggs and melted mozzarella cheese wrapped in a crepe.", Price = 5.00m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Meanie Mushroom", Description = "Saut√©ed mushrooms, mozzarella, tomato, and bacon inside a delicate crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Turkey Club", Description = "Sliced turkey, bacon, spinach, and tomato wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Green Machine", Description = "Spinach, artichokes, and mozzarella cheese inside a fresh crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Perfect Pair", Description = "A unique combination of bacon and Nutella wrapped in a crepe.", Price = 10.00m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Crepe Fromage", Description = "A savory crepe filled with a blend of cheeses.", Price = 8.00m, IsAvailable = true, CategoryId = 31 },
+            new MenuItem { Name = "Farmers Market Crepe", Description = "Turkey, spinach, and mozzarella wrapped in a savory crepe.", Price = 10.50m, IsAvailable = true, CategoryId = 31 },
 
-            new MenuItem { Name = "Travis Special", Description = "Cream cheese, salmon, spinach, and a fried egg served on a freshly toasted bagel.", Price = 14.00m, IsAvailable = true, CategoryId = 4 },
-            new MenuItem { Name = "Crùme Brulagel", Description = "A toasted bagel with a caramelized sugar crust inspired by crùme brùlùe, served with creamcheese.", Price = 8.00m, IsAvailable = true, CategoryId = 4 },
-            new MenuItem { Name = "The Fancy One", Description = "Smoked salmon, cream cheese, and fresh dill on a toasted bagel.", Price = 13.00m, IsAvailable = true, CategoryId = 4 },
-            new MenuItem { Name = "Breakfast Bagel", Description = "A toasted bagel with your choice of ham, bacon, or sausage, a fried egg, and cheddar cheese.", Price = 9.50m, IsAvailable = true, CategoryId = 4 },
-            new MenuItem { Name = "The Classic", Description = "A toasted bagel with cream cheeese", Price = 5.25m, IsAvailable = true, CategoryId = 4 }
+            new MenuItem { Name = "Travis Special", Description = "Cream cheese, salmon, spinach, and a fried egg served on a freshly toasted bagel.", Price = 14.00m, IsAvailable = true, CategoryId = 32 },
+            new MenuItem { Name = "Cr√®me Brulagel", Description = "A toasted bagel with a caramelized sugar crust inspired by cr√®me br√ªl√©e, served with creamcheese.", Price = 8.00m, IsAvailable = true, CategoryId = 32 },
+            new MenuItem { Name = "The Fancy One", Description = "Smoked salmon, cream cheese, and fresh dill on a toasted bagel.", Price = 13.00m, IsAvailable = true, CategoryId = 32 },
+            new MenuItem { Name = "Breakfast Bagel", Description = "A toasted bagel with your choice of ham, bacon, or sausage, a fried egg, and cheddar cheese.", Price = 9.50m, IsAvailable = true, CategoryId = 32 },
+            new MenuItem { Name = "The Classic", Description = "A toasted bagel with cream cheeese", Price = 5.25m, IsAvailable = true, CategoryId = 32 }
 
 
 

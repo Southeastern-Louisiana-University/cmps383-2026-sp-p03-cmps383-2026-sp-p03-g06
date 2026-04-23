@@ -6,9 +6,14 @@ interface OrderContextData {
   selectedLocationId: number | null;
   orderItems: CreateOrderItemDto[];
   locationName: string | null;
+  locationAddress: string | null;
 
   //actions
-  setLocation: (locationId: number, locationName: string) => void;
+  setLocation: (
+    locationId: number,
+    locationName: string,
+    locationAddress: string,
+  ) => void;
   addOrderItem: (item: CreateOrderItemDto) => void;
   removeOrderItem: (menuItemId: number) => void;
   updateOrderItemQuantity: (menuItemId: number, quantity: number) => void;
@@ -25,12 +30,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     null,
   );
   const [locationName, setLocationName] = useState<string | null>(null);
+  const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<CreateOrderItemDto[]>([]);
 
-  const setLocation = useCallback((locationId: number, name: string) => {
-    setSelectedLocationId(locationId);
-    setLocationName(name);
-  }, []);
+  const setLocation = useCallback(
+    (locationId: number, name: string, address: string) => {
+      setSelectedLocationId(locationId);
+      setLocationName(name);
+      setLocationAddress(address);
+    },
+    [],
+  );
 
   const addOrderItem = useCallback((newItem: CreateOrderItemDto) => {
     setOrderItems((currentItems) => {
@@ -77,6 +87,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const clearOrder = useCallback(() => {
     setSelectedLocationId(null);
     setLocationName(null);
+    setLocationAddress(null);
     setOrderItems([]);
   }, []);
 
@@ -92,6 +103,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     selectedLocationId,
     orderItems,
     locationName,
+    locationAddress,
     setLocation,
     addOrderItem,
     removeOrderItem,
