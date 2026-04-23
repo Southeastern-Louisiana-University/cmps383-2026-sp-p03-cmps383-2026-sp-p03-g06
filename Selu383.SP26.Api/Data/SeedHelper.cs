@@ -119,7 +119,7 @@ public static class SeedHelper
 
 
         dataContext.Set<MenuItem>().AddRange(
-            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = 1},
+            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = 29},
             new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = 29 },
             new MenuItem {Name = "Roaring Frappe", Description = "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.", Price = 6.20m, IsAvailable = true, CategoryId = 29 },
             new MenuItem { Name = "Black & White Cold Brew", Description = "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk.", Price = 5.15m, IsAvailable = true, CategoryId = 29 },
