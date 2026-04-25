@@ -1,10 +1,9 @@
 import {
     IconChevronDown,
     IconCup,
-    IconFlame,
-    IconLeaf,
-    IconCookie,
-    IconSnowflake,
+    IconBurger,
+    IconCakeRoll,
+    IconBreadFilled,
 } from '@tabler/icons-react';
 import {
     Anchor,
@@ -29,11 +28,11 @@ import { useNavigate } from 'react-router-dom';
 import classes from './HeaderMegaMenu.module.scss';
 
 const menuCategories = [
-    { icon: IconFlame, title: 'Hot drinks', description: 'Espresso, lattes, cappuccinos and more' },
-    { icon: IconSnowflake, title: 'Cold drinks', description: 'Cold brew, iced lattes, refreshers' },
-    { icon: IconLeaf, title: 'Matcha & tea', description: 'Ceremonial matcha, chai, herbal teas' },
-    { icon: IconCookie, title: 'Food', description: 'Pastries, sandwiches, and snacks' },
-    { icon: IconCup, title: 'Seasonal', description: 'Limited time drinks and specials' },
+    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more' },
+    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite' },
+    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors' },
+    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels' },
+    
 ];
 
 export function HeaderMegaMenu() {

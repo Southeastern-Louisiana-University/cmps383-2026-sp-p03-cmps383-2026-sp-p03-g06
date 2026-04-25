@@ -1,55 +1,78 @@
 import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-type Category = "All" | "Hot drinks" | "Cold drinks" | "Matcha & tea" | "Food" | "Seasonal";
+type Category = "All" | "Drinks" | "Sweet Crepes" | "Savory Crepes" | "Bagels";
 
-type Drink = {
+type MenuItem = {
     name: string;
     price: number;
     category: Exclude<Category, "All">;
-    emoji: string;
+    image: string;
     description: string;
-    seasonal?: boolean;
 };
 
-const drinks: Drink[] = [
-    { emoji: "☕", name: "Latte", price: 4.50, category: "Hot drinks", description: "Espresso with steamed milk and light foam." },
-    { emoji: "☕", name: "Cappuccino", price: 4.25, category: "Hot drinks", description: "Bold espresso with thick steamed milk foam." },
-    { emoji: "🍂", name: "Honey cinnamon flat white", price: 6.00, category: "Hot drinks", description: "Ristretto shots with honey and cinnamon." },
-    { emoji: "☁️", name: "Cold brew cloud", price: 7.00, category: "Cold drinks", description: "Smooth cold brew with sweet cream foam." },
-    { emoji: "❄️", name: "Iced americano", price: 4.75, category: "Cold drinks", description: "Espresso shots over ice with cold water." },
-    { emoji: "🌿", name: "Matcha oat latte", price: 6.50, category: "Matcha & tea", description: "Ceremonial matcha with silky oat milk." },
-    { emoji: "🍵", name: "Chai latte", price: 5.50, category: "Matcha & tea", description: "Spiced chai concentrate with steamed milk." },
-    { emoji: "🧁", name: "Butter croissant", price: 3.50, category: "Food", description: "Flaky, buttery croissant baked fresh daily." },
-    { emoji: "🥪", name: "Avocado toast", price: 7.50, category: "Food", description: "Sourdough with smashed avocado and sea salt." },
-    { emoji: "🌸", name: "Cherry blossom latte", price: 7.25, category: "Seasonal", description: "Espresso with cherry blossom syrup and oat milk.", seasonal: true },
+const menuItems: MenuItem[] = [
+    // DRINKS
+    { name: "Iced Latte", price: 5.50, category: "Drinks", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&fit=crop&auto=format", description: "Espresso and milk served over ice for a refreshing coffee drink." },
+    { name: "Supernova", price: 7.95, category: "Drinks", image: "https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=400&fit=crop&auto=format", description: "A unique coffee blend with a complex, balanced profile and subtle sweetness." },
+    { name: "Roaring Frappe", price: 6.20, category: "Drinks", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&fit=crop&auto=format", description: "Cold brew, milk, and ice blended together with a signature syrup, topped with whipped cream." },
+    { name: "Black & White Cold Brew", price: 5.15, category: "Drinks", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&fit=crop&auto=format", description: "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk." },
+    { name: "Strawberry Limeade", price: 5.00, category: "Drinks", image: "https://images.unsplash.com/photo-1497534446932-c925b458314e?w=400&fit=crop&auto=format", description: "Fresh lime juice blended with strawberry purée for a refreshing, tangy drink." },
+    { name: "Shaken Lemonade", price: 5.00, category: "Drinks", image: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&fit=crop&auto=format", description: "Fresh lemon juice and simple syrup vigorously shaken for a bright, refreshing lemonade." },
+
+    // SWEET CREPES
+    { name: "Mannino Honey Crepe", price: 10.00, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=400&fit=crop&auto=format", description: "A sweet crepe drizzled with Mannino honey and topped with mixed berries." },
+    { name: "Downtowner", price: 10.75, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&fit=crop&auto=format", description: "Strawberries and bananas wrapped in a crepe, finished with Nutella and Hershey's chocolate sauce." },
+    { name: "Funky Monkey", price: 10.00, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?w=400&fit=crop&auto=format", description: "Nutella and bananas wrapped in a crepe, served with whipped cream." },
+    { name: "Le S'mores", price: 9.50, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=400&fit=crop&auto=format", description: "Marshmallow cream and chocolate sauce inside a crepe, topped with graham cracker crumbs." },
+    { name: "Strawberry Fields", price: 10.00, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&fit=crop&auto=format", description: "Fresh strawberries with Hershey's chocolate drizzle and a dusting of powdered sugar." },
+    { name: "Bonjour", price: 8.50, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1506280754576-f6fa8a873550?w=400&fit=crop&auto=format", description: "A sweet crepe filled with syrup and cinnamon, finished with powdered sugar." },
+    { name: "Banana Foster", price: 8.95, category: "Sweet Crepes", image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&fit=crop&auto=format", description: "Bananas with cinnamon in a crepe, topped with a generous drizzle of caramel sauce." },
+
+    // SAVORY CREPES
+    { name: "Matt's Scrambled Eggs", price: 5.00, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=400&fit=crop&auto=format", description: "Scrambled eggs and melted mozzarella cheese wrapped in a crepe." },
+    { name: "Meanie Mushroom", price: 10.50, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&fit=crop&auto=format", description: "Sautéed mushrooms, mozzarella, tomato, and bacon inside a delicate crepe." },
+    { name: "Turkey Club", price: 10.50, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1509722747041-616f39b57569?w=400&fit=crop&auto=format", description: "Sliced turkey, bacon, spinach, and tomato wrapped in a savory crepe." },
+    { name: "Green Machine", price: 10.00, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&fit=crop&auto=format", description: "Spinach, artichokes, and mozzarella cheese inside a fresh crepe." },
+    { name: "Perfect Pair", price: 10.00, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?w=400&fit=crop&auto=format", description: "A unique combination of bacon and Nutella wrapped in a crepe." },
+    { name: "Crepe Fromage", price: 8.00, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&fit=crop&auto=format", description: "A savory crepe filled with a blend of cheeses." },
+    { name: "Farmers Market Crepe", price: 10.50, category: "Savory Crepes", image: "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400&fit=crop&auto=format", description: "Turkey, spinach, and mozzarella wrapped in a savory crepe." },
+
+    // BAGELS
+    { name: "Travis Special", price: 14.00, category: "Bagels", image: "https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?w=400&fit=crop&auto=format", description: "Cream cheese, salmon, spinach, and a fried egg served on a freshly toasted bagel." },
+    { name: "Crème Brulagel", price: 8.00, category: "Bagels", image: "https://images.unsplash.com/photo-1612240498936-65f5101365d2?w=400&fit=crop&auto=format", description: "A toasted bagel with a caramelized sugar crust inspired by crème brûlée, served with cream cheese." },
+    { name: "The Fancy One", price: 13.00, category: "Bagels", image: "https://images.unsplash.com/photo-1598182198871-d3f4ab4fd181?w=400&fit=crop&auto=format", description: "Smoked salmon, cream cheese, and fresh dill on a toasted bagel." },
+    { name: "Breakfast Bagel", price: 9.50, category: "Bagels", image: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&fit=crop&auto=format", description: "A toasted bagel with your choice of ham, bacon, or sausage, a fried egg, and cheddar cheese." },
+    { name: "The Classic", price: 5.25, category: "Bagels", image: "https://images.unsplash.com/photo-1567337710282-00832b415979?w=400&fit=crop&auto=format", description: "A toasted bagel with cream cheese." },
 ];
 
-const categories: Category[] = ["All", "Hot drinks", "Cold drinks", "Matcha & tea", "Food", "Seasonal"];
+const categories: Category[] = ["All", "Drinks", "Sweet Crepes", "Savory Crepes", "Bagels"];
 
 const categoryEmoji: Record<Category, string> = {
     "All": "",
-    "Hot drinks": "🔥",
-    "Cold drinks": "❄️",
-    "Matcha & tea": "🌿",
-    "Food": "🍪",
-    "Seasonal": "✨",
+    "Drinks": "☕",
+    "Sweet Crepes": "🥞",
+    "Savory Crepes": "🍳",
+    "Bagels": "🥯",
 };
 
-type CartItem = Drink & { quantity: number };
+type CartItem = MenuItem & { quantity: number };
 
 export default function OrderPage() {
-    const [activeCategory, setActiveCategory] = useState<Category>("All");
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const activeCategory = (searchParams.get("category") as Category) ?? "All";
     const [cart, setCart] = useState<CartItem[]>([]);
 
-    const filtered = activeCategory === "All" ? drinks : drinks.filter(d => d.category === activeCategory);
+    const filtered = activeCategory === "All"
+        ? menuItems
+        : menuItems.filter(d => d.category === activeCategory);
 
-    const addToCart = (drink: Drink) => {
+    const addToCart = (item: MenuItem) => {
         setCart(prev => {
-            const existing = prev.find(i => i.name === drink.name);
-            if (existing) {
-                return prev.map(i => i.name === drink.name ? { ...i, quantity: i.quantity + 1 } : i);
-            }
-            return [...prev, { ...drink, quantity: 1 }];
+            const existing = prev.find(i => i.name === item.name);
+            if (existing) return prev.map(i => i.name === item.name ? { ...i, quantity: i.quantity + 1 } : i);
+            return [...prev, { ...item, quantity: 1 }];
         });
     };
 
@@ -69,18 +92,20 @@ export default function OrderPage() {
         <div style={{ paddingBottom: cart.length > 0 ? 100 : 0 }}>
 
             {/* PAGE HEADER */}
-            <div style={{ padding: "40px 48px 0" }}>
-                <p style={{ fontSize: 12, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "#2d6a4f", marginBottom: 8 }}>
+            <div className="px-6 md:px-12 pt-10 pb-0">
+                <p className="text-xs font-semibold tracking-[0.08em] uppercase text-[#2d6a4f] mb-2">
                     Caffeinated Lions
                 </p>
-                <h1 style={{ fontSize: 32, fontWeight: 500, marginBottom: 28 }}>Order</h1>
+                <h1 className="text-3xl font-medium mb-6">Order</h1>
 
                 {/* CATEGORY FILTER */}
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 36 }}>
+                <div className="flex gap-2 flex-wrap mb-8">
                     {categories.map(cat => (
                         <button
                             key={cat}
-                            onClick={() => setActiveCategory(cat)}
+                            onClick={() => cat === "All"
+                                ? navigate("/order")
+                                : navigate(`/order?category=${encodeURIComponent(cat)}`)}
                             style={{
                                 padding: "8px 20px",
                                 borderRadius: 20,
@@ -99,40 +124,44 @@ export default function OrderPage() {
                 </div>
             </div>
 
-            {/* DRINK GRID */}
-            <div style={{ padding: "0 48px 48px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
-                {filtered.map(drink => (
+            {/* MENU GRID */}
+            <div className="px-6 md:px-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {filtered.map(item => (
                     <div
-                        key={drink.name}
-                        style={{
-                            background: "#f9f9f9",
-                            borderRadius: 12,
-                            padding: 20,
-                            border: drink.seasonal ? "2px solid #7bf1a8" : "0.5px solid #e0e0e0",
-                            position: "relative",
-                        }}
+                        key={item.name}
+                        className="bg-white border border-[#e0e0e0] rounded-xl overflow-hidden flex flex-col shadow-sm"
                     >
-                        {drink.seasonal && (
-                            <div style={{ position: "absolute", top: -10, left: 16, background: "#7bf1a8", color: "#1a4731", fontSize: 11, fontWeight: 500, padding: "3px 10px", borderRadius: 10 }}>
-                                Seasonal
-                            </div>
-                        )}
-                        <div style={{ width: 52, height: 52, background: "#7bf1a8", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14 }}>
-                            {drink.emoji}
+                        {/* IMAGE */}
+                        <div className="w-full h-40 overflow-hidden bg-[#f0fdf4]">
+                            <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src =
+                                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&fit=crop&auto=format";
+                                }}
+                            />
                         </div>
-                        <p style={{ fontSize: 11, color: "#2d6a4f", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-                            {drink.category}
-                        </p>
-                        <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>{drink.name}</p>
-                        <p style={{ fontSize: 13, color: "#555", marginBottom: 16, lineHeight: 1.5 }}>{drink.description}</p>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <span style={{ fontSize: 15, fontWeight: 500 }}>${drink.price.toFixed(2)}</span>
-                            <button
-                                onClick={() => addToCart(drink)}
-                                style={{ background: "#7bf1a8", color: "#1a4731", border: "none", padding: "9px 18px", borderRadius: 20, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
-                            >
-                                Add +
-                            </button>
+
+                        {/* CONTENT */}
+                        <div className="p-4 flex flex-col flex-1">
+                            <p className="text-[11px] text-[#2d6a4f] font-semibold uppercase tracking-wide mb-1">
+                                {item.category}
+                            </p>
+                            <p className="text-sm font-semibold mb-1">{item.name}</p>
+                            <p className="text-xs text-[#555] leading-relaxed mb-4 flex-1">
+                                {item.description}
+                            </p>
+                            <div className="flex items-center justify-between mt-auto">
+                                <span className="text-sm font-semibold">${item.price.toFixed(2)}</span>
+                                <button
+                                    onClick={() => addToCart(item)}
+                                    className="bg-[#7bf1a8] text-[#1a4731] text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#5ce090] transition-colors"
+                                >
+                                    Add +
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -140,9 +169,7 @@ export default function OrderPage() {
 
             {/* BOTTOM CART BAR */}
             {cart.length > 0 && (
-                <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a4731", padding: "20px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "0.5px solid rgba(255,255,255,0.1)", zIndex: 100 }}>
-
-                    {/* LEFT: item count + cart items */}
+                <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a4731", padding: "18px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 100 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 20, overflow: "hidden" }}>
                         <div style={{ background: "#7bf1a8", color: "#1a4731", width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
                             {totalItems}
@@ -151,7 +178,7 @@ export default function OrderPage() {
                             {cart.slice(0, 3).map((item, i) => (
                                 <div key={item.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     {i > 0 && <div style={{ width: "0.5px", height: 32, background: "rgba(255,255,255,0.2)", flexShrink: 0 }} />}
-                                    <span style={{ fontSize: 16 }}>{item.emoji}</span>
+                                    <img src={item.image} alt={item.name} style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", border: "1.5px solid rgba(255,255,255,0.3)" }} />
                                     <div>
                                         <p style={{ fontSize: 13, fontWeight: 500, color: "white", whiteSpace: "nowrap" }}>{item.name}</p>
                                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
@@ -168,8 +195,6 @@ export default function OrderPage() {
                             )}
                         </div>
                     </div>
-
-                    {/* RIGHT: total + place order */}
                     <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
                         <div style={{ textAlign: "right" }}>
                             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>Total incl. tax</p>
