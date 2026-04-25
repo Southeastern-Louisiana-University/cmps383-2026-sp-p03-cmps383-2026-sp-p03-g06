@@ -23,7 +23,7 @@ interface CheckoutProps {
   onSignIn?: () => void;
 }
 
-export function Checkout({ onSignIn }: CheckoutProps) {
+export default function Checkout({ onSignIn }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isLoggedIn, loading } = useAuthentication();
 
@@ -82,6 +82,7 @@ export function Checkout({ onSignIn }: CheckoutProps) {
 
     try {
       setSubmitting(true);
+      console.log("1. Starting checkout");
 
       const paymentSheetParams = await createPaymentSheet({
         locationId: selectedLocationId,
@@ -91,6 +92,8 @@ export function Checkout({ onSignIn }: CheckoutProps) {
         checkoutEmail: email.trim(),
         checkoutPhoneNumber: phoneNumber.trim(),
       });
+
+      console.log("2. Payment sheet params received", paymentSheetParams);
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "Lion Rewards Cafe",
@@ -105,17 +108,25 @@ export function Checkout({ onSignIn }: CheckoutProps) {
         allowsDelayedPaymentMethods: false,
       });
 
+      console.log("3. initPaymentSheet finished", initError);
+
       if (initError) {
         Alert.alert("Payment Setup Failed", initError.message);
         return;
       }
 
+      console.log("4. About to present payment sheet");
+
       const { error: paymentError } = await presentPaymentSheet();
+
+      console.log("5. presentPaymentSheet finished", paymentError);
 
       if (paymentError) {
         Alert.alert("Payment Failed", paymentError.message);
         return;
       }
+
+      console.log("5. Payment succeeded, creating order");
 
       if (isLoggedIn) {
         await createOrder(selectedLocationId, orderItems, {
@@ -138,6 +149,7 @@ export function Checkout({ onSignIn }: CheckoutProps) {
       clearOrder();
       Alert.alert("Success", "Payment complete and order placed.");
     } catch (error) {
+      console.error("Checkout error", error);
       const message =
         error instanceof Error
           ? error.message
@@ -147,7 +159,6 @@ export function Checkout({ onSignIn }: CheckoutProps) {
       setSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <ThemedView style={styles.container}>

@@ -1,6 +1,5 @@
 import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
 import { ViewCart } from "@/components/modals/ViewCart";
-import { Checkout } from "@/components/modals/checkout";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useOrder } from "@/contexts/OrderContext";
@@ -24,7 +23,6 @@ export default function OrderCatalogScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
   const { selectedLocationId, locationName, locationAddress, itemCount } =
     useOrder();
 
@@ -166,29 +164,9 @@ export default function OrderCatalogScreen() {
         <ViewCart
           onCheckout={() => {
             setShowCart(false);
-            setShowCheckout(true);
+            router.push("/checkout");
           }}
         />
-      </Modal>
-
-      <Modal
-        visible={showCheckout}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowCheckout(false)}
-      >
-        <ThemedView style={styles.modalHeader}>
-          <TouchableOpacity
-            onPress={() => setShowCheckout(false)}
-            style={styles.closeButton}
-          >
-            <ThemedText style={styles.closeButtonText}>
-              <AntDesign name="close" size={24} color="black" />
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-
-        <Checkout />
       </Modal>
     </ThemedView>
   );

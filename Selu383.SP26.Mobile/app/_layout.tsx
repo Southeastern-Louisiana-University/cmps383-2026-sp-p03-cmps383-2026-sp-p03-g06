@@ -18,7 +18,10 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
+  console.log(
+    "Stripe publishable key from env:",
+    process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  );
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}

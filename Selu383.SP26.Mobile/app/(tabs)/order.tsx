@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView from "react-native-maps";
 
 // Set to true to bypass closed location check for testing
 const TEST_MODE_BYPASS_CLOSED = true;
@@ -91,8 +90,10 @@ export default function OrderScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <MapView style={styles.mapContainer} />
-
+      {/* <MapView style={styles.mapContainer} /> */}
+      <View style={styles.mapContainer}>
+        <ThemedText>Map temporarily disabled</ThemedText>
+      </View>
       <View style={styles.selectionContainer}>
         <ScrollView
           style={styles.locationsList}

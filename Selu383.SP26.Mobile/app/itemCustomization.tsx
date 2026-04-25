@@ -44,17 +44,17 @@ export default function ItemCustomizationScreen() {
   const menuItem: MenuItemDto = JSON.parse(params.item as string);
   const [categoryName, setCategoryName] = useState("");
   //Category customization visibility
-  const showSizeOptions = [29].includes(menuItem.categoryId);
-  const showMilkOptions = [29].includes(menuItem.categoryId);
-  const showShotOptions = [29].includes(menuItem.categoryId);
-  const showTemperatureOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showSizeOptions = [33].includes(menuItem.categoryId);
+  const showMilkOptions = [33].includes(menuItem.categoryId);
+  const showShotOptions = [33].includes(menuItem.categoryId);
+  const showTemperatureOptions = [34, 35, 36].includes(menuItem.categoryId);
 
   //Crepes option filters based on categoryID
-  const showFillingOptions = [30, 31, 32].includes(menuItem.categoryId);
-  const showToppingOptions = [30, 31, 32].includes(menuItem.categoryId);
-  const showProteinOptions = [30, 31, 32].includes(menuItem.categoryId);
-  const showCheeseOptions = [30, 31, 32].includes(menuItem.categoryId);
-  const showVeggyOptions = [30, 31, 32].includes(menuItem.categoryId);
+  const showFillingOptions = [34, 35, 36].includes(menuItem.categoryId);
+  const showToppingOptions = [34, 35, 36].includes(menuItem.categoryId);
+  const showProteinOptions = [34, 35, 36].includes(menuItem.categoryId);
+  const showCheeseOptions = [34, 35, 36].includes(menuItem.categoryId);
+  const showVeggyOptions = [34, 35, 36].includes(menuItem.categoryId);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedMilk, setSelectedMilk] = useState<MilkType>("whole");
