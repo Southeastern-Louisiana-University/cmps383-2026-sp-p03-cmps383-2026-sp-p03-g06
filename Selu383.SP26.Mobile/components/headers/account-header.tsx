@@ -1,7 +1,15 @@
+import { useAuthentication } from "@/hooks/use-authentication";
 import { StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 export function AccountHeader() {
+  const { isLoggedIn, loading } = useAuthentication();
+
+  // Only show header if user is logged in
+  if (!isLoggedIn || loading) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.actionContainer}>

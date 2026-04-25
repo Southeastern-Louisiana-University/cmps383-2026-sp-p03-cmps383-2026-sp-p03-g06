@@ -61,7 +61,7 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
           <TouchableOpacity onPress={onClose} style={styles.exitButton}>
             <MaterialIcons name="cancel" size={32} color="black" />
           </TouchableOpacity>
-          {/*NEEDS TO BE SWITCHED TO SEARCH BY LOCATION NAME  */}
+          {/*NEEDS TO BE SWITCHED TO SEARCH BY LOCATION NAME */}
           <TextInput
             placeholder="Enter location id"
             value={locationId}
@@ -80,10 +80,10 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
                     style={styles.locationCard}
                   >
                     <ThemedText style={styles.locationName}>
-                      {searchLocation.name}
+                      {searchLocation.name || "Unknown Location"}
                     </ThemedText>
                     <ThemedText style={styles.locationAddress}>
-                      {searchLocation.address}
+                      {searchLocation.address || "Address not available"}
                     </ThemedText>
                   </TouchableOpacity>
                 )}

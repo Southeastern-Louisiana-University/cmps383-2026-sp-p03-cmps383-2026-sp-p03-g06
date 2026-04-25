@@ -6,13 +6,13 @@ using Selu383.SP26.Api.Extensions;
 using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
+using Microsoft.AspNetCore.Identity;
 
 namespace Selu383.SP26.Api.Controllers;
 
 [Route("api/orders")]
 [ApiController]
-public class OrdersController(DataContext dataContext) : ControllerBase
-{
+public class OrdersController(DataContext dataContext, UserManager<User> userManager) : ControllerBase{
     [HttpGet]
     [Authorize]
     public ActionResult<IEnumerable<OrderDto>> GetMyOrders()
@@ -117,19 +117,38 @@ public class OrdersController(DataContext dataContext) : ControllerBase
         }
 
         var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var first = dto.CheckoutFirstName.Trim();
+        var last = dto.CheckoutLastName.Trim();
 
         var order = new Order
         {
             CustomerId = userId,
+            CustomerName = $"{first} {last}".Trim(),
             LocationId = dto.LocationId,
             TotalPrice = orderTotal,
             Status = "Pending",
             CreatedAt = DateTime.Now,
+            CheckoutFirstName = first,
+            CheckoutLastName = last,
+            CheckoutEmail = dto.CheckoutEmail.Trim(),
+            CheckoutPhoneNumber = dto.CheckoutPhoneNumber.Trim(),
             OrderItems = orderItemsToAdd
         };
 
         dataContext.Set<Order>().Add(order);
         dataContext.SaveChanges();
+
+        var user = userManager.FindByIdAsync(userId.ToString()).Result;
+        if (user != null)
+        {
+            user.RewardPoints += (int)Math.Floor(order.TotalPrice * 10);
+            userManager.UpdateAsync(user).Wait();
+        }
 
         return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapOrderToDto(order));
     }
@@ -137,11 +156,6 @@ public class OrdersController(DataContext dataContext) : ControllerBase
     [HttpPost("guest")]
     public ActionResult<OrderDto> CreateGuestOrder(CreateGuestOrderDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.CustomerName))
-        {
-            return BadRequest("Customer name is required");
-        }
-
         if (dto.LocationId <= 0)
         {
             return BadRequest("Valid LocationId is required");
@@ -193,9 +207,16 @@ public class OrdersController(DataContext dataContext) : ControllerBase
             });
         }
 
+        var guestFirst = dto.CheckoutFirstName.Trim();
+        var guestLast = dto.CheckoutLastName.Trim();
+
         var order = new Order
         {
-            CustomerName = dto.CustomerName,
+            CustomerName = $"{guestFirst} {guestLast}".Trim(),
+            CheckoutFirstName = guestFirst,
+            CheckoutLastName = guestLast,
+            CheckoutEmail = dto.CheckoutEmail.Trim(),
+            CheckoutPhoneNumber = dto.CheckoutPhoneNumber.Trim(),
             LocationId = dto.LocationId,
             TotalPrice = orderTotal,
             Status = "Pending",
@@ -251,6 +272,10 @@ public class OrdersController(DataContext dataContext) : ControllerBase
             Id = order.Id,
             CustomerId = order.CustomerId,
             CustomerName = order.CustomerName,
+            CheckoutFirstName = order.CheckoutFirstName,
+            CheckoutLastName = order.CheckoutLastName,
+            CheckoutEmail = order.CheckoutEmail,
+            CheckoutPhoneNumber = order.CheckoutPhoneNumber,
             LocationId = order.LocationId,
             TotalPrice = order.TotalPrice,
             Status = order.Status,
