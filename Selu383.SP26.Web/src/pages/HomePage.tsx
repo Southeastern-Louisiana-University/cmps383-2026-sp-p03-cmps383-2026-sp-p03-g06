@@ -81,20 +81,72 @@ export default function HomePage() {
             </section>
 
             {/* REWARDS */}
-            <section style={{ background: "#1a4731", padding: "80px 48px", display: "flex", alignItems: "center", gap: 64 }}>
-                <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 12, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "#7bf1a8", marginBottom: 12 }}>Lions rewards</p>
-                    <h2 style={{ fontSize: 36, fontWeight: 500, color: "white", marginBottom: 16 }}>Earn stars,<br />get free drinks.</h2>
-                    <p style={{ color: "rgba(255,255,255,0.65)", maxWidth: 400, marginBottom: 36, lineHeight: 1.7 }}>
-                        Join Lions Rewards and earn 1 star for every dollar spent. Redeem stars for free drinks, food, and exclusive perks.
-                    </p>
-                    <div style={{ display: "flex", gap: 16 }}>
-                        <a href="/rewards" style={{ background: "#7bf1a8", color: "#1a4731", padding: "14px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
-                            Join now — it's free
-                        </a>
-                        <a href="/rewards" style={{ background: "transparent", color: "white", border: "1.5px solid rgba(255,255,255,0.3)", padding: "13px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
-                            Learn more
-                        </a>
+            <section className="relative bg-[#1a4731] px-6 py-20 md:px-12">
+                {/* Background watermark */}
+                <div
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+                    aria-hidden="true"
+                >
+                    <span
+                        className="select-none font-bold tracking-widest text-[16vw]"
+                        style={{ color: "rgba(255,255,255,0.04)", lineHeight: 1, fontFamily: "'Cormorant Garamond', serif" }}
+                    >
+                        REWARDS
+                    </span>
+                </div>
+
+                
+                <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 lg:flex-row">
+                    
+                    {/* LEFT */}
+                    <div className="flex-1">
+                        <p className="tracking-[0.08em] mb-3 text-xs font-medium uppercase text-[#7bf1a8]">
+                            Lions rewards
+                        </p>
+
+                        <h2 className="mb-4 text-4xl font-medium leading-tight text-white">
+                            Earn stars,<br />get free drinks.
+                        </h2>
+
+                        <p className="mb-8 max-w-md leading-relaxed text-white/70">
+                            Join Lions Rewards and earn 1 star for every dollar spent.
+                            Redeem stars for free drinks, food, and exclusive perks.
+                        </p>
+
+                        <div className="flex gap-4">
+                            <a
+                                href="/rewards"
+                                className="rounded-full bg-[#7bf1a8] px-8 py-3 text-sm font-medium text-[#1a4731]"
+                            >
+                                Join now — it's free
+                            </a>
+
+                            <a
+                                href="/rewards"
+                                className="rounded-full border border-white/30 px-8 py-3 text-sm font-medium text-white"
+                            >
+                                Learn more
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="flex flex-1 justify-center gap-5">
+                        {[
+                            { stat: "1★", label: "Per dollar spent" },
+                            { stat: "25★", label: "Free drink reward" },
+                            { stat: "2x", label: "Stars on birthdays" },
+                        ].map((item) => (
+                            <div
+                                key={item.label}
+                                className="max-w-[140px] flex-1 rounded-xl border border-white/20 bg-white/10 p-6 text-center"
+                            >
+                                <p className="mb-2 text-3xl font-semibold text-[#7bf1a8]">
+                                    {item.stat}
+                                </p>
+                                <p className="text-xs text-white/70">{item.label}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div style={{ flex: 1, display: "flex", gap: 20, justifyContent: "center" }}>
@@ -126,9 +178,9 @@ export default function HomePage() {
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
                         {[
-                            { emoji: "☕", name: "Cold brew cloud", detail: "Large · Sweet cream" },
-                            { emoji: "🌿", name: "Matcha oat latte", detail: "Medium · Extra matcha" },
-                            { emoji: "🍂", name: "Honey cinnamon flat white", detail: "Small · Oat milk" },
+                            { emoji: "☕", name: "Supernova", detail: "Large · Sweet cream" },
+                            { emoji: "🌿", name: "Green Machine", detail: "Hearty blend of greens" },
+                            { emoji: "🍂", name: "Strawberry Limeade", detail: "Fresh squeezed lime" },
                         ].map((item) => (
                             <div key={item.name} style={{ background: "#f9f9f9", borderRadius: 12, padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", border: "0.5px solid #e0e0e0" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
