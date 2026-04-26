@@ -103,14 +103,21 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
                 return BadRequest($"Menu item {itemDto.MenuItemId} does not exist");
             }
 
-            var itemTotal = menuItem.Price * itemDto.Quantity;
+            var unitPrice = OrderPricingHelper.CalculateUnitPrice(
+                menuItem.Price,
+                itemDto.CustomizationJson
+            );
+
+
+            var itemTotal = unitPrice * itemDto.Quantity;
+
             orderTotal += itemTotal;
 
             orderItemsToAdd.Add(new OrderItem
             {
                 MenuItemId = itemDto.MenuItemId,
                 Quantity = itemDto.Quantity,
-                UnitPrice = menuItem.Price,
+                UnitPrice = unitPrice,
                 TotalPrice = itemTotal,
                 CustomizationJson = itemDto.CustomizationJson
             });
@@ -194,14 +201,20 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
                 return BadRequest($"Menu item {itemDto.MenuItemId} does not exist");
             }
 
-            var itemTotal = menuItem.Price * itemDto.Quantity;
+            var unitPrice = OrderPricingHelper.CalculateUnitPrice(
+                menuItem.Price,
+                itemDto.CustomizationJson
+             );
+
+            var itemTotal = unitPrice * itemDto.Quantity;
+
             orderTotal += itemTotal;
 
             orderItemsToAdd.Add(new OrderItem
             {
                 MenuItemId = itemDto.MenuItemId,
                 Quantity = itemDto.Quantity,
-                UnitPrice = menuItem.Price,
+                UnitPrice = unitPrice,
                 TotalPrice = itemTotal,
                 CustomizationJson = itemDto.CustomizationJson
             });

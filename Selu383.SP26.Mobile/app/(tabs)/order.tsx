@@ -1,26 +1,27 @@
+import SearchLocation from "@/components/modals/SearchLocation";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { getLocations } from "@/services/apis";
 import { Location } from "@/services/types";
 import { isLocationOpen } from "@/utils/hoursUtils";
-import { router } from "expo-router";
+import Fontisto from "@expo/vector-icons/Fontisto";
+import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// Set to true to bypass closed location check for testing
-const TEST_MODE_BYPASS_CLOSED = true;
+const TEST_MODE_BYPASS_CLOSED = false;
 
 export default function OrderScreen() {
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+  const { setLocation } = useOrder();
+
+  const [showModal, setShowModal] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
-  const { setLocation } = useOrder();
 
   useEffect(() => {
     loadLocations();
@@ -44,43 +45,60 @@ export default function OrderScreen() {
     return (
       <TouchableOpacity
         key={location.id}
-        style={[styles.locationItem, !isOpen && styles.locationItemClosed]}
+        style={[
+          styles.locationItem,
+          {
+            backgroundColor: isOpen ? theme.elevatedCard : theme.card,
+            borderColor: theme.border,
+          },
+          !isOpen && styles.locationItemClosed,
+        ]}
         onPress={() => {
           if (!isSelectable) return;
+
           setLocation(
             location.id,
             location.name,
             location.address || "Unknown Location",
           );
+
           router.push("/(tabs)/orderCatalog");
         }}
         disabled={!isSelectable}
       >
         <View style={styles.locationHeader}>
-          <ThemedText style={styles.locationName}>
+          <ThemedText style={[styles.locationName, { color: theme.text }]}>
             {location.name || "Unknown Location"}
           </ThemedText>
+
           <View
             style={[
               styles.statusBadge,
               isOpen ? styles.statusOpen : styles.statusClosed,
             ]}
           >
-            <Text
+            <ThemedText
               style={[
                 styles.statusText,
                 isOpen ? styles.statusTextOpen : styles.statusTextClosed,
               ]}
             >
               {isOpen ? "Open" : "Closed"}
-            </Text>
+            </ThemedText>
           </View>
         </View>
-        <ThemedText style={styles.locationAddress}>
+
+        <ThemedText
+          style={[styles.locationAddress, { color: theme.mutedText }]}
+        >
           {location.address || "Address not available"}
         </ThemedText>
+
         <ThemedText
-          style={[styles.locationAddress, !isOpen && styles.closedText]}
+          style={[
+            styles.locationAddress,
+            { color: isOpen ? theme.mutedText : theme.softText },
+          ]}
         >
           {location.hoursOfOperation || "Hours not available"}
         </ThemedText>
@@ -89,65 +107,159 @@ export default function OrderScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      {/* <MapView style={styles.mapContainer} /> */}
-      <View style={styles.mapContainer}>
-        <ThemedText>Map temporarily disabled</ThemedText>
-      </View>
-      <View style={styles.selectionContainer}>
-        <ScrollView
-          style={styles.locationsList}
-          showsVerticalScrollIndicator={false}
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <SafeAreaView
+        style={[styles.screen, { backgroundColor: theme.background }]}
+      >
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme.background,
+              borderBottomColor: theme.border,
+            },
+          ]}
         >
-          {locations.length === 0 ? (
-            <ThemedText style={styles.noLocationsMessage}>
-              No locations available
+          <TouchableOpacity
+            onPress={() => setShowModal(true)}
+            style={[
+              styles.headerButton,
+              {
+                backgroundColor: theme.inputBackground,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <Fontisto name="search" size={22} color={theme.icon} />
+          </TouchableOpacity>
+
+          <ThemedText style={[styles.headerTitle, { color: theme.text }]}>
+            Find a Location
+          </ThemedText>
+
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+          <View
+            style={[
+              styles.mapContainer,
+              {
+                backgroundColor: theme.elevatedCard,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <ThemedText style={{ color: theme.mutedText }}>
+              Map temporarily disabled
             </ThemedText>
-          ) : (
-            locations.map(renderLocationItem)
-          )}
-        </ScrollView>
-      </View>
-    </ThemedView>
+          </View>
+
+          <View
+            style={[
+              styles.selectionContainer,
+              {
+                backgroundColor: theme.background,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <ScrollView
+              style={styles.locationsList}
+              showsVerticalScrollIndicator={false}
+            >
+              {loading ? (
+                <ThemedText
+                  style={[
+                    styles.noLocationsMessage,
+                    { color: theme.mutedText },
+                  ]}
+                >
+                  Loading locations...
+                </ThemedText>
+              ) : locations.length === 0 ? (
+                <ThemedText
+                  style={[
+                    styles.noLocationsMessage,
+                    { color: theme.mutedText },
+                  ]}
+                >
+                  No locations available
+                </ThemedText>
+              ) : (
+                locations.map(renderLocationItem)
+              )}
+            </ScrollView>
+          </View>
+        </View>
+
+        <SearchLocation
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+        />
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     alignItems: "center",
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  headerSpacer: {
+    width: 40,
   },
   mapContainer: {
     height: 400,
     width: "100%",
     borderRadius: 12,
     overflow: "hidden",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   selectionContainer: {
     width: "100%",
-    backgroundColor: "#fff",
-    borderColor: "#494848",
     borderWidth: 1,
     flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
   },
   locationsList: {
     flex: 1,
   },
   locationItem: {
-    backgroundColor: "#f8f9fa",
     borderRadius: 8,
     padding: 35,
-    borderColor: "#e9ecef",
     borderWidth: 1,
+    marginHorizontal: 10,
+    marginTop: 10,
   },
   locationItemClosed: {
-    backgroundColor: "#f0f0f0",
     opacity: 0.7,
   },
   locationHeader: {
@@ -163,10 +275,6 @@ const styles = StyleSheet.create({
   },
   locationAddress: {
     fontSize: 14,
-    color: "#555",
-  },
-  closedText: {
-    color: "#999",
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -192,7 +300,6 @@ const styles = StyleSheet.create({
   noLocationsMessage: {
     textAlign: "center",
     fontSize: 16,
-    color: "#999",
     padding: 20,
   },
 });

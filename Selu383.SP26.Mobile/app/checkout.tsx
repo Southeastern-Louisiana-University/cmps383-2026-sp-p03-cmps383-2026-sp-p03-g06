@@ -1,15 +1,20 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { useAuthentication } from "@/hooks/use-authentication";
 import {
   createGuestOrder,
   createOrder,
   createPaymentSheet,
+  getPickupTimes,
 } from "@/services/apis";
+import { PickupTimeDto } from "@/services/types";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useStripe } from "@stripe/stripe-react-native";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, Stack } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -18,12 +23,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface CheckoutProps {
   onSignIn?: () => void;
 }
 
 export default function Checkout({ onSignIn }: CheckoutProps) {
+  const [pickupTimes, setPickupTimes] = useState<PickupTimeDto[]>([]);
+
+  const [selectedPickupTime, setSelectedPickupTime] =
+    useState<PickupTimeDto | null>(null);
+  const { colorScheme } = useColorScheme();
+
+  const theme = getTheme(colorScheme);
+
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { isLoggedIn, loading } = useAuthentication();
 
@@ -35,6 +49,24 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
     clearOrder,
   } = useOrder();
 
+  useEffect(() => {
+    const loadPickupTimes = async () => {
+      if (!selectedLocationId) return;
+
+      try {
+        const times = await getPickupTimes(selectedLocationId);
+        setPickupTimes(times);
+
+        if (times.length > 0) {
+          setSelectedPickupTime(times[0]);
+        }
+      } catch (error) {
+        console.log("Failed to load pickup times:", error);
+      }
+    };
+
+    loadPickupTimes();
+  }, [selectedLocationId]);
   const [isGuest, setIsGuest] = useState(false);
 
   const [firstName, setFirstName] = useState("");
@@ -66,7 +98,6 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
       Alert.alert("Empty Order", "Your cart is empty.");
       return;
     }
-
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -82,7 +113,6 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
 
     try {
       setSubmitting(true);
-      console.log("1. Starting checkout");
 
       const paymentSheetParams = await createPaymentSheet({
         locationId: selectedLocationId,
@@ -92,8 +122,6 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
         checkoutEmail: email.trim(),
         checkoutPhoneNumber: phoneNumber.trim(),
       });
-
-      console.log("2. Payment sheet params received", paymentSheetParams);
 
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: "Lion Rewards Cafe",
@@ -108,25 +136,17 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
         allowsDelayedPaymentMethods: false,
       });
 
-      console.log("3. initPaymentSheet finished", initError);
-
       if (initError) {
         Alert.alert("Payment Setup Failed", initError.message);
         return;
       }
 
-      console.log("4. About to present payment sheet");
-
       const { error: paymentError } = await presentPaymentSheet();
-
-      console.log("5. presentPaymentSheet finished", paymentError);
 
       if (paymentError) {
         Alert.alert("Payment Failed", paymentError.message);
         return;
       }
-
-      console.log("5. Payment succeeded, creating order");
 
       if (isLoggedIn) {
         await createOrder(selectedLocationId, orderItems, {
@@ -159,11 +179,16 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
       setSubmitting(false);
     }
   };
+
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.content}>
-          <ThemedText style={styles.loadingText}>
+      <ThemedView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <ThemedView
+          style={[styles.content, { backgroundColor: theme.background }]}
+        >
+          <ThemedText style={[styles.loadingText, { color: theme.mutedText }]}>
             Checking authentication...
           </ThemedText>
         </ThemedView>
@@ -175,135 +200,287 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
   const checkoutTitle = isLoggedIn ? "Checkout" : "Checkout as Guest";
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
       >
-        {showChoiceScreen ? (
-          <View>
-            <ThemedText style={styles.title}>
-              How would you like to continue?
-            </ThemedText>
-
-            <ThemedText style={styles.subtitle}>
-              Sign in for a faster checkout or continue as a guest.
-            </ThemedText>
-
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={handleSignIn}
-            >
-              <ThemedText style={styles.primaryButtonText}>Sign In</ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => setIsGuest(true)}
-            >
-              <ThemedText style={styles.secondaryButtonText}>
-                Checkout as Guest
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View>
-            <ThemedText style={styles.title}>{checkoutTitle}</ThemedText>
-
-            {locationName ? (
-              <ThemedView style={styles.locationCard}>
-                <ThemedText style={styles.locationLabel}>
-                  Pickup Location
-                </ThemedText>
-                <ThemedText style={styles.locationName}>
-                  {locationName}
-                </ThemedText>
-                {locationAddress ? (
-                  <ThemedText style={styles.locationAddress}>
-                    {locationAddress}
-                  </ThemedText>
-                ) : null}
-              </ThemedView>
-            ) : null}
-
-            <ThemedText style={styles.sectionTitle}>
-              Contact Information
-            </ThemedText>
-
-            <TextInput
-              placeholder="First Name"
-              style={styles.input}
-              value={firstName}
-              onChangeText={setFirstName}
-            />
-            <TextInput
-              placeholder="Last Name"
-              style={styles.input}
-              value={lastName}
-              onChangeText={setLastName}
-            />
-            <TextInput
-              placeholder="Email"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-            <TextInput
-              placeholder="Phone Number"
-              style={styles.input}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-
-            <ThemedText style={styles.sectionTitle}>Payment</ThemedText>
-
-            <ThemedView style={styles.summaryCard}>
-              <ThemedText style={styles.summaryText}>
-                Payment will be collected securely after you tap Place Order.
-              </ThemedText>
-              <ThemedText style={styles.summarySubtext}>
-                You will enter your card details in Stripe&apos;s payment sheet.
-              </ThemedText>
-            </ThemedView>
-
-            <ThemedText style={styles.sectionTitle}>Order Summary</ThemedText>
-
-            <ThemedView style={styles.summaryCard}>
-              <ThemedText style={styles.summaryText}>
-                Items in Order: {orderItems.length}
-              </ThemedText>
-              <ThemedText style={styles.summarySubtext}>
-                Final totals are based on the backend order calculation.
-              </ThemedText>
-            </ThemedView>
-
+        <ThemedView
+          style={[styles.container, { backgroundColor: theme.background }]}
+        >
+          <View
+            style={[
+              styles.header,
+              {
+                backgroundColor: theme.background,
+                borderBottomColor: theme.border,
+              },
+            ]}
+          >
             <TouchableOpacity
               style={[
-                styles.primaryButton,
-                submitting && styles.disabledButton,
+                styles.backButton,
+                { backgroundColor: theme.inputBackground },
               ]}
-              onPress={handlePlaceOrder}
-              disabled={submitting}
+              onPress={() => router.back()}
             >
-              <ThemedText style={styles.primaryButtonText}>
-                {submitting ? "Processing..." : "Place Order"}
-              </ThemedText>
+              <MaterialIcons name="arrow-back" size={24} color={theme.text} />
             </TouchableOpacity>
+
+            <ThemedText
+              style={[styles.headerTitle, { color: theme.text }]}
+            ></ThemedText>
+
+            <View style={styles.headerSpacer} />
           </View>
-        )}
-      </ScrollView>
-    </ThemedView>
+          <ScrollView
+            style={[styles.scrollView, { backgroundColor: theme.background }]}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            {showChoiceScreen ? (
+              <View>
+                <ThemedText style={[styles.title, { color: theme.text }]}>
+                  How would you like to continue?
+                </ThemedText>
+
+                <ThemedText
+                  style={[styles.subtitle, { color: theme.mutedText }]}
+                >
+                  Sign in for a faster checkout or continue as a guest.
+                </ThemedText>
+
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={handleSignIn}
+                >
+                  <ThemedText style={styles.primaryButtonText}>
+                    Sign In
+                  </ThemedText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.secondaryButton}
+                  onPress={() => setIsGuest(true)}
+                >
+                  <ThemedText style={styles.secondaryButtonText}>
+                    Checkout as Guest
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View>
+                <ThemedText style={[styles.title, { color: theme.text }]}>
+                  {checkoutTitle}
+                </ThemedText>
+
+                {locationName ? (
+                  <ThemedView
+                    style={[
+                      styles.locationCard,
+                      { backgroundColor: theme.card },
+                    ]}
+                  >
+                    <ThemedText
+                      style={[styles.locationLabel, { color: theme.mutedText }]}
+                    >
+                      Pickup Location
+                    </ThemedText>
+                    <ThemedText
+                      style={[styles.locationName, { color: theme.text }]}
+                    >
+                      {locationName}
+                    </ThemedText>
+                    {locationAddress ? (
+                      <ThemedText
+                        style={[
+                          styles.locationAddress,
+                          { color: theme.mutedText },
+                        ]}
+                      >
+                        {locationAddress}
+                      </ThemedText>
+                    ) : null}
+                  </ThemedView>
+                ) : null}
+
+                <ThemedText
+                  style={[styles.sectionTitle, { color: theme.text }]}
+                >
+                  Contact Information
+                </ThemedText>
+
+                <TextInput
+                  placeholder="First Name"
+                  placeholderTextColor={theme.mutedText}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                />
+
+                <TextInput
+                  placeholder="Last Name"
+                  placeholderTextColor={theme.mutedText}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  value={lastName}
+                  onChangeText={setLastName}
+                />
+
+                <TextInput
+                  placeholder="Email"
+                  placeholderTextColor={theme.mutedText}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+
+                <TextInput
+                  placeholder="Phone Number"
+                  placeholderTextColor={theme.mutedText}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                />
+                <ThemedText
+                  style={[styles.sectionTitle, { color: theme.text }]}
+                >
+                  Pickup Time
+                </ThemedText>
+
+                <View style={styles.pickupTimesContainer}>
+                  {pickupTimes.map((pickupTime) => {
+                    const isSelected =
+                      selectedPickupTime?.time === pickupTime.time;
+
+                    return (
+                      <TouchableOpacity
+                        key={pickupTime.time}
+                        style={[
+                          styles.pickupTimeButton,
+                          {
+                            backgroundColor: isSelected
+                              ? theme.accent
+                              : theme.inputBackground,
+                            borderColor: isSelected
+                              ? theme.accentDark
+                              : theme.border,
+                          },
+                        ]}
+                        onPress={() => setSelectedPickupTime(pickupTime)}
+                      >
+                        <ThemedText
+                          style={[
+                            styles.pickupTimeText,
+                            {
+                              color: isSelected ? "#434242" : theme.text,
+                            },
+                          ]}
+                        >
+                          {pickupTime.label}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+                <ThemedText
+                  style={[styles.sectionTitle, { color: theme.text }]}
+                >
+                  Payment
+                </ThemedText>
+
+                <ThemedView
+                  style={[styles.summaryCard, { backgroundColor: theme.card }]}
+                >
+                  <ThemedText
+                    style={[styles.summaryText, { color: theme.text }]}
+                  >
+                    Payment will be collected securely after you tap Place
+                    Order.
+                  </ThemedText>
+                  <ThemedText
+                    style={[styles.summarySubtext, { color: theme.mutedText }]}
+                  >
+                    You will enter your card details in Stripe&apos;s payment
+                    sheet.
+                  </ThemedText>
+                </ThemedView>
+
+                <ThemedText
+                  style={[styles.sectionTitle, { color: theme.text }]}
+                >
+                  Order Summary
+                </ThemedText>
+
+                <ThemedView
+                  style={[styles.summaryCard, { backgroundColor: theme.card }]}
+                >
+                  <ThemedText
+                    style={[styles.summaryText, { color: theme.text }]}
+                  >
+                    Items in Order: {orderItems.length}
+                  </ThemedText>
+                  <ThemedText
+                    style={[styles.summarySubtext, { color: theme.mutedText }]}
+                  >
+                    Final totals are based on the backend order calculation.
+                  </ThemedText>
+                </ThemedView>
+
+                <TouchableOpacity
+                  style={[
+                    styles.primaryButton,
+                    submitting && styles.disabledButton,
+                  ]}
+                  onPress={handlePlaceOrder}
+                  disabled={submitting}
+                >
+                  <ThemedText style={styles.primaryButtonText}>
+                    {submitting ? "Processing..." : "Place Order"}
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            )}
+          </ScrollView>
+        </ThemedView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   scrollView: {
     flex: 1,
@@ -314,17 +491,14 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: "#666",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#111",
   },
   subtitle: {
     fontSize: 15,
-    color: "#666",
     marginBottom: 24,
     lineHeight: 22,
   },
@@ -333,23 +507,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 20,
     marginBottom: 12,
-    color: "#111",
   },
   input: {
     height: 50,
     width: "100%",
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
     borderRadius: 10,
     paddingHorizontal: 12,
-    backgroundColor: "#f8f9fa",
   },
   primaryButton: {
     marginTop: 20,
     backgroundColor: "#7bf1a8",
     paddingVertical: 15,
-    borderRadius: 25,
+    borderRadius: 8,
     alignItems: "center",
     elevation: 4,
   },
@@ -365,7 +536,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontSize: 16,
-    color: "#007bff",
+    color: "#7bf1a8",
     fontWeight: "600",
   },
   disabledButton: {
@@ -374,39 +545,72 @@ const styles = StyleSheet.create({
   locationCard: {
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#f8f9fa",
     marginBottom: 8,
   },
   locationLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#666",
     marginBottom: 4,
   },
   locationName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111",
     marginBottom: 2,
   },
   locationAddress: {
     fontSize: 14,
-    color: "#666",
   },
   summaryCard: {
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#f8f9fa",
     marginTop: 4,
   },
   summaryText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111",
     marginBottom: 4,
   },
   summarySubtext: {
     fontSize: 14,
-    color: "#666",
+  },
+  pickupTimesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 10,
+  },
+
+  pickupTimeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+
+  pickupTimeText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  headerSpacer: {
+    width: 40,
   },
 });

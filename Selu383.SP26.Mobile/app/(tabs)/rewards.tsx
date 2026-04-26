@@ -1,14 +1,30 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useAuthentication } from "@/hooks/use-authentication";
 import { getMyRewards, getRewardOfferings } from "@/services/apis";
 import { RewardOfferingDto, UserRewardsDto } from "@/services/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { Image, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { Image, ScrollView, StyleSheet } from "react-native";
 
 export default function RewardsScreen() {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const theme = {
+    background: isDark ? "#121212" : "#ffffff",
+    card: isDark ? "#1e1e1e" : "#ffffff",
+    elevatedCard: isDark ? "#242424" : "#ffffff",
+    text: isDark ? "#f5f5f5" : "#434242",
+    mutedText: isDark ? "#b5b5b5" : "#666666",
+    border: isDark ? "#333333" : "#e5e5e5",
+    barBackground: isDark ? "#333333" : "#434242",
+    accent: "#7bf1a8",
+    darkGreen: "#395a46",
+  };
+
   const [rewardOfferings, setRewardOfferings] = useState<RewardOfferingDto[]>(
     [],
   );
@@ -18,8 +34,12 @@ export default function RewardsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!isLoggedIn || authLoading) {
-        setLoading(false);
+      if (authLoading) {
+        return;
+      }
+
+      if (!isLoggedIn) {
+        router.replace("/login");
         return;
       }
 
@@ -53,63 +73,108 @@ export default function RewardsScreen() {
       fetchData();
     }, [isLoggedIn, authLoading]),
   );
+
   return (
-    <ThemedView style={styles.container}>
-      {authLoading ? (
-        <ThemedView style={styles.centerContainer}>
-          <ThemedText>Loading...</ThemedText>
-        </ThemedView>
-      ) : !isLoggedIn ? (
-        <ThemedView style={styles.centerContainer}>
-          <ThemedText type="title" style={styles.loginPromptTitle}>
-            Login Required
+    <ThemedView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      {authLoading || !isLoggedIn ? (
+        <ThemedView
+          style={[
+            styles.centerContainer,
+            { backgroundColor: theme.background },
+          ]}
+        >
+          <ThemedText style={{ color: theme.text }}>
+            Redirecting to login...
           </ThemedText>
-          <ThemedText style={styles.loginPromptText}>
-            Please log in to view your rewards and points.
-          </ThemedText>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.push("/login")}
-          >
-            <ThemedText style={styles.loginButtonText}>Go to Login</ThemedText>
-          </TouchableOpacity>
         </ThemedView>
       ) : (
-        <ThemedView style={styles.rewardsContainer}>
-          <ThemedText type="title">Lion Rewards</ThemedText>
-          <ThemedView style={styles.rewardsCounterContainer}>
-            <ThemedText style={styles.rewardsText}>Points</ThemedText>
-            <ThemedText style={styles.rewardsTextPoints}>
+        <ThemedView
+          style={[
+            styles.rewardsContainer,
+            { backgroundColor: theme.background },
+          ]}
+        >
+          <ThemedText type="title" style={{ color: theme.text }}>
+            Lion Rewards
+          </ThemedText>
+
+          <ThemedView
+            style={[
+              styles.rewardsCounterContainer,
+              {
+                backgroundColor: theme.elevatedCard,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <ThemedText
+              style={[styles.rewardsText, { color: theme.mutedText }]}
+            >
+              Points
+            </ThemedText>
+
+            <ThemedText
+              style={[styles.rewardsTextPoints, { color: theme.text }]}
+            >
               {loading
                 ? "Loading..."
                 : userRewards
                   ? `${userRewards.rewardPoints.toString()}`
                   : "0"}
             </ThemedText>
-            <ThemedView style={styles.rewardsBarContainer}>
+
+            <ThemedView
+              style={[
+                styles.rewardsBarContainer,
+                {
+                  borderColor: theme.border,
+                  backgroundColor: theme.barBackground,
+                },
+              ]}
+            >
               <LinearGradient
                 style={[
                   styles.rewardsBarMeter,
                   {
                     width: userRewards
-                      ? `${Math.min((userRewards.rewardPoints / 100) * 100, 100)}%`
+                      ? `${Math.min(
+                          (userRewards.rewardPoints / 100) * 100,
+                          100,
+                        )}%`
                       : "0%",
                   },
                 ]}
-                colors={["#395a46", "#6fe39a"]}
+                colors={[theme.darkGreen, theme.accent]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               />
             </ThemedView>
           </ThemedView>
-          <ThemedText style={styles.rewardsMenuText}>Rewards Menu</ThemedText>
+
+          <ThemedText style={[styles.rewardsMenuText, { color: theme.text }]}>
+            Rewards Menu
+          </ThemedText>
+
           <ScrollView
             style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
             {loading ? (
-              <ThemedView style={styles.rewardsCardsContainer}>
-                <ThemedText style={styles.rewardsCardText}>
+              <ThemedView
+                style={[
+                  styles.rewardsCardsContainer,
+                  {
+                    backgroundColor: theme.card,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <ThemedText
+                  style={[styles.rewardsCardText, { color: theme.text }]}
+                >
                   Loading...
                 </ThemedText>
               </ThemedView>
@@ -117,7 +182,13 @@ export default function RewardsScreen() {
               rewardOfferings.map((offering, index) => (
                 <ThemedView
                   key={offering.id || index}
-                  style={styles.rewardsCardsContainer}
+                  style={[
+                    styles.rewardsCardsContainer,
+                    {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                    },
+                  ]}
                 >
                   <Image
                     source={{
@@ -125,14 +196,34 @@ export default function RewardsScreen() {
                     }}
                     style={styles.image}
                   />
-                  <ThemedView style={styles.cardContent}>
-                    <ThemedText style={styles.rewardsCardTitle}>
+
+                  <ThemedView
+                    style={[
+                      styles.cardContent,
+                      { backgroundColor: theme.card },
+                    ]}
+                  >
+                    <ThemedText
+                      style={[styles.rewardsCardTitle, { color: theme.text }]}
+                    >
                       {offering.name || "Unnamed Reward"}
                     </ThemedText>
-                    <ThemedText style={styles.rewardsCardDescription}>
+
+                    <ThemedText
+                      style={[
+                        styles.rewardsCardDescription,
+                        { color: theme.mutedText },
+                      ]}
+                    >
                       {offering.description || "No description available"}
                     </ThemedText>
-                    <ThemedText style={styles.rewardsCardPoints}>
+
+                    <ThemedText
+                      style={[
+                        styles.rewardsCardPoints,
+                        { color: theme.accent },
+                      ]}
+                    >
                       {(offering.pointsRequired || 0).toString()} points
                       required
                     </ThemedText>
@@ -140,8 +231,18 @@ export default function RewardsScreen() {
                 </ThemedView>
               ))
             ) : (
-              <ThemedView style={styles.rewardsCardsContainer}>
-                <ThemedText style={styles.rewardsCardText}>
+              <ThemedView
+                style={[
+                  styles.rewardsCardsContainer,
+                  {
+                    backgroundColor: theme.card,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <ThemedText
+                  style={[styles.rewardsCardText, { color: theme.text }]}
+                >
                   No rewards available
                 </ThemedText>
               </ThemedView>
@@ -159,6 +260,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   rewardsContainer: {
+    flex: 1,
     padding: 20,
     paddingTop: 80,
   },
@@ -168,6 +270,7 @@ const styles = StyleSheet.create({
     height: 220,
     alignItems: "center",
     paddingTop: 50,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: {
       width: 10,
@@ -180,24 +283,14 @@ const styles = StyleSheet.create({
   rewardsText: {
     fontSize: 16,
     fontWeight: "300",
-    color: "#434242",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
   rewardsTextPoints: {
     fontSize: 20,
     marginTop: 20,
     fontWeight: "bold",
-    color: "#434242",
-  },
-  rewardsTextContainer: {
-    fontSize: 16,
   },
   rewardsBarContainer: {
     borderWidth: 1,
-    borderColor: "#434242",
-    backgroundColor: "#434242",
     borderRadius: 12,
     width: "80%",
     height: 20,
@@ -207,20 +300,19 @@ const styles = StyleSheet.create({
   },
   rewardsBarMeter: {
     height: 14,
-    width: "70%",
     borderRadius: 12,
   },
   rewardsMenuText: {
     fontSize: 20,
     marginTop: 30,
     marginBottom: 20,
-    justifyContent: "center",
     textAlign: "center",
     fontWeight: "bold",
-    color: "#434242",
   },
   scrollContainer: {
-    flexGrow: 1,
+    flex: 1,
+  },
+  scrollContent: {
     paddingBottom: 20,
   },
   rewardsCardsContainer: {
@@ -229,8 +321,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 15,
     alignItems: "center",
-    backgroundColor: "#fff",
     marginBottom: 15,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -247,19 +339,16 @@ const styles = StyleSheet.create({
   rewardsCardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#434242",
     marginBottom: 5,
   },
   rewardsCardDescription: {
     fontSize: 14,
-    color: "#666",
     marginBottom: 5,
     lineHeight: 18,
   },
   rewardsCardPoints: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#395a46",
   },
   rewardsCardText: {
     flex: 1,
@@ -276,37 +365,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-  },
-  loginPromptTitle: {
-    marginBottom: 15,
-    textAlign: "center",
-    color: "#434242",
-  },
-  loginPromptText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 30,
-    color: "#666",
-    lineHeight: 22,
-  },
-  loginButton: {
-    backgroundColor: "#395a46",
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  loginButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
   },
 });

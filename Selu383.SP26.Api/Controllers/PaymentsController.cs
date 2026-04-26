@@ -50,7 +50,11 @@ public class PaymentsController : ControllerBase
                 return BadRequest($"Menu item {itemDto.MenuItemId} does not exist");
             }
 
-            orderTotal += menuItem.Price * itemDto.Quantity;
+            orderTotal += OrderPricingHelper.CalculateItemTotal(
+                menuItem.Price,
+                itemDto.Quantity,
+                itemDto.CustomizationJson
+            );
         }
 
         // Stripe uses the smallest currency unit, so USD must be in cents

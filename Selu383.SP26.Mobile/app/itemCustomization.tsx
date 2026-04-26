@@ -1,5 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useOrder } from "@/contexts/OrderContext";
 import {
   CheeseOption,
@@ -41,15 +43,16 @@ export default function ItemCustomizationScreen() {
   const params = useLocalSearchParams();
   const { addOrderItem } = useOrder();
 
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+
   const menuItem: MenuItemDto = JSON.parse(params.item as string);
-  const [categoryName, setCategoryName] = useState("");
-  //Category customization visibility
+
   const showSizeOptions = [33].includes(menuItem.categoryId);
   const showMilkOptions = [33].includes(menuItem.categoryId);
   const showShotOptions = [33].includes(menuItem.categoryId);
   const showTemperatureOptions = [34, 35, 36].includes(menuItem.categoryId);
 
-  //Crepes option filters based on categoryID
   const showFillingOptions = [34, 35, 36].includes(menuItem.categoryId);
   const showToppingOptions = [34, 35, 36].includes(menuItem.categoryId);
   const showProteinOptions = [34, 35, 36].includes(menuItem.categoryId);
@@ -103,63 +106,131 @@ export default function ItemCustomizationScreen() {
 
     addOrderItem({
       menuItemId: menuItem.id,
-      quantity: quantity,
+      quantity,
       customizationJson: JSON.stringify(customization),
     });
 
     router.back();
   };
 
+  const getOptionButtonStyle = (isSelected: boolean) => [
+    styles.optionButton,
+    {
+      backgroundColor: isSelected
+        ? theme.isDark
+          ? theme.darkGreen
+          : "#e8f9ea"
+        : theme.inputBackground,
+      borderColor: isSelected ? theme.accent : theme.border,
+    },
+  ];
+
+  const getOptionTextStyle = (isSelected: boolean) => [
+    styles.optionText,
+    {
+      color: isSelected
+        ? theme.isDark
+          ? "#ffffff"
+          : "#2d5a3d"
+        : theme.softText,
+      fontWeight: isSelected ? ("600" as const) : ("400" as const),
+    },
+  ];
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.fixedHeader}>
+
+      <ThemedView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <ThemedView
+          style={[
+            styles.fixedHeader,
+            {
+              backgroundColor: theme.background,
+              borderBottomColor: theme.border,
+            },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.backButton}
+            style={[
+              styles.backButton,
+              { backgroundColor: theme.inputBackground },
+            ]}
             onPress={() => router.back()}
           >
-            <ThemedText style={styles.backButtonText}>
-              <AntDesign name="arrow-left" size={24} color="black" />
-            </ThemedText>
+            <AntDesign name="arrow-left" size={24} color={theme.text} />
           </TouchableOpacity>
         </ThemedView>
 
         <ScrollView
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.background }]}
           contentContainerStyle={styles.scrollContent}
         >
-          <ThemedView style={styles.itemHeader}>
+          <ThemedView
+            style={[
+              styles.itemHeader,
+              {
+                backgroundColor: theme.background,
+                borderBottomColor: theme.border,
+              },
+            ]}
+          >
             <Image
               source={{
                 uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
               }}
               style={styles.itemImage}
             />
-            <ThemedText style={styles.itemName}>{menuItem.name}</ThemedText>
-            <ThemedText style={styles.itemDescription}>
+
+            <ThemedText style={[styles.itemName, { color: theme.text }]}>
+              {menuItem.name}
+            </ThemedText>
+
+            <ThemedText
+              style={[styles.itemDescription, { color: theme.mutedText }]}
+            >
               {menuItem.description || "Delicious coffee beverage"}
             </ThemedText>
-            <ThemedText style={styles.itemPrice}>
+
+            <ThemedText style={[styles.itemPrice, { color: theme.softText }]}>
               ${calculatePrice().toFixed(2)}
             </ThemedText>
           </ThemedView>
 
-          {/* Quantity Selection */}
-          <ThemedView style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Quantity</ThemedText>
-            <ThemedView style={styles.quantityContainer}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.background }]}
+          >
+            <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+              Quantity
+            </ThemedText>
+
+            <ThemedView
+              style={[
+                styles.quantityContainer,
+                { backgroundColor: theme.background },
+              ]}
+            >
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={[
+                  styles.quantityButton,
+                  { backgroundColor: theme.accent },
+                ]}
                 onPress={() => quantity > 1 && setQuantity(quantity - 1)}
               >
                 <ThemedText style={styles.quantityButtonText}>-</ThemedText>
               </TouchableOpacity>
-              <ThemedText style={styles.quantityText}>
+
+              <ThemedText style={[styles.quantityText, { color: theme.text }]}>
                 {quantity.toString()}
               </ThemedText>
+
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={[
+                  styles.quantityButton,
+                  { backgroundColor: theme.accent },
+                ]}
                 onPress={() => setQuantity(quantity + 1)}
               >
                 <ThemedText style={styles.quantityButtonText}>+</ThemedText>
@@ -167,32 +238,29 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           </ThemedView>
 
-          {/* Drink Size */}
           {showSizeOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Drink Size</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Drink Size
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {DRINK_SIZES.map((size) => (
                   <TouchableOpacity
                     key={size.value}
-                    style={[
-                      styles.optionButton,
-                      selectedSize === size.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(selectedSize === size.value)}
                     onPress={() => setSelectedSize(size.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedSize === size.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(selectedSize === size.value)}
                     >
                       {size.label}
                     </ThemedText>
                     {size.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${size.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -202,32 +270,29 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Milk Type*/}
           {showMilkOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Milk Type</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Milk Type
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {MILK_OPTIONS.map((milk) => (
                   <TouchableOpacity
                     key={milk.value}
-                    style={[
-                      styles.optionButton,
-                      selectedMilk === milk.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(selectedMilk === milk.value)}
                     onPress={() => setSelectedMilk(milk.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedMilk === milk.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(selectedMilk === milk.value)}
                     >
                       {milk.label}
                     </ThemedText>
                     {milk.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${milk.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -237,34 +302,29 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Espresso Shots*/}
           {showShotOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
                 Espresso Shots
               </ThemedText>
               <View style={styles.optionsGrid}>
                 {SHOT_OPTIONS.map((shot) => (
                   <TouchableOpacity
                     key={shot.value}
-                    style={[
-                      styles.optionButton,
-                      selectedShot === shot.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(selectedShot === shot.value)}
                     onPress={() => setSelectedShot(shot.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedShot === shot.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(selectedShot === shot.value)}
                     >
                       {shot.label}
                     </ThemedText>
                     {shot.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${shot.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -274,32 +334,33 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Temperature Selection*/}
           {showTemperatureOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Temperature</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Temperature
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {TEMPERATURE_OPTIONS.map((temp) => (
                   <TouchableOpacity
                     key={temp.value}
-                    style={[
-                      styles.optionButton,
-                      selectedTemperature === temp.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(
+                      selectedTemperature === temp.value,
+                    )}
                     onPress={() => setSelectedTemperature(temp.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedTemperature === temp.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(
+                        selectedTemperature === temp.value,
+                      )}
                     >
                       {temp.label}
                     </ThemedText>
                     {temp.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${temp.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -309,32 +370,33 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Filling Selection */}
           {showFillingOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Fillings</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Fillings
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {FILLING_OPTIONS.map((filling) => (
                   <TouchableOpacity
                     key={filling.value}
-                    style={[
-                      styles.optionButton,
-                      selectedFilling === filling.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(
+                      selectedFilling === filling.value,
+                    )}
                     onPress={() => setSelectedFilling(filling.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedFilling === filling.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(
+                        selectedFilling === filling.value,
+                      )}
                     >
                       {filling.label}
                     </ThemedText>
                     {filling.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${filling.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -344,32 +406,33 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Toppings */}
           {showToppingOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Toppings</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Toppings
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {TOPPING_OPTIONS.map((topping) => (
                   <TouchableOpacity
                     key={topping.value}
-                    style={[
-                      styles.optionButton,
-                      selectedTopping === topping.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(
+                      selectedTopping === topping.value,
+                    )}
                     onPress={() => setSelectedTopping(topping.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedTopping === topping.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(
+                        selectedTopping === topping.value,
+                      )}
                     >
                       {topping.label}
                     </ThemedText>
                     {topping.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${topping.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -379,32 +442,33 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Proteins */}
           {showProteinOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Proteins</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Proteins
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {PROTEIN_OPTIONS.map((protein) => (
                   <TouchableOpacity
                     key={protein.value}
-                    style={[
-                      styles.optionButton,
-                      selectedProtein === protein.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(
+                      selectedProtein === protein.value,
+                    )}
                     onPress={() => setSelectedProtein(protein.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedProtein === protein.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(
+                        selectedProtein === protein.value,
+                      )}
                     >
                       {protein.label}
                     </ThemedText>
                     {protein.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${protein.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -414,32 +478,33 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Cheeses */}
           {showCheeseOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Cheeses</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Cheeses
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {CHEESE_OPTIONS.map((cheese) => (
                   <TouchableOpacity
                     key={cheese.value}
-                    style={[
-                      styles.optionButton,
-                      selectedCheese === cheese.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(
+                      selectedCheese === cheese.value,
+                    )}
                     onPress={() => setSelectedCheese(cheese.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedCheese === cheese.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(
+                        selectedCheese === cheese.value,
+                      )}
                     >
                       {cheese.label}
                     </ThemedText>
                     {cheese.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${cheese.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -449,32 +514,29 @@ export default function ItemCustomizationScreen() {
             </ThemedView>
           )}
 
-          {/* Veggies */}
           {showVeggyOptions && (
-            <ThemedView style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Vegetables</ThemedText>
+            <ThemedView
+              style={[styles.section, { backgroundColor: theme.background }]}
+            >
+              <ThemedText style={[styles.sectionTitle, { color: theme.text }]}>
+                Vegetables
+              </ThemedText>
               <View style={styles.optionsGrid}>
                 {VEGGY_OPTIONS.map((veggy) => (
                   <TouchableOpacity
                     key={veggy.value}
-                    style={[
-                      styles.optionButton,
-                      selectedVeggy === veggy.value &&
-                        styles.optionButtonSelected,
-                    ]}
+                    style={getOptionButtonStyle(selectedVeggy === veggy.value)}
                     onPress={() => setSelectedVeggy(veggy.value)}
                   >
                     <ThemedText
-                      style={[
-                        styles.optionText,
-                        selectedVeggy === veggy.value &&
-                          styles.optionTextSelected,
-                      ]}
+                      style={getOptionTextStyle(selectedVeggy === veggy.value)}
                     >
                       {veggy.label}
                     </ThemedText>
                     {veggy.price > 0 && (
-                      <ThemedText style={styles.optionPrice}>
+                      <ThemedText
+                        style={[styles.optionPrice, { color: theme.mutedText }]}
+                      >
                         +${veggy.price.toFixed(2)}
                       </ThemedText>
                     )}
@@ -485,9 +547,8 @@ export default function ItemCustomizationScreen() {
           )}
         </ScrollView>
 
-        {/* Floating Add to Cart Button */}
         <TouchableOpacity
-          style={styles.floatingAddButton}
+          style={[styles.floatingAddButton, { backgroundColor: theme.accent }]}
           onPress={handleAddToOrder}
         >
           <ThemedText style={styles.addButtonText}>
@@ -502,13 +563,12 @@ export default function ItemCustomizationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100, // Space for floating button
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",
@@ -517,7 +577,6 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 25,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   fixedHeader: {
     flexDirection: "row",
@@ -525,41 +584,34 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#fff",
     zIndex: 10,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
   },
   backButtonText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#666",
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
   },
   closeButtonText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#666",
   },
   itemHeader: {
     alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   itemImage: {
     width: 200,
@@ -576,14 +628,12 @@ const styles = StyleSheet.create({
   },
   itemDescription: {
     fontSize: 16,
-    color: "#666",
     textAlign: "center",
     marginBottom: 8,
   },
   itemPrice: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#434242",
   },
   section: {
     padding: 20,
@@ -603,7 +653,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#7bf1a8",
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 20,
@@ -629,7 +678,6 @@ const styles = StyleSheet.create({
     bottom: 50,
     left: 20,
     right: 20,
-    backgroundColor: "#7bf1a8",
     paddingVertical: 15,
     borderRadius: 25,
     alignItems: "center",
@@ -654,26 +702,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    backgroundColor: "#f8f9fa",
     minWidth: "30%",
     alignItems: "center",
   },
-  optionButtonSelected: {
-    borderColor: "#7bf1a8",
-    backgroundColor: "#e8f9ea",
-  },
   optionText: {
     fontSize: 14,
-    color: "#434242",
-  },
-  optionTextSelected: {
-    fontWeight: "600",
-    color: "#2d5a3d",
   },
   optionPrice: {
     fontSize: 12,
-    color: "#666",
     marginTop: 4,
   },
 });

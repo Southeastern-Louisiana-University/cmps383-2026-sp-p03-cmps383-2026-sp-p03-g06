@@ -1,3 +1,6 @@
+import { ThemedText } from "@/components/themed-text";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -10,28 +13,19 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { getCurrentUser, loginUser } from "../../services/apis";
+import { loginUser } from "../../services/apis";
 
 interface LoginScreenProps {
   onLoginSuccess?: () => void;
 }
 
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps = {}) {
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const checkAuth = async () => {
-    try {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setIsLoggedIn(true);
-      }
-    } catch (error) {
-      setIsLoggedIn(false);
-    }
-  };
 
   const handleLogin = async () => {
     if (!userName || !password) {
@@ -41,28 +35,24 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps = {}) {
 
     setLoading(true);
     try {
-      const result = await loginUser({
+      await loginUser({
         userName,
         password,
       });
 
-      // Login successful
       Alert.alert("Success", "Login successful!", [
         {
           text: "OK",
           onPress: () => {
             if (onLoginSuccess) {
-              // If callback provided, call it (used when embedded in AccountScreen)
               onLoginSuccess();
             } else {
-              // Otherwise navigate to main app area
               router.push("/(tabs)");
             }
           },
         },
       ]);
     } catch (error) {
-      // Login failed
       const errorMessage =
         error instanceof Error ? error.message : "An error occurred";
       Alert.alert("Login Failed", errorMessage);
@@ -73,44 +63,75 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps = {}) {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.signInHeader}>Claim your rewards now!</Text>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <ThemedText style={[styles.signInHeader, { color: theme.text }]}>
+          Claim your rewards now!
+        </ThemedText>
+
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
           placeholder="Username"
+          placeholderTextColor={theme.mutedText}
           value={userName}
           onChangeText={setUserName}
           autoCapitalize="none"
           editable={!loading}
         />
+
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
           placeholder="Password"
+          placeholderTextColor={theme.mutedText}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
           editable={!loading}
         />
+
         <TouchableOpacity
-          style={[styles.signInButton, loading && styles.disabledButton]}
+          style={[
+            styles.signInButton,
+            { backgroundColor: theme.accent },
+            loading && styles.disabledButton,
+          ]}
           onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
             <Text style={styles.signInButtonText}>Sign In</Text>
           )}
         </TouchableOpacity>
+
         <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don't have an account? </Text>
+          <ThemedText style={[styles.signUpText, { color: theme.softText }]}>
+            Don't have an account?
+          </ThemedText>
+
           <TouchableOpacity
-            onPress={() => {
-              router.push("/signUp");
-            }}
+            onPress={() => router.push("/signUp")}
             disabled={loading}
           >
-            <Text style={styles.signUpLink}>Sign Up</Text>
+            <ThemedText style={[styles.signUpLink, { color: theme.accent }]}>
+              Sign Up
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -136,7 +157,6 @@ const styles = StyleSheet.create({
   signInButton: {
     width: "90%",
     marginTop: 20,
-    backgroundColor: "#7bf1a8",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 18,
@@ -144,7 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   signInButtonText: {
-    color: "#434242",
+    color: "#434242", // kept your original style
     fontWeight: "500",
     fontSize: 16,
   },
@@ -164,10 +184,8 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     fontSize: 14,
-    color: "#434242",
   },
   signUpLink: {
-    color: "#7bf1a8",
     fontWeight: "bold",
   },
 });
