@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Caff-logo.png";
 
@@ -7,17 +7,165 @@ type Tab = "orders" | "payment";
 const pastOrders = [
     { id: "#10245", status: "Picked up", date: "Apr 22, 2026", items: "Iced Latte (L)", total: "$6.50" },
     { id: "#10198", status: "Picked up", date: "Apr 18, 2026", items: "Supernova Espresso (M)", total: "$7.95" },
-    { id: "#10134", status: "Picked up", date: "Apr 11, 2026", items: "Roaring Frappe (L), Banana Foster ", total: "$15.15" },
+    { id: "#10134", status: "Picked up", date: "Apr 11, 2026", items: "Roaring Frappe (L), Banana Foster", total: "$15.15" },
 ];
+
+type FieldDef = { label: string; key: string; icon: string; value: string };
+
+// FIX: map frontend keys to the API field names the backend expects
+const API_KEY_MAP: Record<string, string> = {
+    email: "email",
+    phone: "phoneNumber",
+    address: "address",
+    name: "name",
+    birthday: "birthday",
+};
+
+function FieldRow({ field }: { field: FieldDef }) {
+    const [editing, setEditing] = useState(false);
+    const [value, setValue] = useState(field.value);
+    const [draft, setDraft] = useState(field.value);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleSave = async () => {
+        // FIX: guard against duplicate in-flight saves triggered by rapid Enter presses
+        if (saving) return;
+
+        setSaving(true);
+        setError(null);
+        try {
+            const apiKey = API_KEY_MAP[field.key];
+            if (apiKey) {
+                // FIX: use env variable instead of hardcoded localhost
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify({ [apiKey]: draft }),
+                });
+
+                if (!res.ok) {
+                    // FIX: surface the actual server error message instead of a generic one
+                    const errBody = await res.json().catch(() => ({}));
+                    throw new Error(errBody.message || `Server error ${res.status}`);
+                }
+            }
+
+            setValue(draft);
+            setEditing(false);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Could not save. Try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setDraft(value);
+        setEditing(false);
+        setError(null);
+    };
+
+    return (
+        <div className="mb-5 border-b border-[#f0f0f0] pb-5 last:mb-0 last:border-0 last:pb-0">
+            <div className="mb-1 flex items-center gap-2">
+                <span className="text-xs">{field.icon}</span>
+                <p className="tracking-[0.1em] font-semibold uppercase text-[10px] text-[#999]">{field.label}</p>
+            </div>
+
+            {editing ? (
+                <div className="mt-1 flex flex-col gap-2">
+                    <input
+                        type="text"
+                        value={draft}
+                        onChange={e => setDraft(e.target.value)}
+                        className="w-full text-sm border border-[#7bf1a8] rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#7bf1a8]/40"
+                        autoFocus
+                        onKeyDown={e => {
+                            if (e.key === "Enter") handleSave();
+                            if (e.key === "Escape") handleCancel();
+                        }}
+                    />
+                    {error && <p className="text-xs text-red-500">{error}</p>}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="flex-1 rounded-lg bg-[#7bf1a8] py-1.5 text-xs font-semibold text-[#1a4731] transition-colors hover:bg-[#5ce090] disabled:opacity-50"
+                        >
+                            {saving ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                            onClick={handleCancel}
+                            className="flex-1 rounded-lg border border-[#e0e0e0] py-1.5 text-xs font-medium text-[#555] transition-colors hover:bg-[#f9f9f9]"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-center justify-between">
+                    <p className="text-sm text-[#333]">{value}</p>
+                    <button
+                        onClick={() => setEditing(true)}
+                        className="text-xs text-[#aaa] transition-colors hover:text-[#1a4731]"
+                    >
+                        ✏️
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState<Tab>("orders");
+    const [userData, setUserData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        birthday: "",
+    });
     const navigate = useNavigate();
+
+    // FIX: fetch real user data from API on mount instead of using hardcoded values
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                setUserData({
+                    name: data.name ?? "",
+                    email: data.email ?? "",
+                    phone: data.phoneNumber ?? "",
+                    birthday: data.birthday ?? "",
+                });
+            } catch {
+                // fail silently — fields will just be empty
+            }
+        };
+        fetchUser();
+    }, []);
+
+    // FIX: memoize fields array so it isn't recreated on every render
+    const fields: FieldDef[] = useMemo(() => [
+        { label: "FULL NAME", key: "name", icon: "👤", value: userData.name },
+        { label: "EMAIL", key: "email", icon: "✉️", value: userData.email },
+        { label: "PHONE NUMBER", key: "phone", icon: "📱", value: userData.phone },
+        { label: "BIRTHDAY", key: "birthday", icon: "🎂", value: userData.birthday },
+    ], [userData]);
 
     return (
         <div className="flex min-h-screen flex-col bg-[#f9fdf9]">
 
-            {/* MAIN WRAPPER */}
             <div className="flex-1">
 
                 {/* PAGE HEADER */}
@@ -38,30 +186,14 @@ export default function ProfilePage() {
                     <div className="w-full shrink-0 lg:w-72">
                         <div className="rounded-2xl border border-[#e0e0e0] bg-white p-6">
                             <h2 className="mb-6 text-base font-semibold text-[#1a4731]">Personal Info</h2>
-
-                            {[
-                                { label: "FULL NAME", value: "John Doe", placeholder: "Your name", icon: "👤" },
-                                { label: "EMAIL", value: "john@example.com", placeholder: "your@email.com", icon: "✉️" },
-                                { label: "PHONE NUMBER", value: "(555) 123-4567", placeholder: "+1 (555) 000-0000", icon: "📱" },
-                                { label: "BIRTHDAY", value: "Jan 15, 1999", placeholder: "Not set", icon: "🎂" },
-                            ].map((field) => (
-                                <div key={field.label} className="mb-5 border-b border-[#f0f0f0] pb-5 last:mb-0 last:border-0 last:pb-0">
-                                    <div className="mb-1 flex items-center gap-2">
-                                        <span className="text-xs">{field.icon}</span>
-                                        <p className="tracking-[0.1em] font-semibold uppercase text-[10px] text-[#999]">{field.label}</p>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm text-[#333]">{field.value || field.placeholder}</p>
-                                        <button className="text-xs text-[#aaa] transition-colors hover:text-[#1a4731]">✏️</button>
-                                    </div>
-                                </div>
+                            {fields.map(field => (
+                                <FieldRow key={field.key} field={field} />
                             ))}
                         </div>
 
-                        {/* Log out */}
                         <button
                             onClick={() => navigate("/")}
-                            className="mt-4 w-full text-sm text-[#555] border border-[#e0e0e0] rounded-full py-2.5 hover:bg-white transition-colors"
+                            className="mt-4 w-full rounded-full border border-[#e0e0e0] py-2.5 text-sm text-[#555] transition-colors hover:bg-white"
                         >
                             Log out
                         </button>
@@ -69,12 +201,10 @@ export default function ProfilePage() {
 
                     {/* RIGHT — Tabs */}
                     <div className="flex-1">
-
-                        {/* Tab bar */}
                         <div className="mb-6 flex gap-2">
                             <button
                                 onClick={() => setActiveTab("orders")}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all"
+                                className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all"
                                 style={{
                                     background: activeTab === "orders" ? "#7bf1a8" : "white",
                                     color: activeTab === "orders" ? "#1a4731" : "#555",
@@ -85,7 +215,7 @@ export default function ProfilePage() {
                             </button>
                             <button
                                 onClick={() => setActiveTab("payment")}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all"
+                                className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all"
                                 style={{
                                     background: activeTab === "payment" ? "#7bf1a8" : "white",
                                     color: activeTab === "payment" ? "#1a4731" : "#555",
@@ -96,7 +226,6 @@ export default function ProfilePage() {
                             </button>
                         </div>
 
-                        {/* Past Orders */}
                         {activeTab === "orders" && (
                             <div className="divide-y divide-[#f0f0f0] rounded-2xl border border-[#e0e0e0] bg-white">
                                 {pastOrders.map((order) => (
@@ -115,7 +244,7 @@ export default function ProfilePage() {
                                             <span className="text-sm font-semibold">{order.total}</span>
                                             <button
                                                 onClick={() => navigate("/order")}
-                                                className="bg-[#7bf1a8] text-[#1a4731] text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#5ce090] transition-colors"
+                                                className="rounded-full bg-[#7bf1a8] px-4 py-2 text-xs font-semibold text-[#1a4731] transition-colors hover:bg-[#5ce090]"
                                             >
                                                 Reorder
                                             </button>
@@ -125,7 +254,6 @@ export default function ProfilePage() {
                             </div>
                         )}
 
-                        {/* Payment */}
                         {activeTab === "payment" && (
                             <div className="rounded-2xl border border-[#e0e0e0] bg-white p-8 text-center">
                                 <div className="mb-4 text-4xl">💳</div>
@@ -144,12 +272,8 @@ export default function ProfilePage() {
             <footer className="mt-8 bg-[#1a4731] px-6 py-12 md:px-12">
                 <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <img
-                                src={Logo}
-                                alt="Caffeinated Lions Logo"
-                                className="h-8 w-8 rounded-full object-cover"
-                            />
+                        <div className="mb-2 flex items-center gap-2">
+                            <img src={Logo} alt="Caffeinated Lions Logo" className="h-8 w-8 rounded-full object-cover" />
                             <span className="font-semibold text-white">Caffeinated Lions</span>
                         </div>
                         <p className="text-sm text-white/60">Handcrafted with care. Open daily 6am – 8pm.</p>
@@ -169,7 +293,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </footer>
-
         </div>
     );
 }

@@ -99,9 +99,23 @@ export default function HomePage() {
             </section>
 
             {/* REWARDS */}
-            <section className="bg-[#1a4731] px-6 py-20 md:px-12">
-                <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 lg:flex-row">
+            <section className="relative bg-[#1a4731] px-6 py-20 md:px-12">
+                {/* Background watermark */}
+                <div
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+                    aria-hidden="true"
+                >
+                    <span
+                        className="select-none font-bold tracking-widest text-[16vw]"
+                        style={{ color: "rgba(255,255,255,0.04)", lineHeight: 1, fontFamily: "'Cormorant Garamond', serif" }}
+                    >
+                        REWARDS
+                    </span>
+                </div>
 
+                
+                <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 lg:flex-row">
+                    
                     {/* LEFT */}
                     <div className="flex-1">
                         <p className="tracking-[0.08em] mb-3 text-xs font-medium uppercase text-[#7bf1a8]">
@@ -186,8 +200,8 @@ export default function HomePage() {
                     <div className="flex flex-1 flex-col gap-4">
                         {[
                             { emoji: "☕", name: "Supernova", detail: "Large · Sweet cream" },
-                            { emoji: "🌿", name: "Green Machine", detail: "Medium · Extra matcha" },
-                            { emoji: "🍂", name: "Strawberry Limeade", detail: "Small · Oat milk" },
+                            { emoji: "🌿", name: "Green Machine", detail: "Hearty blend of greens" },
+                            { emoji: "🍂", name: "Strawberry Limeade", detail: "Fresh squeezed lime" },
                         ].map((item) => (
                             <div
                                 key={item.name}
