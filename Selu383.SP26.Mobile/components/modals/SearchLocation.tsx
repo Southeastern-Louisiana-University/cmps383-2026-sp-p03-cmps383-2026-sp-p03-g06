@@ -1,6 +1,10 @@
-import { getLocationById } from "@/services/apis";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
+import { useOrder } from "@/contexts/OrderContext";
+import { getLocations } from "@/services/apis";
 import { Location, SearchLocationProps } from "@/services/types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -15,39 +19,67 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
   visible,
   onClose,
 }) => {
-  const [locationId, setLocationId] = useState("");
-  const [searchLocation, setSearchLocation] = useState<Location | null>(null);
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+  const { setLocation } = useOrder();
+
+  const [searchText, setSearchText] = useState("");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const timeout = setTimeout(async () => {
+    const fetchLocations = async () => {
       try {
-        setErrorMessage("");
-
-        if (!locationId.trim()) {
-          setSearchLocation(null);
-          return;
-        }
-
-        const id = Number(locationId);
-
-        if (isNaN(id)) {
-          setSearchLocation(null);
-          setErrorMessage("Please enter a valid numeric id.");
-          return;
-        }
-
-        const data = await getLocationById(id);
-        setSearchLocation(data);
+        const data = await getLocations();
+        setLocations(data);
       } catch (error) {
-        setSearchLocation(null);
-        setErrorMessage("Location not found.");
-        console.error("Error fetching search location:", error);
+        console.error("Error fetching locations:", error);
+        setErrorMessage("Unable to load locations.");
       }
-    }, 400);
+    };
+
+    if (visible) {
+      fetchLocations();
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setErrorMessage("");
+
+      if (!searchText.trim()) {
+        setFilteredLocations([]);
+        return;
+      }
+
+      const results = locations.filter((location) =>
+        location.name?.toLowerCase().includes(searchText.toLowerCase()),
+      );
+
+      setFilteredLocations(results);
+
+      if (results.length === 0) {
+        setErrorMessage("No locations found.");
+      }
+    }, 300);
 
     return () => clearTimeout(timeout);
-  }, [locationId]);
+  }, [searchText, locations]);
+
+  const handleSelectLocation = (location: Location) => {
+    setLocation(
+      location.id,
+      location.name,
+      location.address || "Unknown Location",
+    );
+
+    setSearchText("");
+    setFilteredLocations([]);
+    onClose();
+
+    router.push("/(tabs)/orderCatalog");
+  };
 
   return (
     <Modal
@@ -57,36 +89,73 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.modalContainer}>
-        <View style={styles.modalView}>
+        <View
+          style={[
+            styles.modalView,
+            {
+              backgroundColor: theme.background,
+            },
+          ]}
+        >
           <TouchableOpacity onPress={onClose} style={styles.exitButton}>
-            <MaterialIcons name="cancel" size={32} color="black" />
+            <MaterialIcons name="cancel" size={32} color={theme.text} />
           </TouchableOpacity>
-          {/*NEEDS TO BE SWITCHED TO SEARCH BY LOCATION NAME */}
+
           <TextInput
-            placeholder="Enter location id"
-            value={locationId}
-            onChangeText={setLocationId}
-            style={styles.searchInput}
-            keyboardType="numeric"
+            placeholder="Search location name"
+            placeholderTextColor={theme.mutedText}
+            value={searchText}
+            onChangeText={setSearchText}
+            style={[
+              styles.searchInput,
+              {
+                backgroundColor: theme.inputBackground,
+                borderColor: theme.inputBorder,
+                color: theme.text,
+              },
+            ]}
+            autoCapitalize="words"
           />
-          {(errorMessage || searchLocation) && (
+
+          {(errorMessage || filteredLocations.length > 0) && (
             <View style={styles.searchResultContainer}>
               <View style={styles.searchResults}>
-                {errorMessage ? <ThemedText>{errorMessage}</ThemedText> : null}
-
-                {searchLocation && (
-                  <TouchableOpacity
-                    onPress={() => {}}
-                    style={styles.locationCard}
+                {errorMessage ? (
+                  <ThemedText
+                    style={[styles.errorText, { color: theme.mutedText }]}
                   >
-                    <ThemedText style={styles.locationName}>
-                      {searchLocation.name || "Unknown Location"}
+                    {errorMessage}
+                  </ThemedText>
+                ) : null}
+
+                {filteredLocations.map((location) => (
+                  <TouchableOpacity
+                    key={location.id}
+                    onPress={() => handleSelectLocation(location)}
+                    style={[
+                      styles.locationCard,
+                      {
+                        backgroundColor: theme.elevatedCard,
+                        borderColor: theme.border,
+                      },
+                    ]}
+                  >
+                    <ThemedText
+                      style={[styles.locationName, { color: theme.text }]}
+                    >
+                      {location.name || "Unknown Location"}
                     </ThemedText>
-                    <ThemedText style={styles.locationAddress}>
-                      {searchLocation.address || "Address not available"}
+
+                    <ThemedText
+                      style={[
+                        styles.locationAddress,
+                        { color: theme.mutedText },
+                      ]}
+                    >
+                      {location.address || "Address not available"}
                     </ThemedText>
                   </TouchableOpacity>
-                )}
+                ))}
               </View>
             </View>
           )}
@@ -103,7 +172,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     paddingTop: 50,
   },
@@ -111,7 +179,6 @@ const styles = StyleSheet.create({
     width: "90%",
     marginTop: 12,
     height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
@@ -130,10 +197,8 @@ const styles = StyleSheet.create({
   },
   locationCard: {
     padding: 15,
-    backgroundColor: "#f8f9fa",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#e9ecef",
     width: "100%",
   },
   locationName: {
@@ -144,8 +209,11 @@ const styles = StyleSheet.create({
   },
   locationAddress: {
     fontSize: 14,
-    color: "#666",
     paddingLeft: 10,
+  },
+  errorText: {
+    textAlign: "center",
+    marginBottom: 10,
   },
 });
 

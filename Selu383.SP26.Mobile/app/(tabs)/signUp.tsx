@@ -1,3 +1,6 @@
+import { ThemedText } from "@/components/themed-text";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { signUpUser } from "@/services/apis";
 import { RegisterDto } from "@/services/types";
 import { router } from "expo-router";
@@ -5,14 +8,16 @@ import React, { useState } from "react";
 import {
   Alert,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpScreen() {
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +43,6 @@ export default function SignUpScreen() {
       return;
     }
 
-    // Validate password requirements
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
       Alert.alert(
@@ -79,38 +83,67 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.signInHeader}>Start claiming rewards now!</Text>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <ThemedText style={[styles.signInHeader, { color: theme.text }]}>
+          Start claiming rewards now!
+        </ThemedText>
+
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
           placeholder="Username"
+          placeholderTextColor={theme.mutedText}
           value={userName}
           onChangeText={setUserName}
         />
+
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
           placeholder="Password"
+          placeholderTextColor={theme.mutedText}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
+
         <TouchableOpacity
-          style={[styles.signInButton, isLoading && styles.buttonDisabled]}
+          style={[
+            styles.signInButton,
+            { backgroundColor: theme.accent },
+            isLoading && styles.buttonDisabled,
+          ]}
           onPress={handleSignUp}
           disabled={isLoading}
         >
-          <Text style={styles.signInButtonText}>
+          <ThemedText style={styles.signInButtonText}>
             {isLoading ? "Creating Account..." : "Sign Up"}
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
+
         <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Already have an account? </Text>
-          <TouchableOpacity
-            onPress={() => {
-              router.push("/login");
-            }}
-          >
-            <Text style={styles.signUpLink}>Sign In</Text>
+          <ThemedText style={[styles.signUpText, { color: theme.softText }]}>
+            Already have an account?
+          </ThemedText>
+
+          <TouchableOpacity onPress={() => router.push("/login")}>
+            <ThemedText style={[styles.signUpLink, { color: theme.accent }]}>
+              Sign In
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -136,7 +169,6 @@ const styles = StyleSheet.create({
   signInButton: {
     width: "90%",
     marginTop: 20,
-    backgroundColor: "#7bf1a8",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 18,
@@ -144,11 +176,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonDisabled: {
-    backgroundColor: "#ccc",
     opacity: 0.6,
   },
   signInButtonText: {
-    color: "#434242",
+    color: "#434242", // kept your original styling
     fontWeight: "500",
     fontSize: 16,
   },
@@ -165,10 +196,8 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     fontSize: 14,
-    color: "#434242",
   },
   signUpLink: {
-    color: "#7bf1a8",
     fontWeight: "bold",
   },
 });

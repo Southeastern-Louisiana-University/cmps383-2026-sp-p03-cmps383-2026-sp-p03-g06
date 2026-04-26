@@ -1,48 +1,86 @@
-/**
- * Parses hours of operation string and determines if location is currently open
- * Expected format: "9:00 AM - 5:00 PM" or similar time ranges
- */
+const DAY_INDEX: Record<string, number> = {
+  sun: 0,
+  sunday: 0,
+  mon: 1,
+  monday: 1,
+  tue: 2,
+  tues: 2,
+  tuesday: 2,
+  wed: 3,
+  wednesday: 3,
+  thu: 4,
+  thur: 4,
+  thurs: 4,
+  thursday: 4,
+  fri: 5,
+  friday: 5,
+  sat: 6,
+  saturday: 6,
+};
 
-interface HoursRange {
-  open: Date;
-  close: Date;
-}
+function parseTimeToMinutes(timeStr: string): number | null {
+  const match = timeStr
+    .trim()
+    .toUpperCase()
+    .match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?/);
 
-function parseTimeString(timeStr: string): Date | null {
-  // Try parsing common formats like "9:00 AM", "9:00", "09:00 AM"
-  const cleanedTime = timeStr.trim().toUpperCase();
-
-  // Match time with optional AM/PM
-  const match = cleanedTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
   if (!match) return null;
 
   let hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
-  const period = match[3]?.toUpperCase();
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const period = match[3];
 
-  // Handle 12-hour format
-  if (period === "PM" && hours !== 12) {
-    hours += 12;
-  } else if (period === "AM" && hours === 12) {
-    hours = 0;
-  }
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
 
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+  return hours * 60 + minutes;
 }
 
-function parseHoursRange(hoursStr: string): HoursRange | null {
-  // Split by " - " or "-" to get open and close times
-  const parts = hoursStr.split(/\s*-\s*/);
-  if (parts.length !== 2) return null;
+function isTodayInDayRange(dayPart: string, today: number): boolean {
+  const cleaned = dayPart.toLowerCase().trim();
 
-  const openTime = parseTimeString(parts[0]);
-  const closeTime = parseTimeString(parts[1]);
+  const rangeMatch = cleaned.match(/([a-z]+)\s*-\s*([a-z]+)/i);
 
-  if (!openTime || !closeTime) return null;
+  if (rangeMatch) {
+    const start = DAY_INDEX[rangeMatch[1]];
+    const end = DAY_INDEX[rangeMatch[2]];
 
-  return { open: openTime, close: closeTime };
+    if (start === undefined || end === undefined) return false;
+
+    if (start <= end) {
+      return today >= start && today <= end;
+    }
+
+    return today >= start || today <= end;
+  }
+
+  const singleDayMatch = cleaned.match(/[a-z]+/i);
+
+  if (!singleDayMatch) return false;
+
+  return DAY_INDEX[singleDayMatch[0]] === today;
+}
+
+function isCurrentTimeInRange(timeRange: string): boolean {
+  const match = timeRange.match(
+    /(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)/i,
+  );
+
+  if (!match) return false;
+
+  const open = parseTimeToMinutes(match[1]);
+  const close = parseTimeToMinutes(match[2]);
+
+  if (open === null || close === null) return false;
+
+  const now = new Date();
+  const current = now.getHours() * 60 + now.getMinutes();
+
+  if (close < open) {
+    return current >= open || current < close;
+  }
+
+  return current >= open && current < close;
 }
 
 export function isLocationOpen(
@@ -50,36 +88,38 @@ export function isLocationOpen(
 ): boolean {
   if (!hoursOfOperation) return false;
 
-  const hoursRange = parseHoursRange(hoursOfOperation);
-  if (!hoursRange) return false;
+  const hours = hoursOfOperation.trim();
 
-  const now = new Date();
-  const currentHours = now.getHours();
-  const currentMinutes = now.getMinutes();
-  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
-
-  const openTimeInMinutes =
-    hoursRange.open.getHours() * 60 + hoursRange.open.getMinutes();
-  const closeTimeInMinutes =
-    hoursRange.close.getHours() * 60 + hoursRange.close.getMinutes();
-
-  // Handle cases where closing time is after midnight (e.g., 10 AM - 2 AM)
-  if (closeTimeInMinutes < openTimeInMinutes) {
-    // Location is open past midnight
-    return (
-      currentTimeInMinutes >= openTimeInMinutes ||
-      currentTimeInMinutes < closeTimeInMinutes
-    );
+  if (/closed/i.test(hours) && !hours.includes("|")) {
+    return false;
   }
 
-  return (
-    currentTimeInMinutes >= openTimeInMinutes &&
-    currentTimeInMinutes < closeTimeInMinutes
-  );
-}
+  if (/24 hours|open 24/i.test(hours)) {
+    return true;
+  }
 
-export function getLocationStatus(
-  hoursOfOperation: string | null | undefined,
-): "open" | "closed" {
-  return isLocationOpen(hoursOfOperation) ? "open" : "closed";
+  const today = new Date().getDay();
+
+  const sections = hours.split("|").map((section) => section.trim());
+
+  for (const section of sections) {
+    const firstColonIndex = section.indexOf(":");
+
+    if (firstColonIndex === -1) continue;
+
+    const dayPart = section.substring(0, firstColonIndex).trim();
+    const timePart = section.substring(firstColonIndex + 1).trim();
+
+    if (!dayPart || !timePart) continue;
+
+    if (!isTodayInDayRange(dayPart, today)) continue;
+
+    if (/closed/i.test(timePart)) {
+      return false;
+    }
+
+    return isCurrentTimeInRange(timePart);
+  }
+
+  return false; // ✅ fallback if nothing matched
 }

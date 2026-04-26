@@ -1,39 +1,68 @@
-import { ThemedView } from "@/components/themed-view";
+import { ThemedText } from "@/components/themed-text";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { router } from "expo-router";
 import React from "react";
 import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function HomeScreen() {
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <ThemedView style={styles.topCard}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <View
+        style={[
+          styles.topCard,
+          {
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <Image
           source={{
             uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           }}
           style={styles.image}
         />
-        <Text style={styles.cardText}>Your day awaits</Text>
-        <Text style={styles.cardSubText}>
+
+        <ThemedText style={[styles.cardText, { color: theme.text }]}>
+          Your day awaits
+        </ThemedText>
+
+        <ThemedText style={[styles.cardSubText, { color: theme.mutedText }]}>
           Explore various potential rewards and offers you can redeem with your
           points.
-        </Text>
+        </ThemedText>
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: theme.accent }]}
           onPress={() => router.push("/rewards")}
         >
-          <Text style={styles.buttonText}>Learn More</Text>
+          <ThemedText style={styles.buttonText}>Learn More</ThemedText>
         </TouchableOpacity>
-      </ThemedView>
-      <ThemedView style={styles.secondCard}>
+      </View>
+
+      <View
+        style={[
+          styles.secondCard,
+          {
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <View style={styles.imageContainer}>
           <Image
             source={{
@@ -41,18 +70,32 @@ export default function HomeScreen() {
             }}
             style={styles.overlayImage}
           />
+
           <View style={styles.overlay}>
-            <Text style={styles.overlayText}>Quick Order</Text>
-            <Text style={styles.overlaySubText}>Reorder your favorites</Text>
+            <ThemedText style={styles.overlayText}>Quick Order</ThemedText>
+            <ThemedText style={styles.overlaySubText}>
+              Reorder your favorites
+            </ThemedText>
+
             <TouchableOpacity
-              style={styles.overlayButton}
+              style={[
+                styles.overlayButton,
+                { backgroundColor: theme.isDark ? theme.accent : "#2c2b2b" },
+              ]}
               onPress={() => router.push("/order")}
             >
-              <Text style={styles.overlayButtonText}>Order Now</Text>
+              <ThemedText
+                style={[
+                  styles.overlayButtonText,
+                  { color: theme.isDark ? "#111111" : theme.accent },
+                ]}
+              >
+                Order Now
+              </ThemedText>
             </TouchableOpacity>
           </View>
         </View>
-      </ThemedView>
+      </View>
     </ScrollView>
   );
 }
@@ -60,30 +103,35 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: 2,
+    paddingBottom: 20,
   },
   topCard: {
     margin: 10,
     paddingBottom: 20,
     borderRadius: 12,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.18,
     shadowRadius: 3.84,
     elevation: 5,
+    overflow: "hidden",
   },
   image: {
     width: "100%",
     height: 200,
-    borderRadius: 8,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
   cardText: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#2D2D2D",
     textAlign: "left",
     marginTop: 15,
     paddingHorizontal: 20,
@@ -91,7 +139,6 @@ const styles = StyleSheet.create({
   cardSubText: {
     fontSize: 16,
     fontWeight: "400",
-    color: "#666666",
     textAlign: "left",
     marginTop: 5,
     paddingHorizontal: 20,
@@ -100,7 +147,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginRight: 20,
     borderRadius: 18,
-    backgroundColor: "#7bf1a8",
     paddingVertical: 10,
     paddingHorizontal: 40,
     alignSelf: "flex-end",
@@ -114,12 +160,13 @@ const styles = StyleSheet.create({
   secondCard: {
     margin: 10,
     borderRadius: 12,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 3.84,
     elevation: 5,
     overflow: "hidden",
@@ -131,7 +178,6 @@ const styles = StyleSheet.create({
   overlayImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 12,
   },
   overlay: {
     position: "absolute",
@@ -139,7 +185,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.28)",
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
     justifyContent: "center",
     alignItems: "flex-start",
     paddingHorizontal: 20,
@@ -157,13 +203,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   overlayButton: {
-    backgroundColor: "#2c2b2b",
     paddingVertical: 10,
     paddingHorizontal: 40,
     borderRadius: 18,
   },
   overlayButtonText: {
-    color: "#7bf1a8",
     fontWeight: "600",
     fontSize: 16,
   },

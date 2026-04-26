@@ -121,7 +121,9 @@ public class LocationsController(DataContext dataContext) : ControllerBase
             return NotFound();
         }
 
-        var now = DateTime.Now;
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Chicago");
+        var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+
         var slots = new List<PickupTimeDto>();
 
         // ASAP slot — ready in 15 minutes
@@ -134,12 +136,23 @@ public class LocationsController(DataContext dataContext) : ControllerBase
         });
 
         // Scheduled slots every 15 minutes for the next 3 hours
-        var slotStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0)
-            .AddMinutes(30 - now.Minute % 15); // round up to next 15-min mark
+        var slotStart = now.AddMinutes(30);
+        var minutesToAdd = (15 - slotStart.Minute % 15) % 15;
+        slotStart = slotStart.AddMinutes(minutesToAdd);
+
+        slotStart = new DateTime(
+            slotStart.Year,
+            slotStart.Month,
+            slotStart.Day,
+            slotStart.Hour,
+            slotStart.Minute,
+            0
+        );
 
         for (int i = 0; i < 12; i++)
         {
             var slotTime = slotStart.AddMinutes(i * 15);
+
             slots.Add(new PickupTimeDto
             {
                 Label = slotTime.ToString("h:mm tt"),
@@ -147,6 +160,7 @@ public class LocationsController(DataContext dataContext) : ControllerBase
                 IsAsap = false,
             });
         }
+
 
         return Ok(slots);
     }

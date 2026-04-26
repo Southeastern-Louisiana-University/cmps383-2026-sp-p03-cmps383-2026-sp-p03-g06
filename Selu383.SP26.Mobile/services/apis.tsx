@@ -266,3 +266,66 @@ export async function createPaymentSheet(
 
   return response.json();
 }
+export async function getMyProfile() {
+  const response = await fetch(`${API_BASE}/api/users/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load profile");
+  }
+
+  return response.json();
+}
+
+export async function getMyOrders() {
+  const response = await fetch(`${API_BASE}/api/users/me/orders`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load previous orders");
+  }
+
+  return response.json();
+}
+
+export async function updateMyProfile(profileData: {
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+  preferredLocationId?: number | null;
+}) {
+  const response = await fetch(`${API_BASE}/api/users/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update profile");
+  }
+
+  return response.json();
+}
+
+export async function getPickupTimes(locationId: number) {
+  const response = await fetch(
+    `${API_BASE}/api/locations/${locationId}/pickup-times`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load pickup times");
+  }
+
+  return response.json();
+}
