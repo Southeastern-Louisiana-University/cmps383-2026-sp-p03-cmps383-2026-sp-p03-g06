@@ -21,6 +21,8 @@ public class Order
     public decimal TotalPrice { get; set; }
 
     public string Status { get; set; } = "Pending";
+    public int? RewardOfferingId { get; set; }
+    public int? RewardedMenuItemId { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 

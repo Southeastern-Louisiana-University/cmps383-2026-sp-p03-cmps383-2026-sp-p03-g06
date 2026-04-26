@@ -22,6 +22,9 @@ public class CreateOrderDto
     [Required]
     [MaxLength(30)]
     public string CheckoutPhoneNumber { get; set; } = string.Empty;
+    public int? RewardOfferingId { get; set; }
+
+    public int? RewardedMenuItemId { get; set; }
 
     public List<CreateOrderItemDto> OrderItems { get; set; } = new();
 }

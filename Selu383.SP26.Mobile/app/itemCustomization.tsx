@@ -41,10 +41,17 @@ import {
 
 export default function ItemCustomizationScreen() {
   const params = useLocalSearchParams();
-  const { addOrderItem } = useOrder();
-
+  const {
+    addOrderItem,
+    selectedReward,
+    rewardedMenuItemId,
+    setRewardedMenuItemId,
+    setRewardedCustomizationJson,
+  } = useOrder();
   const { colorScheme } = useColorScheme();
   const theme = getTheme(colorScheme);
+  const FALLBACK_MENU_IMAGE =
+    "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
   const menuItem: MenuItemDto = JSON.parse(params.item as string);
 
@@ -104,15 +111,50 @@ export default function ItemCustomizationScreen() {
       veggy: selectedVeggy,
     };
 
+    const defaultCustomization: DrinkCustomization = {
+      milkType: "whole",
+      drinkSize: "small",
+      shotCount: 0,
+      temperature: "hot",
+      filling: "none",
+      topping: "none",
+      protein: "none",
+      cheese: "none",
+      veggy: "none",
+    };
+
+    const cleanedCustomization = Object.fromEntries(
+      Object.entries(customization).filter(([key, value]) => {
+        if (value === null || value === undefined || value === "") return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+
+        const defaultValue =
+          defaultCustomization[key as keyof DrinkCustomization];
+
+        if (value === defaultValue) return false;
+
+        return true;
+      }),
+    );
+
+    const customizationJson =
+      Object.keys(cleanedCustomization).length > 0
+        ? JSON.stringify(cleanedCustomization)
+        : undefined;
+
     addOrderItem({
       menuItemId: menuItem.id,
       quantity,
-      customizationJson: JSON.stringify(customization),
+      customizationJson,
     });
+
+    if (selectedReward && !rewardedMenuItemId) {
+      setRewardedMenuItemId(menuItem.id);
+      setRewardedCustomizationJson(customizationJson);
+    }
 
     router.back();
   };
-
   const getOptionButtonStyle = (isSelected: boolean) => [
     styles.optionButton,
     {
@@ -179,7 +221,7 @@ export default function ItemCustomizationScreen() {
           >
             <Image
               source={{
-                uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                uri: menuItem.imageUrl || FALLBACK_MENU_IMAGE,
               }}
               style={styles.itemImage}
             />

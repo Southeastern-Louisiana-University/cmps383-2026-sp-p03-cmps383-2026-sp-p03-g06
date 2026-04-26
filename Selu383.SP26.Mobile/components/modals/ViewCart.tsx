@@ -28,9 +28,9 @@ interface ViewCartProps {
 
 export function ViewCart({ onCheckout }: ViewCartProps) {
   const { colorScheme } = useColorScheme();
-
   const theme = getTheme(colorScheme);
-
+  const FALLBACK_MENU_IMAGE =
+    "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   const {
     orderItems,
     locationName,
@@ -38,6 +38,9 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
     updateOrderItemQuantity,
     removeOrderItem,
     itemCount,
+    selectedReward,
+    rewardedMenuItemId,
+    rewardedCustomizationJson,
   } = useOrder();
 
   const [menuItems, setMenuItems] = useState<MenuItemDto[]>([]);
@@ -82,6 +85,42 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
     setCartItemsWithDetails(itemsWithDetails);
   };
 
+  const isRewardedCartItem = (item: CartItemWithDetails): boolean => {
+    return (
+      !!selectedReward &&
+      rewardedMenuItemId === item.menuItemId &&
+      rewardedCustomizationJson === item.customizationJson
+    );
+  };
+
+  const hasRealCustomization = (customizationJson?: string): boolean => {
+    if (!customizationJson) return false;
+
+    try {
+      const parsed = JSON.parse(customizationJson);
+
+      const defaultValues: Record<string, unknown> = {
+        drinkSize: "small",
+        milkType: "whole",
+        shotCount: 1,
+        temperature: "hot",
+      };
+
+      return Object.entries(parsed).some(([key, value]) => {
+        if (value === null || value === undefined || value === "") return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+
+        if (defaultValues[key] !== undefined && defaultValues[key] === value) {
+          return false;
+        }
+
+        return true;
+      });
+    } catch {
+      return false;
+    }
+  };
+
   const handleQuantityChange = (
     menuItemId: number,
     customizationJson: string | undefined,
@@ -113,6 +152,10 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
   };
 
   const calculateItemTotal = (item: CartItemWithDetails): number => {
+    if (isRewardedCartItem(item)) {
+      return 0;
+    }
+
     return calculateCartItemTotal({
       basePrice: item.menuItem?.price || 0,
       quantity: item.quantity,
@@ -191,94 +234,117 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
       </View>
 
       <ScrollView style={styles.cartList} showsVerticalScrollIndicator={false}>
-        {cartItemsWithDetails.map((item, index) => (
-          <View
-            key={`item-${item.menuItemId.toString()}-${index.toString()}`}
-            style={[
-              styles.cartItem,
-              {
-                backgroundColor: theme.background,
-                borderColor: theme.background,
-              },
-            ]}
-          >
-            <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-              }}
-              style={styles.itemImage}
-            />
+        {cartItemsWithDetails.map((item, index) => {
+          const isRewardedItem = isRewardedCartItem(item);
 
-            <View style={styles.itemDetails}>
-              <ThemedText style={[styles.itemName, { color: theme.text }]}>
-                {item.menuItem?.name || "Unknown Item"}
-              </ThemedText>
+          return (
+            <View
+              key={`item-${item.menuItemId.toString()}-${index.toString()}`}
+              style={[
+                styles.cartItem,
+                {
+                  backgroundColor: theme.background,
+                  borderColor: theme.background,
+                },
+              ]}
+            >
+              <Image
+                source={{
+                  uri: item.menuItem?.imageUrl || FALLBACK_MENU_IMAGE,
+                }}
+                style={styles.itemImage}
+              />
 
-              {item.customizationJson ? (
-                <ThemedText
-                  style={[styles.customization, { color: theme.accentDark }]}
-                >
-                  Customized
+              <View style={styles.itemDetails}>
+                <ThemedText style={[styles.itemName, { color: theme.text }]}>
+                  {item.menuItem?.name || "Unknown Item"}
                 </ThemedText>
-              ) : null}
+
+                {isRewardedItem ? (
+                  <ThemedText
+                    style={[styles.rewardText, { color: theme.accentDark }]}
+                  >
+                    Free Reward
+                  </ThemedText>
+                ) : null}
+
+                {hasRealCustomization(item.customizationJson) ? (
+                  <ThemedText
+                    style={[styles.customization, { color: theme.accentDark }]}
+                  >
+                    Customized
+                  </ThemedText>
+                ) : null}
+              </View>
+
+              <View style={styles.quantityControls}>
+                <TouchableOpacity
+                  style={[
+                    styles.quantityButton,
+                    { backgroundColor: theme.accent },
+                  ]}
+                  onPress={() =>
+                    handleQuantityChange(
+                      item.menuItemId,
+                      item.customizationJson,
+                      item.quantity - 1,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.quantityButtonText}>-</ThemedText>
+                </TouchableOpacity>
+
+                <ThemedText style={[styles.quantity, { color: theme.text }]}>
+                  {item.quantity.toString()}
+                </ThemedText>
+
+                <TouchableOpacity
+                  style={[
+                    styles.quantityButton,
+                    { backgroundColor: theme.accent },
+                  ]}
+                  onPress={() =>
+                    handleQuantityChange(
+                      item.menuItemId,
+                      item.customizationJson,
+                      item.quantity + 1,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.quantityButtonText}>+</ThemedText>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.itemTotalContainer}>
+                <ThemedText
+                  style={[
+                    styles.itemTotal,
+                    {
+                      color: isRewardedItem
+                        ? theme.accentDark
+                        : theme.accentDark,
+                    },
+                  ]}
+                >
+                  {isRewardedItem
+                    ? "Free"
+                    : `$${(calculateItemTotal(item) || 0).toFixed(2)}`}
+                </ThemedText>
+
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() =>
+                    handleRemoveItem(item.menuItemId, item.customizationJson)
+                  }
+                >
+                  <ThemedText style={styles.removeButtonText}>
+                    Remove
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <View style={styles.quantityControls}>
-              <TouchableOpacity
-                style={[
-                  styles.quantityButton,
-                  { backgroundColor: theme.accent },
-                ]}
-                onPress={() =>
-                  handleQuantityChange(
-                    item.menuItemId,
-                    item.customizationJson,
-                    item.quantity - 1,
-                  )
-                }
-              >
-                <ThemedText style={styles.quantityButtonText}>-</ThemedText>
-              </TouchableOpacity>
-
-              <ThemedText style={[styles.quantity, { color: theme.text }]}>
-                {item.quantity.toString()}
-              </ThemedText>
-
-              <TouchableOpacity
-                style={[
-                  styles.quantityButton,
-                  { backgroundColor: theme.accent },
-                ]}
-                onPress={() =>
-                  handleQuantityChange(
-                    item.menuItemId,
-                    item.customizationJson,
-                    item.quantity + 1,
-                  )
-                }
-              >
-                <ThemedText style={styles.quantityButtonText}>+</ThemedText>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.itemTotalContainer}>
-              <ThemedText
-                style={[styles.itemTotal, { color: theme.accentDark }]}
-              >
-                ${(calculateItemTotal(item) || 0).toFixed(2)}
-              </ThemedText>
-
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() =>
-                  handleRemoveItem(item.menuItemId, item.customizationJson)
-                }
-              >
-                <ThemedText style={styles.removeButtonText}>Remove</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
 
       <View
@@ -356,15 +422,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  clearButton: {
-    alignSelf: "flex-end",
-    padding: 5,
-  },
-  clearButtonText: {
-    color: "#ff6b6b",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   loadingText: {
     textAlign: "center",
     marginTop: 50,
@@ -412,17 +469,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 3,
   },
-  itemDescription: {
-    fontSize: 12,
-    marginBottom: 3,
-  },
   customization: {
     fontSize: 11,
     fontStyle: "italic",
     marginBottom: 3,
   },
-  itemPrice: {
-    fontSize: 14,
+  rewardText: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 3,
   },
   quantityControls: {
     flexDirection: "row",
@@ -470,7 +525,7 @@ const styles = StyleSheet.create({
   },
   summary: {
     padding: 20,
-    paddingBottom: 60,
+    paddingBottom: 45,
     borderTopWidth: 1,
   },
   summaryRow: {

@@ -47,6 +47,9 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
     locationAddress,
     orderItems,
     clearOrder,
+    selectedReward,
+    rewardedMenuItemId,
+    clearSelectedReward,
   } = useOrder();
 
   useEffect(() => {
@@ -98,6 +101,13 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
       Alert.alert("Empty Order", "Your cart is empty.");
       return;
     }
+    if (selectedReward && !rewardedMenuItemId) {
+      Alert.alert(
+        "Missing Reward Item",
+        "Please choose a menu item to use your selected reward.",
+      );
+      return;
+    }
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -121,6 +131,8 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
         checkoutLastName: lastName.trim(),
         checkoutEmail: email.trim(),
         checkoutPhoneNumber: phoneNumber.trim(),
+        rewardOfferingId: isLoggedIn ? selectedReward?.id : undefined,
+        rewardedMenuItemId: isLoggedIn ? rewardedMenuItemId : undefined,
       });
 
       const { error: initError } = await initPaymentSheet({
@@ -154,6 +166,8 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
           lastName: lastName.trim(),
           email: email.trim(),
           phoneNumber: phoneNumber.trim(),
+          rewardOfferingId: selectedReward?.id,
+          rewardedMenuItemId: rewardedMenuItemId,
         });
       } else {
         await createGuestOrder({
@@ -165,7 +179,7 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
           orderItems,
         });
       }
-
+      clearSelectedReward();
       clearOrder();
       Alert.alert("Success", "Payment complete and order placed.");
     } catch (error) {
@@ -286,11 +300,13 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
                     >
                       Pickup Location
                     </ThemedText>
+
                     <ThemedText
                       style={[styles.locationName, { color: theme.text }]}
                     >
                       {locationName}
                     </ThemedText>
+
                     {locationAddress ? (
                       <ThemedText
                         style={[
@@ -301,6 +317,30 @@ export default function Checkout({ onSignIn }: CheckoutProps) {
                         {locationAddress}
                       </ThemedText>
                     ) : null}
+                  </ThemedView>
+                ) : null}
+
+                {selectedReward ? (
+                  <ThemedView
+                    style={[
+                      styles.summaryCard,
+                      { backgroundColor: theme.card },
+                    ]}
+                  >
+                    <ThemedText
+                      style={[styles.summaryText, { color: theme.text }]}
+                    >
+                      Reward Selected
+                    </ThemedText>
+
+                    <ThemedText
+                      style={[
+                        styles.summarySubtext,
+                        { color: theme.mutedText },
+                      ]}
+                    >
+                      {selectedReward.name}
+                    </ThemedText>
                   </ThemedView>
                 ) : null}
 
