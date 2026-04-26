@@ -1,98 +1,80 @@
-﻿import HeroSection from "../components/HeroSection";
-
 export default function HomePage() {
     return (
-        <div className="bg-white">
+        <div>
 
             {/* HERO */}
-            <HeroSection />
+            <section style={{ background: "#f9fdf9", display: "flex", alignItems: "center", gap: 64, minHeight: 520, padding: "80px 48px" }}>
+                <div style={{ flex: 1, maxWidth: 520 }}>
+                    <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2d6a4f", marginBottom: 12 }}>
+                        Welcome to Caffeinated Lions
+                    </p>
+                    <h1 style={{ fontSize: 52, fontWeight: 500, lineHeight: 1.15, marginBottom: 20 }}>
+                        Your perfect cup,{" "}
+                        <span style={{ color: "#2d6a4f" }}>every single day.</span>
+                    </h1>
+                    <p style={{ fontSize: 16, lineHeight: 1.7, color: "#555", maxWidth: 400, marginBottom: 36 }}>
+                        Handcrafted drinks made with care. Earn rewards, skip the line, and start your morning right.
+                    </p>
+                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                        <a href="/order" style={{ background: "#7bf1a8", color: "#1a4731", border: "none", padding: "14px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
+                            Order now
+                        </a>
+                        <a href="/order" style={{ background: "transparent", color: "#000", border: "1.5px solid #ccc", padding: "13px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
+                            View menu
+                        </a>
+                    </div>
+                </div>
+                <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                    <div style={{ width: 340, height: 340, borderRadius: "50%", background: "#7bf1a8", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                        <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: 80, lineHeight: 1 }}>☕</div>
+                            <p style={{ fontSize: 18, fontWeight: 500, color: "#1a4731", marginTop: 12 }}>Caffeinated Lions</p>
+                        </div>
+                        <div style={{ position: "absolute", top: 24, right: 24, background: "white", borderRadius: 12, padding: "10px 16px", fontSize: 13, fontWeight: 500, color: "#1a4731", border: "0.5px solid #b7f5d0" }}>
+                            Now open
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             {/* FEATURED DRINKS */}
-            <section className="bg-white px-6 py-20 md:px-12">
-                <div className="mb-12 text-center">
-                    <p className="tracking-[0.08em] mb-3 text-xs font-semibold uppercase text-[#2d6a4f]">
-                        Featured drinks
-                    </p>
-                    <h2 className="mb-4 text-4xl font-medium">
-                        What's popular right now
-                    </h2>
-                    <p className="mx-auto max-w-md text-base text-[#555]">
-                        Fresh seasonal drinks and crowd favorites, ready to order.
-                    </p>
+            <section style={{ padding: "80px 48px", background: "white" }}>
+                <div style={{ textAlign: "center", marginBottom: 48 }}>
+                    <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2d6a4f", marginBottom: 12 }}>Featured drinks</p>
+                    <h2 style={{ fontSize: 36, fontWeight: 500, marginBottom: 16 }}>What's popular right now</h2>
+                    <p style={{ fontSize: 16, color: "#555", maxWidth: 480, margin: "0 auto" }}>Fresh seasonal drinks and crowd favorites, ready to order.</p>
                 </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 960, margin: "0 auto" }}>
 
-                <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
                     {[
-                        {
-                            emoji: "🥪",
-                            tag: "Favorite Eats",
-                            name: "Travis Special",
-                            desc: "Cream cheese, salmon, spinach, and a fried egg served on a freshly toasted bagel",
-                            price: "$14.00",
-                            popular: true,
-                        },
-                        {
-                            emoji: "☕",
-                            tag: "Fan favorite",
-                            name: "Supernova",
-                            desc: "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.",
-                            price: "$7.95",
-                            popular: true,
-                        },
-                        {
-                            emoji: "☕",
-                            tag: "New arrival",
-                            name: "Roaring Frappe",
-                            desc: "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.",
-                            price: "$6.20",
-                            popular: false,
-                        },
+                        { emoji: "🌿", tag: "Seasonal", name: "Matcha oat latte", desc: "Ceremonial grade matcha with silky oat milk and a touch of vanilla.", price: "$6.50", popular: false },
+                        { emoji: "☁️", tag: "Fan favorite", name: "Cold brew cloud", desc: "Smooth cold brew topped with sweet cream cold foam and caramel.", price: "$7.00", popular: true },
+                        { emoji: "🍂", tag: "New arrival", name: "Honey cinnamon flat white", desc: "Double ristretto shots with warm honey, cinnamon, and steamed whole milk.", price: "$6.00", popular: false },
                     ].map((drink) => (
-                        <div
-                            key={drink.name}
-                            className={`relative rounded-xl p-7 bg-[#f9f9f9] border ${drink.popular
-                                    ? "border-[#7bf1a8] border-2"
-                                    : "border-[#e0e0e0]"
-                                }`}
-                        >
+                        <div key={drink.name} style={{ background: "#f9f9f9", borderRadius: 12, padding: 28, border: drink.popular ? "2px solid #7bf1a8" : "0.5px solid #e0e0e0", position: "relative" }}>
                             {drink.popular && (
-                                <div className="-translate-x-1/2 absolute -top-3 left-1/2 whitespace-nowrap rounded-full bg-[#7bf1a8] px-4 py-1 font-medium text-[#1a4731] text-[11px]">
+                                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#7bf1a8", color: "#1a4731", fontSize: 11, fontWeight: 500, padding: "4px 14px", borderRadius: 12, whiteSpace: "nowrap" }}>
                                     Most popular
                                 </div>
                             )}
-
-                            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#7bf1a8] text-3xl">
+                            <div style={{ width: 64, height: 64, background: "#7bf1a8", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, marginBottom: 20 }}>
                                 {drink.emoji}
                             </div>
-
-                            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#2d6a4f]">
-                                {drink.tag}
-                            </p>
-
-                            <p className="mb-2 text-lg font-semibold">{drink.name}</p>
-
-                            <p className="mb-5 text-sm leading-relaxed text-[#555]">
-                                {drink.desc}
-                            </p>
-
-                            <div className="flex items-center justify-between">
-                                <span className="text-lg font-semibold">{drink.price}</span>
-                                <a
-                                    href="/order"
-                                    className="rounded-full bg-[#7bf1a8] px-5 py-2 text-sm font-medium text-[#1a4731]"
-                                >
+                            <p style={{ fontSize: 12, color: "#2d6a4f", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{drink.tag}</p>
+                            <p style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{drink.name}</p>
+                            <p style={{ fontSize: 14, color: "#555", marginBottom: 20, lineHeight: 1.6 }}>{drink.desc}</p>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <span style={{ fontSize: 18, fontWeight: 500 }}>{drink.price}</span>
+                                <a href="/order" style={{ background: "#7bf1a8", color: "#1a4731", border: "none", padding: "10px 20px", borderRadius: 24, fontSize: 13, fontWeight: 500, textDecoration: "none" }}>
                                     Add to order
                                 </a>
                             </div>
                         </div>
                     ))}
-                </div>
 
-                <div className="mt-10 text-center">
-                    <a
-                        href="/order"
-                        className="rounded-full border border-[#ccc] px-8 py-3 text-sm font-medium text-black hover:bg-gray-50"
-                    >
+                </div>
+                <div style={{ textAlign: "center", marginTop: 40 }}>
+                    <a href="/order" style={{ background: "transparent", color: "#000", border: "1.5px solid #ccc", padding: "13px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
                         See full menu
                     </a>
                 </div>
@@ -167,60 +149,50 @@ export default function HomePage() {
                         ))}
                     </div>
                 </div>
+                <div style={{ flex: 1, display: "flex", gap: 20, justifyContent: "center" }}>
+                    {[
+                        { stat: "1★", label: "Per dollar spent" },
+                        { stat: "25★", label: "Free drink reward" },
+                        { stat: "2x", label: "Stars on birthdays" },
+                    ].map((item) => (
+                        <div key={item.label} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "28px 24px", textAlign: "center", border: "0.5px solid rgba(255,255,255,0.12)", flex: 1, maxWidth: 160 }}>
+                            <p style={{ fontSize: 36, fontWeight: 500, color: "#7bf1a8", marginBottom: 8 }}>{item.stat}</p>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.5 }}>{item.label}</p>
+                        </div>
+                    ))}
+                </div>
             </section>
 
             {/* QUICK ORDER */}
-            <section className="bg-white px-6 py-20 md:px-12">
-                <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 lg:flex-row">
-
-                    {/* LEFT */}
-                    <div className="flex-1">
-                        <p className="tracking-[0.08em] mb-3 text-xs font-medium uppercase text-[#2d6a4f]">
-                            Quick order
+            <section style={{ padding: "80px 48px", background: "white" }}>
+                <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", alignItems: "center", gap: 64 }}>
+                    <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2d6a4f", marginBottom: 12 }}>Quick order</p>
+                        <h2 style={{ fontSize: 36, fontWeight: 500, marginBottom: 16 }}>Reorder your favorites in seconds.</h2>
+                        <p style={{ fontSize: 16, color: "#555", marginBottom: 32, maxWidth: 400, lineHeight: 1.7 }}>
+                            Sign in to see your recent orders and reorder with one tap. Skip the line, pick up in store.
                         </p>
-
-                        <h2 className="mb-4 text-4xl font-medium">
-                            Reorder your favorites in seconds.
-                        </h2>
-
-                        <p className="mb-8 max-w-md text-base leading-relaxed text-[#555]">
-                            Sign in to see your recent orders and reorder with one tap.
-                            Skip the line, pick up in store.
-                        </p>
-
-                        <a
-                            href="/profile"
-                            className="rounded-full bg-[#7bf1a8] px-8 py-3 text-sm font-medium text-[#1a4731]"
-                        >
+                        <a href="/profile" style={{ background: "#7bf1a8", color: "#1a4731", padding: "14px 32px", borderRadius: 24, fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
                             Sign in to order
                         </a>
                     </div>
-
-                    {/* RIGHT */}
-                    <div className="flex flex-1 flex-col gap-4">
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
                         {[
                             { emoji: "☕", name: "Supernova", detail: "Large · Sweet cream" },
                             { emoji: "🌿", name: "Green Machine", detail: "Hearty blend of greens" },
                             { emoji: "🍂", name: "Strawberry Limeade", detail: "Fresh squeezed lime" },
                         ].map((item) => (
-                            <div
-                                key={item.name}
-                                className="flex items-center justify-between rounded-xl border border-[#e0e0e0] bg-[#f9f9f9] p-5"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#7bf1a8] text-xl">
+                            <div key={item.name} style={{ background: "#f9f9f9", borderRadius: 12, padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", border: "0.5px solid #e0e0e0" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                    <div style={{ width: 44, height: 44, background: "#7bf1a8", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
                                         {item.emoji}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">{item.name}</p>
-                                        <p className="text-xs text-[#555]">{item.detail}</p>
+                                        <p style={{ fontWeight: 500, fontSize: 15 }}>{item.name}</p>
+                                        <p style={{ fontSize: 13, color: "#555" }}>{item.detail}</p>
                                     </div>
                                 </div>
-
-                                <a
-                                    href="/order"
-                                    className="rounded-full bg-[#7bf1a8] px-5 py-2 text-sm font-medium text-[#1a4731]"
-                                >
+                                <a href="/order" style={{ background: "#7bf1a8", color: "#1a4731", padding: "10px 20px", borderRadius: 24, fontSize: 13, fontWeight: 500, textDecoration: "none" }}>
                                     Reorder
                                 </a>
                             </div>
@@ -230,22 +202,15 @@ export default function HomePage() {
             </section>
 
             {/* FOOTER */}
-            <footer className="border-t border-[#e0e0e0] bg-[#f9f9f9] px-6 py-12 md:px-12">
-                <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
-                    <div>
-                        <p className="text-lg font-semibold">Caffeinated Lions</p>
-                        <p className="text-xs text-[#555]">
-                            © 2026 Caffeinated Lions. All rights reserved.
-                        </p>
-                    </div>
-
-                    <div className="flex gap-8">
-                        {[].map((link) => (
-                            <a key={link} href="#" className="text-sm text-[#555]">
-                                {link}
-                            </a>
-                        ))}
-                    </div>
+            <footer style={{ background: "#f9f9f9", borderTop: "0.5px solid #e0e0e0", padding: 48, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                    <p style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>Caffeinated Lions</p>
+                    <p style={{ fontSize: 13, color: "#555" }}>© 2026 Caffeinated Lions. All rights reserved.</p>
+                </div>
+                <div style={{ display: "flex", gap: 32 }}>
+                    {["Menu", "Rewards", "Careers", "Contact"].map((link) => (
+                        <a key={link} href="#" style={{ fontSize: 14, color: "#555", textDecoration: "none" }}>{link}</a>
+                    ))}
                 </div>
             </footer>
 

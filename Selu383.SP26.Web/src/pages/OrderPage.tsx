@@ -1,24 +1,4 @@
-﻿import travisSpecialImg from "../assets/travis-special.png";
-import bonjourImg from "../assets/bonjour.png";
-import bonjour2Img from "../assets/bonjour2.png";
-import meanieImg from "../assets/meanie.png";
-import fancyImg from "../assets/fancy.png";
-import classicImg from "../assets/classic.png";
-import breakfastImg from "../assets/breakfast.png";
-import cremeImg from "../assets/creme.png";
-import bananaImg from "../assets/banana.png";
-import strawImg from "../assets/straw.png";
-import manImg from "../assets/man.png";
-import smoreImg from "../assets/smore.png";
-import funkImg from "../assets/funk.png";
-import pairImg from "../assets/pair.png";
-import farmImg from "../assets/farm.png";
-import fromageImg from "../assets/fromage.png";
-import greenImg from "../assets/green.png";
-import turkeyImg from "../assets/turkey.png";
-import eggImg from "../assets/egg.png";
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
 
 const API = "https://localhost:7116";
 
@@ -26,11 +6,11 @@ type Category = "All" | "Drinks" | "Sweet Crepes" | "Savory Crepes" | "Bagels";
 type Size = "Small" | "Medium" | "Large";
 type MilkType = "Whole" | "Skim" | "Soy" | "Almond" | "Oat" | "No Milk";
 
-type MenuItem = {
+type Drink = {
     name: string;
     price: number;
     category: Exclude<Category, "All">;
-    image: string;
+    emoji: string;
     description: string;
     backendId: number;
 };
@@ -311,9 +291,7 @@ function ConfirmationModal({ orderId, onClose }: { orderId: number; onClose: () 
 
 // --- MAIN PAGE ---
 export default function OrderPage() {
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-    const activeCategory = (searchParams.get("category") as Category) ?? "All";
+    const [activeCategory, setActiveCategory] = useState<Category>("All");
     const [cart, setCart] = useState<CartItem[]>([]);
     const [modalItem, setModalItem] = useState<MenuItem | null>(null);
     const [showCheckout, setShowCheckout] = useState(false);
@@ -321,17 +299,7 @@ export default function OrderPage() {
 
     const filtered = activeCategory === "All" ? menuItems : menuItems.filter(d => d.category === activeCategory);
 
-    const handleAddClick = (item: MenuItem) => {
-        if (item.category === "Drinks") {
-            setModalItem(item);
-        } else {
-            setCart(prev => {
-                const existing = prev.find(i => i.name === item.name && !i.size);
-                if (existing) return prev.map(i => i.name === item.name && !i.size ? { ...i, quantity: i.quantity + 1 } : i);
-                return [...prev, { ...item, quantity: 1, itemTotal: item.price }];
-            });
-        }
-    };
+    const filtered = activeCategory === "All" ? drinks : drinks.filter(d => d.category === activeCategory);
 
     const handleModalConfirm = (size: Size, milk: MilkType) => {
         if (!modalItem) return;
@@ -341,10 +309,9 @@ export default function OrderPage() {
             if (existing) return prev.map(i => i.name === modalItem.name && i.size === size && i.milk === milk ? { ...i, quantity: i.quantity + 1 } : i);
             return [...prev, { ...modalItem, quantity: 1, size, milk, itemTotal }];
         });
-        setModalItem(null);
     };
 
-    const updateQty = (name: string, delta: number, size?: Size, milk?: MilkType) => {
+    const updateQty = (name: string, delta: number) => {
         setCart(prev =>
             prev.map(i => i.name === name && i.size === size && i.milk === milk ? { ...i, quantity: i.quantity + delta } : i)
                 .filter(i => i.quantity > 0)
@@ -352,7 +319,7 @@ export default function OrderPage() {
     };
 
     const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
-    const subtotal = cart.reduce((sum, i) => sum + i.itemTotal * i.quantity, 0);
+    const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const tax = subtotal * 0.085;
     const total = subtotal + tax;
 
@@ -408,6 +375,23 @@ export default function OrderPage() {
                                     Add +
                                 </button>
                             </div>
+                        )}
+                        <div style={{ width: 52, height: 52, background: "#7bf1a8", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14 }}>
+                            {drink.emoji}
+                        </div>
+                        <p style={{ fontSize: 11, color: "#2d6a4f", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                            {drink.category}
+                        </p>
+                        <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>{drink.name}</p>
+                        <p style={{ fontSize: 13, color: "#555", marginBottom: 16, lineHeight: 1.5 }}>{drink.description}</p>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 15, fontWeight: 500 }}>${drink.price.toFixed(2)}</span>
+                            <button
+                                onClick={() => addToCart(drink)}
+                                style={{ background: "#7bf1a8", color: "#1a4731", border: "none", padding: "9px 18px", borderRadius: 20, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                            >
+                                Add +
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -415,23 +399,25 @@ export default function OrderPage() {
 
             {/* BOTTOM CART BAR */}
             {cart.length > 0 && (
-                <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a4731", padding: "18px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 100 }}>
+                <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a4731", padding: "20px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "0.5px solid rgba(255,255,255,0.1)", zIndex: 100 }}>
+
+                    {/* LEFT: item count + cart items */}
                     <div style={{ display: "flex", alignItems: "center", gap: 20, overflow: "hidden" }}>
                         <div style={{ background: "#7bf1a8", color: "#1a4731", width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
                             {totalItems}
                         </div>
                         <div style={{ display: "flex", gap: 16, alignItems: "center", overflow: "hidden" }}>
                             {cart.slice(0, 3).map((item, i) => (
-                                <div key={`${item.name}-${item.size}-${item.milk}`} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div key={item.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     {i > 0 && <div style={{ width: "0.5px", height: 32, background: "rgba(255,255,255,0.2)", flexShrink: 0 }} />}
-                                    <img src={item.image} alt={item.name} style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", border: "1.5px solid rgba(255,255,255,0.3)" }} />
+                                    <span style={{ fontSize: 16 }}>{item.emoji}</span>
                                     <div>
                                         <p style={{ fontSize: 13, fontWeight: 500, color: "white", whiteSpace: "nowrap" }}>{item.name}{item.size ? ` (${item.size})` : ""}</p>
                                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
-                                            <button onClick={() => updateQty(item.name, -1, item.size, item.milk)} style={{ width: 18, height: 18, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                                            <button onClick={() => updateQty(item.name, -1)} style={{ width: 18, height: 18, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
                                             <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>×{item.quantity}</span>
-                                            <button onClick={() => updateQty(item.name, 1, item.size, item.milk)} style={{ width: 18, height: 18, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
-                                            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>${(item.itemTotal * item.quantity).toFixed(2)}</span>
+                                            <button onClick={() => updateQty(item.name, 1)} style={{ width: 18, height: 18, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                                            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>${(item.price * item.quantity).toFixed(2)}</span>
                                         </div>
                                         {item.milk && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>{item.milk} milk</p>}
                                     </div>
@@ -440,6 +426,8 @@ export default function OrderPage() {
                             {cart.length > 3 && <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", whiteSpace: "nowrap" }}>+{cart.length - 3} more</p>}
                         </div>
                     </div>
+
+                    {/* RIGHT: total + place order */}
                     <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
                         <div style={{ textAlign: "right" }}>
                             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>Total incl. tax</p>
