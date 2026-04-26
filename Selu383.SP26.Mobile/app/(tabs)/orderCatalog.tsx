@@ -1,10 +1,12 @@
 import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
 import { ViewCart } from "@/components/modals/ViewCart";
+import { Checkout } from "@/components/modals/checkout";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -22,22 +24,20 @@ export default function OrderCatalogScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
-  //state for location and orderContext
-  const { selectedLocationId, locationName, addOrderItem, itemCount } =
+  const [showCheckout, setShowCheckout] = useState(false);
+  const { selectedLocationId, locationName, locationAddress, itemCount } =
     useOrder();
 
-  //if no location selected, route to locationSelection
   useEffect(() => {
     if (selectedLocationId === null) {
       router.push("/(tabs)/order");
     }
   }, [selectedLocationId]);
 
-  const handleAddToOrder = (menuItem: MenuItemDto) => {
-    addOrderItem({
-      menuItemId: menuItem.id,
-      quantity: 1,
-      customizationJson: undefined, //THIS IS WHERE CUSTOMIZATION GOES apparently..
+  const handleItemPress = (menuItem: MenuItemDto) => {
+    router.push({
+      pathname: "/itemCustomization",
+      params: { item: JSON.stringify(menuItem) },
     });
   };
   //hydrate catalog
@@ -75,7 +75,11 @@ export default function OrderCatalogScreen() {
   });
   //card renderer for the items
   const renderMenuItem = ({ item }: { item: MenuItemDto }) => (
-    <ThemedView style={styles.cardContainer}>
+    <TouchableOpacity
+      style={styles.cardContainer}
+      onPress={() => handleItemPress(item)}
+      activeOpacity={0.8}
+    >
       <ThemedView style={styles.imageContainer}>
         <Image
           source={{
@@ -84,7 +88,11 @@ export default function OrderCatalogScreen() {
           style={styles.itemImage}
         />
       </ThemedView>
-      <ThemedText style={styles.catalogItemText}>
+      <ThemedText
+        style={styles.catalogItemText}
+        numberOfLines={2}
+        ellipsizeMode="tail"
+      >
         {item.name || "Unknown Item"}
       </ThemedText>
       {/* <ThemedText style={styles.itemPrice}>${item.price.toFixed(2)}</ThemedText>
@@ -93,13 +101,7 @@ export default function OrderCatalogScreen() {
           {item.description}
         </ThemedText>
       )} */}
-      <TouchableOpacity
-        style={styles.customizeButton}
-        onPress={() => handleAddToOrder(item)}
-      >
-        <ThemedText style={styles.customizeButtonText}>Add to Order</ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -119,6 +121,7 @@ export default function OrderCatalogScreen() {
         onCategoryChange={handleCategoryChange}
         onSearchChange={handleSearchChange}
         locationName={locationName}
+        locationAddress={locationAddress}
         itemCount={itemCount}
       />
       <FlatList
@@ -155,10 +158,37 @@ export default function OrderCatalogScreen() {
             onPress={() => setShowCart(false)}
             style={styles.closeButton}
           >
-            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+            <ThemedText style={styles.closeButtonText}>
+              <AntDesign name="close" size={24} color="black" />
+            </ThemedText>
           </TouchableOpacity>
         </ThemedView>
-        <ViewCart />
+        <ViewCart
+          onCheckout={() => {
+            setShowCart(false);
+            setShowCheckout(true);
+          }}
+        />
+      </Modal>
+
+      <Modal
+        visible={showCheckout}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowCheckout(false)}
+      >
+        <ThemedView style={styles.modalHeader}>
+          <TouchableOpacity
+            onPress={() => setShowCheckout(false)}
+            style={styles.closeButton}
+          >
+            <ThemedText style={styles.closeButtonText}>
+              <AntDesign name="close" size={24} color="black" />
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+
+        <Checkout />
       </Modal>
     </ThemedView>
   );
@@ -184,31 +214,38 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: "flex-start",
+    paddingHorizontal: 10,
   },
   cardContainer: {
-    padding: 15,
     backgroundColor: "#f8f9fa",
-    borderRadius: 12,
+    borderRadius: 18,
     borderColor: "#e9ecef",
     borderWidth: 1,
-    width: 180,
-    height: 240,
-    margin: 5,
+    width: 160,
+    minHeight: 150,
+    margin: 8,
+    overflow: "hidden",
+    justifyContent: "flex-start",
   },
   imageContainer: {
     alignItems: "center",
-    marginBottom: 10,
+    paddingTop: 12,
+    paddingHorizontal: 12,
   },
   itemImage: {
-    width: 140,
-    height: 120,
-    borderRadius: 12,
+    width: 120,
+    height: 140,
+    borderRadius: 60,
+    resizeMode: "cover",
   },
   catalogItemText: {
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 8,
+    paddingHorizontal: 8,
+    lineHeight: 18,
   },
   itemPrice: {
     textAlign: "center",
@@ -224,22 +261,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flex: 1,
   },
-  customizeButton: {
-    padding: 6,
-    backgroundColor: "#7bf1a8",
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  customizeButtonText: {
-    color: "#434242",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
   viewCartButton: {
     position: "absolute",
     bottom: 30,
     right: 20,
-    backgroundColor: "#0e5f00",
+    backgroundColor: "#7bf1a8",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -250,7 +276,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   viewCartButtonText: {
-    color: "#fff",
+    color: "#434242",
     fontSize: 16,
     fontWeight: "bold",
   },

@@ -14,6 +14,7 @@ interface OrderCatalogHeaderProps {
   onCategoryChange?: (categoryId: number | null) => void;
   onSearchChange?: (searchText: string) => void;
   locationName?: string | null;
+  locationAddress?: string | null;
   itemCount?: number;
 }
 
@@ -21,6 +22,7 @@ export function OrderCatalogHeader({
   onCategoryChange,
   onSearchChange,
   locationName,
+  locationAddress,
   itemCount,
 }: OrderCatalogHeaderProps) {
   const [filter, setFilter] = React.useState("");
@@ -47,6 +49,8 @@ export function OrderCatalogHeader({
 
   const handleCategoryPress = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
+    console.log("Pressed categoryId:", categoryId);
+
     onCategoryChange?.(categoryId);
   };
 
@@ -58,7 +62,14 @@ export function OrderCatalogHeader({
     <View style={styles.container}>
       {locationName && (
         <View style={styles.locationBar}>
-          <ThemedText style={styles.locationText}>{locationName}</ThemedText>
+          <View style={styles.locationInfo}>
+            <ThemedText style={styles.locationText}>{locationName}</ThemedText>
+            {locationAddress && (
+              <ThemedText style={styles.locationAddressText}>
+                {locationAddress}
+              </ThemedText>
+            )}
+          </View>
           {itemCount != null && itemCount > 0 && (
             <ThemedText style={styles.orderCountText}>
               {itemCount.toString()} item{itemCount === 1 ? "" : "s"} in order
@@ -129,10 +140,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
   },
+  locationInfo: {
+    flex: 1,
+  },
   locationText: {
     fontSize: 18,
     fontWeight: "600",
     color: "#0e5f00",
+  },
+  locationAddressText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#666",
+    marginTop: 2,
   },
   orderCountText: {
     fontSize: 14,
@@ -165,12 +185,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   searchFilterButton: {
-    width: 72,
-    height: 28,
+    paddingHorizontal: 16,
+    height: 32,
     borderRadius: 16,
     backgroundColor: "#7bf1a8",
     justifyContent: "center",
     alignItems: "center",
+    minWidth: 60,
   },
   searchFilterButtonActive: {
     backgroundColor: "#5bb377",

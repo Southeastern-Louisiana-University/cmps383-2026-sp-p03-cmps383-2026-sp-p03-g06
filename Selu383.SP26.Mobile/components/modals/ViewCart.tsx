@@ -1,13 +1,14 @@
 import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
+import { calculateCartItemTotal } from "@/utils/pricing";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
@@ -19,14 +20,18 @@ interface CartItemWithDetails {
   menuItem?: MenuItemDto;
 }
 
-export function ViewCart() {
+interface ViewCartProps {
+  onCheckout: () => void;
+}
+
+export function ViewCart({ onCheckout }: ViewCartProps) {
   const {
     orderItems,
     selectedLocationId,
     locationName,
+    locationAddress,
     updateOrderItemQuantity,
     removeOrderItem,
-    clearOrder,
     itemCount,
   } = useOrder();
 
@@ -70,15 +75,22 @@ export function ViewCart() {
     setCartItemsWithDetails(itemsWithDetails);
   };
 
-  const handleQuantityChange = (menuItemId: number, newQuantity: number) => {
+  const handleQuantityChange = (
+    menuItemId: number,
+    customizationJson: string | undefined,
+    newQuantity: number,
+  ) => {
     if (newQuantity <= 0) {
-      handleRemoveItem(menuItemId);
+      handleRemoveItem(menuItemId, customizationJson);
     } else {
-      updateOrderItemQuantity(menuItemId, newQuantity);
+      updateOrderItemQuantity(menuItemId, customizationJson, newQuantity);
     }
   };
 
-  const handleRemoveItem = (menuItemId: number) => {
+  const handleRemoveItem = (
+    menuItemId: number,
+    customizationJson: string | undefined,
+  ) => {
     Alert.alert(
       "Remove Item",
       "Are you sure you want to remove this item from your order?",
@@ -87,14 +99,18 @@ export function ViewCart() {
         {
           text: "Remove",
           style: "destructive",
-          onPress: () => removeOrderItem(menuItemId),
+          onPress: () => removeOrderItem(menuItemId, customizationJson),
         },
       ],
     );
   };
 
   const calculateItemTotal = (item: CartItemWithDetails): number => {
-    return (item.menuItem?.price || 0) * item.quantity;
+    return calculateCartItemTotal({
+      basePrice: item.menuItem?.price || 0,
+      quantity: item.quantity,
+      customizationJson: item.customizationJson,
+    });
   };
 
   const calculateOrderTotal = (): number => {
@@ -104,19 +120,19 @@ export function ViewCart() {
   };
   //PUT CHECKOUT IMPLEMETATION HERE, PLACEHOLDER
   const handleCheckout = () => {
-    Alert.alert("Checkout", "Checkout flow will be implemented next!");
+    onCheckout();
   };
 
-  const handleClearCart = () => {
-    Alert.alert(
-      "Clear Cart",
-      "Are you sure you want to remove all items from your cart?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Clear", style: "destructive", onPress: clearOrder },
-      ],
-    );
-  };
+  // const handleClearCart = () => {
+  //   Alert.alert(
+  //     "Clear Cart",
+  //     "Are you sure you want to remove all items from your cart?",
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       { text: "Clear", style: "destructive", onPress: clearOrder },
+  //     ],
+  //   );
+  // };
 
   if (loading) {
     return (
@@ -148,9 +164,14 @@ export function ViewCart() {
         {locationName ? (
           <ThemedText style={styles.locationText}>{locationName}</ThemedText>
         ) : null}
-        <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
+        {locationAddress ? (
+          <ThemedText style={styles.locationAddress}>
+            {locationAddress}
+          </ThemedText>
+        ) : null}
+        {/* <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
           <ThemedText style={styles.clearButtonText}>Clear Cart</ThemedText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ThemedView>
 
       {/*Cart Items*/}
@@ -172,26 +193,20 @@ export function ViewCart() {
                 {item.menuItem?.name || "Unknown Item"}
               </ThemedText>
 
-              {item.menuItem?.description ? (
-                <ThemedText style={styles.itemDescription}>
-                  {item.menuItem.description}
-                </ThemedText>
-              ) : null}
-
               {item.customizationJson ? (
                 <ThemedText style={styles.customization}>Customized</ThemedText>
               ) : null}
-
-              <ThemedText style={styles.itemPrice}>
-                ${(item.menuItem?.price || 0).toFixed(2)} each
-              </ThemedText>
             </ThemedView>
 
             <ThemedView style={styles.quantityControls}>
               <TouchableOpacity
                 style={styles.quantityButton}
                 onPress={() =>
-                  handleQuantityChange(item.menuItemId, item.quantity - 1)
+                  handleQuantityChange(
+                    item.menuItemId,
+                    item.customizationJson,
+                    item.quantity - 1,
+                  )
                 }
               >
                 <ThemedText style={styles.quantityButtonText}>-</ThemedText>
@@ -204,7 +219,11 @@ export function ViewCart() {
               <TouchableOpacity
                 style={styles.quantityButton}
                 onPress={() =>
-                  handleQuantityChange(item.menuItemId, item.quantity + 1)
+                  handleQuantityChange(
+                    item.menuItemId,
+                    item.customizationJson,
+                    item.quantity - 1,
+                  )
                 }
               >
                 <ThemedText style={styles.quantityButtonText}>+</ThemedText>
@@ -218,7 +237,9 @@ export function ViewCart() {
 
               <TouchableOpacity
                 style={styles.removeButton}
-                onPress={() => handleRemoveItem(item.menuItemId)}
+                onPress={() =>
+                  handleRemoveItem(item.menuItemId, item.customizationJson)
+                }
               >
                 <ThemedText style={styles.removeButtonText}>Remove</ThemedText>
               </TouchableOpacity>
@@ -283,6 +304,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   locationText: {
+    fontSize: 14,
+    color: "#0e5f00",
+    fontWeight: "600",
+  },
+  locationAddress: {
     fontSize: 14,
     color: "#0e5f00",
     fontWeight: "600",
@@ -387,20 +413,24 @@ const styles = StyleSheet.create({
   },
   itemTotalContainer: {
     alignItems: "flex-end",
+    minWidth: 80,
   },
   itemTotal: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#0e5f00",
-    marginBottom: 5,
+    marginBottom: 8,
+    textAlign: "right",
   },
   removeButton: {
-    padding: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   removeButtonText: {
     fontSize: 12,
     color: "#ff6b6b",
     fontWeight: "600",
+    textAlign: "right",
   },
   summary: {
     padding: 20,
