@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Data;
-using Selu383.SP26.Api.Features.Auth;
+using Selu383.SP26.Api.Extensions;
 using Selu383.SP26.Api.Features.Rewards;
 
 namespace Selu383.SP26.Api.Controllers;
@@ -13,12 +12,10 @@ namespace Selu383.SP26.Api.Controllers;
 public class RewardsController : ControllerBase
 {
     private readonly DataContext _dataContext;
-    private readonly UserManager<User> _userManager;
 
-    public RewardsController(DataContext dataContext, UserManager<User> userManager)
+    public RewardsController(DataContext dataContext)
     {
         _dataContext = dataContext;
-        _userManager = userManager;
     }
 
     [HttpGet("offerings")]
@@ -43,7 +40,13 @@ public class RewardsController : ControllerBase
     [HttpGet("me")]
     public async Task<ActionResult<object>> GetMyRewards()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == userId.Value);
 
         if (user == null)
         {
@@ -56,5 +59,90 @@ public class RewardsController : ControllerBase
             user.UserName,
             user.RewardPoints
         });
+    }
+
+    [Authorize]
+    [HttpPost("redeem")]
+    public async Task<ActionResult<RedeemRewardResultDto>> RedeemReward(RedeemRewardDto dto)
+    {
+        var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == userId.Value);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var offering = await _dataContext.RewardOfferings
+            .FirstOrDefaultAsync(x => x.Id == dto.RewardOfferingId && x.IsActive);
+        if (offering == null)
+        {
+            return NotFound("Reward offering not found");
+        }
+
+        if (user.RewardPoints < offering.PointsRequired)
+        {
+            return BadRequest("Not enough points to redeem this reward");
+        }
+
+        user.RewardPoints -= offering.PointsRequired;
+
+        var redemption = new RewardRedemption
+        {
+            UserId = user.Id,
+            RewardOfferingId = offering.Id,
+            PointsSpent = offering.PointsRequired,
+            RedeemedAt = DateTime.UtcNow
+        };
+
+        _dataContext.RewardRedemptions.Add(redemption);
+        await _dataContext.SaveChangesAsync();
+
+        return Ok(new RedeemRewardResultDto
+        {
+            RemainingPoints = user.RewardPoints,
+            Redemption = new RewardRedemptionDto
+            {
+                Id = redemption.Id,
+                RewardOfferingId = offering.Id,
+                RewardName = offering.Name,
+                PointsSpent = redemption.PointsSpent,
+                RedeemedAt = redemption.RedeemedAt
+            }
+        });
+    }
+
+    [Authorize]
+    [HttpGet("redemptions/me")]
+    public async Task<ActionResult<IEnumerable<RewardRedemptionDto>>> GetMyRedemptions()
+    {
+        var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var redemptions = await _dataContext.RewardRedemptions
+            .Where(x => x.UserId == userId.Value)
+            .OrderByDescending(x => x.RedeemedAt)
+            .Join(
+                _dataContext.RewardOfferings,
+                redemption => redemption.RewardOfferingId,
+                offering => offering.Id,
+                (redemption, offering) => new RewardRedemptionDto
+                {
+                    Id = redemption.Id,
+                    RewardOfferingId = offering.Id,
+                    RewardName = offering.Name,
+                    PointsSpent = redemption.PointsSpent,
+                    RedeemedAt = redemption.RedeemedAt
+                })
+            .ToListAsync();
+
+        return Ok(redemptions);
     }
 }
