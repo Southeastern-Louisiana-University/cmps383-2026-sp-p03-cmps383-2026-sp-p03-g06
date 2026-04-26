@@ -1,3 +1,5 @@
+﻿import Logo from '../assets/Caff-logo.png';
+
 import {
     IconChevronDown,
     IconCup,
@@ -8,36 +10,29 @@ import {
 import {
     Anchor,
     Box,
-    Burger,
     Button,
     Center,
-    Collapse,
     Divider,
-    Drawer,
     Group,
     HoverCard,
-    ScrollArea,
     Text,
     ThemeIcon,
     UnstyledButton,
     useMantineTheme,
     Container,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { useNavigate } from 'react-router-dom';
 import classes from './HeaderMegaMenu.module.scss';
 
 const menuCategories = [
-    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more' },
-    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite' },
-    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors' },
-    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels' },
-    
+    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more', slug: 'drinks' },
+    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite', slug: 'sweet-crepes' },
+    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors',slug: 'savory-crepes' },
+    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels', slug: 'bagels' },
+
 ];
 
 export function HeaderMegaMenu() {
-    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-    const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
     const theme = useMantineTheme();
     const navigate = useNavigate();
 
@@ -45,7 +40,7 @@ export function HeaderMegaMenu() {
         <UnstyledButton
             className={classes.subLink}
             key={item.title}
-            onClick={() => navigate('/order')}
+            onClick={() => navigate(`/order/${item.slug}`)}
         >
             <Group wrap="nowrap" align="flex-start">
                 <ThemeIcon size={34} variant="default" radius="md">
@@ -65,12 +60,31 @@ export function HeaderMegaMenu() {
                 <Container fluid className={classes.inner}>
 
                     {/* LEFT — Logo */}
-                    <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#7bf1a8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-                            ☕
-                        </div>
-                        <span style={{ fontWeight: 600, fontSize: 16, color: '#1a4731' }}>Caffeinated Lions</span>
+                    <a
+                        href="/"
+                        style={{
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10
+                        }}
+                    >
+                        <img
+                            src={Logo}
+                            alt="Caffeinated Lions Logo"
+                            style={{
+                                width: 56,
+                                height: 56,
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }}
+                        />
+
+                        <span style={{ fontWeight: 600, fontSize: 16, color: '#1a4731' }}>
+                            Caffeinated Lions
+                        </span>
                     </a>
+
 
                     {/* CENTER — Nav */}
                     <div className={classes.nav}>
@@ -124,62 +138,14 @@ export function HeaderMegaMenu() {
                     </div>
 
                     {/* RIGHT — Auth */}
-                    <Group visibleFrom="sm" className={classes.auth}>
+                    <Group className={classes.auth}>
                         <Button variant="default" radius="xl">Log in</Button>
                         <Button radius="xl" className={classes.join}>Sign up</Button>
                     </Group>
 
-                    {/* MOBILE BURGER */}
-                    <Burger
-                        opened={drawerOpened}
-                        onClick={toggleDrawer}
-                        hiddenFrom="sm"
-                        aria-label="Toggle navigation"
-                    />
                 </Container>
             </header>
-
-            {/* MOBILE DRAWER */}
-            <Drawer
-                opened={drawerOpened}
-                onClose={closeDrawer}
-                size="100%"
-                padding="md"
-                title="Caffeinated Lions"
-                hiddenFrom="sm"
-                zIndex={1000000}
-            >
-                <ScrollArea h="calc(100vh - 80px)" mx="-md">
-                    <Divider my="sm" />
-
-                    <a href="/" className={classes.link}>Home</a>
-
-                    <UnstyledButton className={classes.link} onClick={toggleLinks}>
-                        <Center inline>
-                            <Box component="span" mr={5}>Order</Box>
-                            <IconChevronDown size={16} color={theme.colors.gray[6]} />
-                        </Center>
-                    </UnstyledButton>
-
-                    <Collapse expanded={linksOpened}>
-                        {menuCategories.map((item) => (
-                            <a key={item.title} href="/order" className={classes.link} style={{ paddingLeft: 32, fontSize: 14 }}>
-                                {item.title}
-                            </a>
-                        ))}
-                    </Collapse>
-
-                    <a href="/rewards" className={classes.link}>Rewards</a>
-                    <a href="/profile" className={classes.link}>Profile</a>
-
-                    <Divider my="sm" />
-
-                    <Group justify="center" grow pb="xl" px="md">
-                        <Button variant="default" radius="xl">Log in</Button>
-                        <Button radius="xl" className={classes.join}>Sign up</Button>
-                    </Group>
-                </ScrollArea>
-            </Drawer>
         </Box>
     );
 }
+

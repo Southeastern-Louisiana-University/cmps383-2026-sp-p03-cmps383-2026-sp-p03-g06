@@ -1,3 +1,4 @@
+﻿import Logo from '../assets/Caff-logo.png';
 import { useNavigate } from "react-router-dom";
 
 const STARS = 72;
@@ -38,18 +39,18 @@ export default function RewardsPage() {
     const progress = Math.min((STARS / NEXT_REWARD) * 100, 100);
 
     return (
-        <div className="min-h-screen bg-[#f9fdf9] flex flex-col">
-            <div className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-12 py-16">
+        <div className="flex min-h-screen flex-col bg-[#f9fdf9]">
+            <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-16 md:px-12">
 
                 {/* PAGE HEADER */}
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-6 h-px bg-[#2d6a4f]" />
-                    <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#2d6a4f]">
+                <div className="mb-4 flex items-center gap-3">
+                    <div className="h-px w-6 bg-[#2d6a4f]" />
+                    <p className="tracking-[0.18em] text-xs font-semibold uppercase text-[#2d6a4f]">
                         Lions Rewards
                     </p>
                 </div>
                 <h1
-                    className="font-light leading-tight tracking-tight mb-10"
+                    className="mb-10 font-light leading-tight tracking-tight"
                     style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontFamily: "Georgia, serif" }}
                 >
                     Your stars, your{" "}
@@ -57,15 +58,15 @@ export default function RewardsPage() {
                 </h1>
 
                 {/* BALANCE CARD */}
-                <div className="bg-[#1a4731] rounded-2xl p-7 mb-10">
-                    <div className="flex flex-col lg:flex-row gap-8">
+                <div className="mb-10 rounded-2xl bg-[#1a4731] p-7">
+                    <div className="flex flex-col gap-8 lg:flex-row">
 
                         {/* LEFT — star count */}
                         <div className="flex-1">
-                            <p className="text-xs font-semibold tracking-[0.12em] uppercase text-[#7bf1a8] mb-3">
+                            <p className="tracking-[0.12em] mb-3 text-xs font-semibold uppercase text-[#7bf1a8]">
                                 Current Balance
                             </p>
-                            <div className="flex items-baseline gap-2 mb-2">
+                            <div className="mb-2 flex items-baseline gap-2">
                                 <span className="text-6xl font-light text-[#7bf1a8]">{STARS}</span>
                                 <span className="text-lg text-white/70">★ Stars</span>
                             </div>
@@ -73,14 +74,14 @@ export default function RewardsPage() {
                         </div>
 
                         {/* RIGHT — progress + cap info */}
-                        <div className="flex-1 flex flex-col justify-between gap-4">
+                        <div className="flex flex-1 flex-col justify-between gap-4">
                             {/* Progress bar */}
                             <div>
-                                <div className="flex justify-between text-xs text-white/60 mb-2">
+                                <div className="mb-2 flex justify-between text-xs text-white/60">
                                     <span>{STARS} stars</span>
                                     <span>Next reward at {NEXT_REWARD} ★</span>
                                 </div>
-                                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
                                     <div
                                         className="h-full rounded-full transition-all"
                                         style={{ width: `${progress}%`, background: "#7bf1a8" }}
@@ -89,16 +90,16 @@ export default function RewardsPage() {
                             </div>
 
                             {/* 10% cap notice */}
-                            <div className="bg-white/10 border border-white/10 rounded-xl p-4">
+                            <div className="rounded-xl border border-white/10 bg-white/10 p-4">
                                 <div className="flex gap-2">
-                                    <span className="text-[#7bf1a8] mt-0.5 text-sm">ℹ</span>
-                                    <p className="text-xs text-white/70 leading-relaxed">
+                                    <span className="mt-0.5 text-sm text-[#7bf1a8]">ℹ</span>
+                                    <p className="text-xs leading-relaxed text-white/70">
                                         Rewards are capped at{" "}
-                                        <span className="text-white font-semibold">10% of your total spend.</span>{" "}
+                                        <span className="font-semibold text-white">10% of your total spend.</span>{" "}
                                         Your current max discount is{" "}
-                                        <span className="text-[#7bf1a8] font-semibold">${MAX_DISCOUNT.toFixed(2)}.</span>{" "}
+                                        <span className="font-semibold text-[#7bf1a8]">${MAX_DISCOUNT.toFixed(2)}.</span>{" "}
                                         You've used{" "}
-                                        <span className="text-[#7bf1a8] font-semibold">${USED_DISCOUNT.toFixed(2)}</span>{" "}
+                                        <span className="font-semibold text-[#7bf1a8]">${USED_DISCOUNT.toFixed(2)}</span>{" "}
                                         of that.
                                     </p>
                                 </div>
@@ -108,11 +109,11 @@ export default function RewardsPage() {
                 </div>
 
                 {/* REDEEM SECTION */}
-                <h2 className="text-xl font-medium mb-5" style={{ fontFamily: "Georgia, serif" }}>
+                <h2 className="mb-5 text-xl font-medium" style={{ fontFamily: "Georgia, serif" }}>
                     Redeem your stars
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2">
                     {rewards.map((reward) => {
                         const canRedeem = STARS >= reward.cost && USED_DISCOUNT < MAX_DISCOUNT;
                         const starsNeeded = reward.cost - STARS;
@@ -120,28 +121,28 @@ export default function RewardsPage() {
                         return (
                             <div
                                 key={reward.name}
-                                className="bg-white border border-[#e0e0e0] rounded-2xl p-5 flex flex-col gap-3"
+                                className="flex flex-col gap-3 rounded-2xl border border-[#e0e0e0] bg-white p-5"
                             >
                                 <div className="flex items-start justify-between">
                                     <span className="text-3xl">{reward.emoji}</span>
-                                    <span className="text-xs font-semibold text-[#2d6a4f] bg-[#f0fdf4] border border-[#b7f5d0] px-3 py-1 rounded-full">
+                                    <span className="rounded-full border border-[#b7f5d0] bg-[#f0fdf4] px-3 py-1 text-xs font-semibold text-[#2d6a4f]">
                                         ★ {reward.cost} stars
                                     </span>
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-base mb-1">{reward.name}</p>
-                                    <p className="text-sm text-[#555] leading-relaxed">{reward.desc}</p>
+                                    <p className="mb-1 text-base font-semibold">{reward.name}</p>
+                                    <p className="text-sm leading-relaxed text-[#555]">{reward.desc}</p>
                                 </div>
                                 {canRedeem ? (
-                                    <button className="w-full bg-[#7bf1a8] text-[#1a4731] font-semibold text-sm py-3 rounded-xl hover:bg-[#5ce090] transition-colors">
+                                    <button className="w-full rounded-xl bg-[#7bf1a8] py-3 text-sm font-semibold text-[#1a4731] transition-colors hover:bg-[#5ce090]">
                                         Redeem
                                     </button>
                                 ) : USED_DISCOUNT >= MAX_DISCOUNT ? (
-                                    <div className="w-full bg-[#f5f5f5] text-[#aaa] text-sm py-3 rounded-xl flex items-center justify-center gap-2">
+                                    <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5f5f5] py-3 text-sm text-[#aaa]">
                                         🔒 Discount cap reached
                                     </div>
                                 ) : (
-                                    <div className="w-full bg-[#f5f5f5] text-[#aaa] text-sm py-3 rounded-xl flex items-center justify-center gap-2">
+                                    <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5f5f5] py-3 text-sm text-[#aaa]">
                                         🔒 Need {starsNeeded} more stars
                                     </div>
                                 )}
@@ -151,11 +152,11 @@ export default function RewardsPage() {
                 </div>
 
                 {/* EARN MORE BANNER */}
-                <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#e0e0e0] bg-white p-5">
                     <div className="flex items-center gap-4">
                         <span className="text-3xl">⭐</span>
                         <div>
-                            <p className="font-semibold text-sm">Want more stars?</p>
+                            <p className="text-sm font-semibold">Want more stars?</p>
                             <p className="text-xs text-[#555]">Order a drink today and earn stars instantly. Bonus stars on your birthday!</p>
                         </div>
                     </div>
@@ -169,26 +170,32 @@ export default function RewardsPage() {
             </div>
 
             {/* FOOTER */}
-            <footer className="bg-[#1a4731] py-12 px-6 md:px-12">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
+            <footer className="bg-[#1a4731] px-6 py-12 md:px-12">
+                <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row">
                     <div>
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-full bg-[#7bf1a8] flex items-center justify-center text-sm">☕</div>
-                            <span className="text-white font-semibold">Caffeinated Lions</span>
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={Logo}
+                                alt="Caffeinated Lions Logo"
+                                className="rounded-full object-cover"
+                                style={{ width: 40, height: 40 }}
+                            />
+                            <span className="font-semibold text-white">Caffeinated Lions</span>
                         </div>
+
                         <p className="text-sm text-white/60">Handcrafted with care. Open daily 6am – 8pm.</p>
                     </div>
                     <div className="flex gap-8">
                         {["Menu", "Rewards", "Careers", "Contact"].map((link) => (
-                            <a key={link} href="#" className="text-sm text-white/60 hover:text-white transition-colors">{link}</a>
+                            <a key={link} href="#" className="text-sm text-white/60 transition-colors hover:text-white">{link}</a>
                         ))}
                     </div>
                 </div>
-                <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="mx-auto mt-8 flex max-w-6xl flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 md:flex-row">
                     <p className="text-xs text-white/40">© 2026 Caffeinated Lions. All rights reserved.</p>
                     <div className="flex gap-6">
                         {["Privacy", "Terms", "Cookies"].map((link) => (
-                            <a key={link} href="#" className="text-xs text-white/40 hover:text-white/70 transition-colors">{link}</a>
+                            <a key={link} href="#" className="text-xs text-white/40 transition-colors hover:text-white/70">{link}</a>
                         ))}
                     </div>
                 </div>
