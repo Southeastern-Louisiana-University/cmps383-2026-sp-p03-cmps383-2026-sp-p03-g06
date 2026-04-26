@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Data;
@@ -6,7 +7,7 @@ using Selu383.SP26.Api.Extensions;
 using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
-using Microsoft.AspNetCore.Identity;
+using Selu383.SP26.Api.Features.Rewards;
 
 namespace Selu383.SP26.Api.Controllers;
 
@@ -60,10 +61,9 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
 
         return Ok(MapOrderToDto(order));
     }
-
     [HttpPost]
     [Authorize]
-    public ActionResult<OrderDto> CreateOrder(CreateOrderDto dto)
+    public async Task<ActionResult<OrderDto>> CreateOrder(CreateOrderDto dto)
     {
         if (dto.LocationId <= 0)
         {
@@ -75,7 +75,12 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             return BadRequest("Order must contain at least one item");
         }
 
-        // Verify location exists
+        var userId = User.GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
         var locationExists = dataContext.Set<Location>()
             .Any(x => x.Id == dto.LocationId);
 
@@ -84,7 +89,35 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             return BadRequest("Location does not exist");
         }
 
-        // Verify all menu items exist and get prices
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        RewardOffering? rewardOffering = null;
+
+        if (dto.RewardOfferingId.HasValue || dto.RewardedMenuItemId.HasValue)
+        {
+            if (!dto.RewardOfferingId.HasValue || !dto.RewardedMenuItemId.HasValue)
+            {
+                return BadRequest("RewardOfferingId and RewardedMenuItemId are both required when using a reward.");
+            }
+
+            rewardOffering = dataContext.Set<RewardOffering>()
+                .FirstOrDefault(x => x.Id == dto.RewardOfferingId.Value && x.IsActive);
+
+            if (rewardOffering == null)
+            {
+                return BadRequest("Reward offering not found.");
+            }
+
+            if (user.RewardPoints < rewardOffering.PointsRequired)
+            {
+                return BadRequest("Not enough points to redeem this reward.");
+            }
+        }
+
         var orderTotal = decimal.Zero;
         var orderItemsToAdd = new List<OrderItem>();
 
@@ -108,9 +141,17 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
                 itemDto.CustomizationJson
             );
 
+            var isRewardedItem =
+                rewardOffering != null &&
+                dto.RewardedMenuItemId.HasValue &&
+                itemDto.MenuItemId == dto.RewardedMenuItemId.Value;
+
+            if (isRewardedItem)
+            {
+                unitPrice = 0m;
+            }
 
             var itemTotal = unitPrice * itemDto.Quantity;
-
             orderTotal += itemTotal;
 
             orderItemsToAdd.Add(new OrderItem
@@ -121,12 +162,6 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
                 TotalPrice = itemTotal,
                 CustomizationJson = itemDto.CustomizationJson
             });
-        }
-
-        var userId = User.GetCurrentUserId();
-        if (userId == null)
-        {
-            return Unauthorized();
         }
 
         var first = dto.CheckoutFirstName.Trim();
@@ -144,18 +179,30 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             CheckoutLastName = last,
             CheckoutEmail = dto.CheckoutEmail.Trim(),
             CheckoutPhoneNumber = dto.CheckoutPhoneNumber.Trim(),
-            OrderItems = orderItemsToAdd
+            OrderItems = orderItemsToAdd,
+            RewardOfferingId = dto.RewardOfferingId,
+            RewardedMenuItemId = dto.RewardedMenuItemId
         };
 
         dataContext.Set<Order>().Add(order);
-        dataContext.SaveChanges();
 
-        var user = userManager.FindByIdAsync(userId.ToString()).Result;
-        if (user != null)
+        if (rewardOffering != null)
         {
-            user.RewardPoints += (int)Math.Floor(order.TotalPrice * 10);
-            userManager.UpdateAsync(user).Wait();
+            user.RewardPoints -= rewardOffering.PointsRequired;
+
+            dataContext.Set<RewardRedemption>().Add(new RewardRedemption
+            {
+                UserId = user.Id,
+                RewardOfferingId = rewardOffering.Id,
+                PointsSpent = rewardOffering.PointsRequired,
+                RedeemedAt = DateTime.UtcNow
+            });
         }
+
+        user.RewardPoints += (int)Math.Floor(order.TotalPrice * 10);
+
+        await userManager.UpdateAsync(user);
+        await dataContext.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapOrderToDto(order));
     }
@@ -294,6 +341,8 @@ public class OrdersController(DataContext dataContext, UserManager<User> userMan
             Status = order.Status,
             CreatedAt = order.CreatedAt,
             PickedUpAt = order.PickedUpAt,
+            RewardOfferingId = order.RewardOfferingId,
+            RewardedMenuItemId = order.RewardedMenuItemId,
             OrderItems = order.OrderItems.Select(x => new OrderItemDto
             {
                 Id = x.Id,

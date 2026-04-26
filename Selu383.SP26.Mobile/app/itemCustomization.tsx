@@ -41,8 +41,13 @@ import {
 
 export default function ItemCustomizationScreen() {
   const params = useLocalSearchParams();
-  const { addOrderItem } = useOrder();
-
+  const {
+    addOrderItem,
+    selectedReward,
+    rewardedMenuItemId,
+    setRewardedMenuItemId,
+    setRewardedCustomizationJson,
+  } = useOrder();
   const { colorScheme } = useColorScheme();
   const theme = getTheme(colorScheme);
 
@@ -104,15 +109,50 @@ export default function ItemCustomizationScreen() {
       veggy: selectedVeggy,
     };
 
+    const defaultCustomization: DrinkCustomization = {
+      milkType: "whole",
+      drinkSize: "small",
+      shotCount: 0,
+      temperature: "hot",
+      filling: "none",
+      topping: "none",
+      protein: "none",
+      cheese: "none",
+      veggy: "none",
+    };
+
+    const cleanedCustomization = Object.fromEntries(
+      Object.entries(customization).filter(([key, value]) => {
+        if (value === null || value === undefined || value === "") return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+
+        const defaultValue =
+          defaultCustomization[key as keyof DrinkCustomization];
+
+        if (value === defaultValue) return false;
+
+        return true;
+      }),
+    );
+
+    const customizationJson =
+      Object.keys(cleanedCustomization).length > 0
+        ? JSON.stringify(cleanedCustomization)
+        : undefined;
+
     addOrderItem({
       menuItemId: menuItem.id,
       quantity,
-      customizationJson: JSON.stringify(customization),
+      customizationJson,
     });
+
+    if (selectedReward && !rewardedMenuItemId) {
+      setRewardedMenuItemId(menuItem.id);
+      setRewardedCustomizationJson(customizationJson);
+    }
 
     router.back();
   };
-
   const getOptionButtonStyle = (isSelected: boolean) => [
     styles.optionButton,
     {
