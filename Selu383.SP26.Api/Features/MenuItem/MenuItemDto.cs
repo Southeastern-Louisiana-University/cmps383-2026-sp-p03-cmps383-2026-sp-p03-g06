@@ -13,4 +13,5 @@ public class MenuItemDto
     public bool IsAvailable { get; set; }
 
     public int CategoryId { get; set; }
+    public string? ImageUrl { get; set; }
 }

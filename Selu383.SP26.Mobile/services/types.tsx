@@ -86,6 +86,7 @@ export interface MenuItemDto {
   price: number;
   isAvailable: boolean;
   categoryId: number;
+  imageUrl?: string | null;
 }
 
 export interface CategoryDto {
