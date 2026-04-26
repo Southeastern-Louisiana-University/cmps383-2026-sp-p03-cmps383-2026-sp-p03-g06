@@ -1,23 +1,175 @@
-import { Link } from "react-router-dom";
+﻿import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Logo from "../assets/Caff-logo.png";
+
+type Tab = "orders" | "payment";
+
+const pastOrders = [
+    { id: "#10245", status: "Picked up", date: "Apr 22, 2026", items: "Iced Latte (L)", total: "$6.50" },
+    { id: "#10198", status: "Picked up", date: "Apr 18, 2026", items: "Supernova Espresso (M)", total: "$7.95" },
+    { id: "#10134", status: "Picked up", date: "Apr 11, 2026", items: "Roaring Frappe (L), Banana Foster ", total: "$15.15" },
+];
 
 export default function ProfilePage() {
+    const [activeTab, setActiveTab] = useState<Tab>("orders");
+    const navigate = useNavigate();
+
     return (
-        <div className="profile-page">
-            <h2>Your Profile</h2>
+        <div className="flex min-h-screen flex-col bg-[#f9fdf9]">
 
-            <div className="profile-info">
-                <p><strong>Name:</strong> John Doe</p>
-                <p><strong>Email:</strong> john@example.com</p>
-                <p><strong>Phone:</strong> (555) 123‑4567</p>
-                <p><strong>Birthday:</strong> 01/15/1999</p>
+            {/* MAIN WRAPPER */}
+            <div className="flex-1">
+
+                {/* PAGE HEADER */}
+                <div className="mx-auto flex max-w-5xl items-center gap-5 px-6 pb-8 pt-12 md:px-12">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#7bf1a8] text-2xl font-bold text-[#1a4731]">
+                        ?
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-medium" style={{ fontFamily: "Georgia, serif" }}>Your Profile</h1>
+                        <p className="mt-1 text-sm text-[#555]">Manage your account details and orders</p>
+                    </div>
+                </div>
+
+                {/* MAIN CONTENT */}
+                <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-16 md:px-12 lg:flex-row">
+
+                    {/* LEFT — Personal Info */}
+                    <div className="w-full shrink-0 lg:w-72">
+                        <div className="rounded-2xl border border-[#e0e0e0] bg-white p-6">
+                            <h2 className="mb-6 text-base font-semibold text-[#1a4731]">Personal Info</h2>
+
+                            {[
+                                { label: "FULL NAME", value: "John Doe", placeholder: "Your name", icon: "👤" },
+                                { label: "EMAIL", value: "john@example.com", placeholder: "your@email.com", icon: "✉️" },
+                                { label: "PHONE NUMBER", value: "(555) 123-4567", placeholder: "+1 (555) 000-0000", icon: "📱" },
+                                { label: "BIRTHDAY", value: "Jan 15, 1999", placeholder: "Not set", icon: "🎂" },
+                            ].map((field) => (
+                                <div key={field.label} className="mb-5 border-b border-[#f0f0f0] pb-5 last:mb-0 last:border-0 last:pb-0">
+                                    <div className="mb-1 flex items-center gap-2">
+                                        <span className="text-xs">{field.icon}</span>
+                                        <p className="tracking-[0.1em] font-semibold uppercase text-[10px] text-[#999]">{field.label}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm text-[#333]">{field.value || field.placeholder}</p>
+                                        <button className="text-xs text-[#aaa] transition-colors hover:text-[#1a4731]">✏️</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Log out */}
+                        <button
+                            onClick={() => navigate("/")}
+                            className="mt-4 w-full text-sm text-[#555] border border-[#e0e0e0] rounded-full py-2.5 hover:bg-white transition-colors"
+                        >
+                            Log out
+                        </button>
+                    </div>
+
+                    {/* RIGHT — Tabs */}
+                    <div className="flex-1">
+
+                        {/* Tab bar */}
+                        <div className="mb-6 flex gap-2">
+                            <button
+                                onClick={() => setActiveTab("orders")}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all"
+                                style={{
+                                    background: activeTab === "orders" ? "#7bf1a8" : "white",
+                                    color: activeTab === "orders" ? "#1a4731" : "#555",
+                                    border: activeTab === "orders" ? "none" : "1px solid #e0e0e0",
+                                }}
+                            >
+                                🧾 Past Orders
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("payment")}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all"
+                                style={{
+                                    background: activeTab === "payment" ? "#7bf1a8" : "white",
+                                    color: activeTab === "payment" ? "#1a4731" : "#555",
+                                    border: activeTab === "payment" ? "none" : "1px solid #e0e0e0",
+                                }}
+                            >
+                                💳 Payment
+                            </button>
+                        </div>
+
+                        {/* Past Orders */}
+                        {activeTab === "orders" && (
+                            <div className="divide-y divide-[#f0f0f0] rounded-2xl border border-[#e0e0e0] bg-white">
+                                {pastOrders.map((order) => (
+                                    <div key={order.id} className="flex items-center justify-between gap-4 p-5">
+                                        <div className="flex-1">
+                                            <div className="mb-1 flex items-center gap-3">
+                                                <span className="text-sm font-semibold text-[#1a4731]">{order.id}</span>
+                                                <span className="rounded-full border border-[#b7f5d0] bg-[#f0fdf4] px-2.5 py-0.5 font-medium text-[11px] text-[#2d6a4f]">
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                            <p className="mb-1 text-xs text-[#999]">{order.date}</p>
+                                            <p className="text-sm text-[#555]">{order.items}</p>
+                                        </div>
+                                        <div className="flex shrink-0 items-center gap-4">
+                                            <span className="text-sm font-semibold">{order.total}</span>
+                                            <button
+                                                onClick={() => navigate("/order")}
+                                                className="bg-[#7bf1a8] text-[#1a4731] text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#5ce090] transition-colors"
+                                            >
+                                                Reorder
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Payment */}
+                        {activeTab === "payment" && (
+                            <div className="rounded-2xl border border-[#e0e0e0] bg-white p-8 text-center">
+                                <div className="mb-4 text-4xl">💳</div>
+                                <p className="mb-2 text-base font-medium">No payment methods saved</p>
+                                <p className="mb-6 text-sm text-[#555]">Add a card to speed up checkout</p>
+                                <button className="rounded-full bg-[#7bf1a8] px-6 py-2.5 text-sm font-semibold text-[#1a4731]">
+                                    Add payment method
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div className="profile-links">
-                <Link to="/orders">Past Orders</Link>
-                <Link to="/payment">Payment Methods</Link>
-            </div>
+            {/* FOOTER */}
+            <footer className="mt-8 bg-[#1a4731] px-6 py-12 md:px-12">
+                <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={Logo}
+                                alt="Caffeinated Lions Logo"
+                                className="h-8 w-8 rounded-full object-cover"
+                            />
+                            <span className="font-semibold text-white">Caffeinated Lions</span>
+                        </div>
+                        <p className="text-sm text-white/60">Handcrafted with care. Open daily 6am – 8pm.</p>
+                    </div>
+                    <div className="flex gap-8">
+                        {["Menu", "Rewards", "Careers", "Contact"].map((link) => (
+                            <a key={link} href="#" className="text-sm text-white/60 transition-colors hover:text-white">{link}</a>
+                        ))}
+                    </div>
+                </div>
+                <div className="mx-auto mt-8 flex max-w-6xl flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 md:flex-row">
+                    <p className="text-xs text-white/40">© 2026 Caffeinated Lions. All rights reserved.</p>
+                    <div className="flex gap-6">
+                        {["Privacy", "Terms", "Cookies"].map((link) => (
+                            <a key={link} href="#" className="text-xs text-white/40 transition-colors hover:text-white/70">{link}</a>
+                        ))}
+                    </div>
+                </div>
+            </footer>
 
-            <button className="logout-btn">Log Out</button>
         </div>
     );
 }
