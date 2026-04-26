@@ -1,19 +1,32 @@
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useAuthentication } from "@/hooks/use-authentication";
 import { StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 export function AccountHeader() {
   const { isLoggedIn, loading } = useAuthentication();
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
 
-  // Only show header if user is logged in
   if (!isLoggedIn || loading) {
     return null;
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        },
+      ]}
+    >
       <View style={styles.actionContainer}>
-        <ThemedText style={styles.actionText}>My Account</ThemedText>
+        <ThemedText style={[styles.actionText, { color: theme.text }]}>
+          My Account
+        </ThemedText>
       </View>
     </View>
   );
@@ -25,8 +38,6 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     alignItems: "stretch",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#fff",
   },
   actionContainer: {
     flexDirection: "row",

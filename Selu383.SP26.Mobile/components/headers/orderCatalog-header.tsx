@@ -1,3 +1,5 @@
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { getCategory } from "@/services/apis";
 import { CategoryDto } from "@/services/types";
 import React, { useEffect, useState } from "react";
@@ -25,12 +27,14 @@ export function OrderCatalogHeader({
   locationAddress,
   itemCount,
 }: OrderCatalogHeaderProps) {
-  const [filter, setFilter] = React.useState("");
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+
+  const [filter, setFilter] = useState("");
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null,
   );
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCategories();
@@ -42,15 +46,11 @@ export function OrderCatalogHeader({
       setCategories(categories);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleCategoryPress = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
-    console.log("Pressed categoryId:", categoryId);
-
     onCategoryChange?.(categoryId);
   };
 
@@ -58,33 +58,58 @@ export function OrderCatalogHeader({
     setFilter(text);
     onSearchChange?.(text);
   };
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        },
+      ]}
+    >
       {locationName && (
         <View style={styles.locationBar}>
           <View style={styles.locationInfo}>
-            <ThemedText style={styles.locationText}>{locationName}</ThemedText>
+            <ThemedText style={[styles.locationText, { color: theme.text }]}>
+              {locationName}
+            </ThemedText>
+
             {locationAddress && (
-              <ThemedText style={styles.locationAddressText}>
+              <ThemedText
+                style={[styles.locationAddressText, { color: theme.mutedText }]}
+              >
                 {locationAddress}
               </ThemedText>
             )}
           </View>
+
           {itemCount != null && itemCount > 0 && (
-            <ThemedText style={styles.orderCountText}>
-              {itemCount.toString()} item{itemCount === 1 ? "" : "s"} in order
+            <ThemedText style={[styles.orderCountText, { color: theme.text }]}>
+              {itemCount} item{itemCount === 1 ? "" : "s"} in order
             </ThemedText>
           )}
         </View>
       )}
+
       <View style={styles.actionContainer}>
         <TextInput
           placeholder="Search for menu items..."
-          style={styles.searchInput}
+          placeholderTextColor={theme.mutedText}
+          style={[
+            styles.searchInput,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
           value={filter}
           onChangeText={handleSearchChange}
         />
       </View>
+
       <View style={styles.filterContainer}>
         <ScrollView
           horizontal
@@ -94,7 +119,10 @@ export function OrderCatalogHeader({
           <TouchableOpacity
             style={[
               styles.searchFilterButton,
-              selectedCategoryId === null && styles.searchFilterButtonActive,
+              { backgroundColor: theme.accent },
+              selectedCategoryId === null && {
+                backgroundColor: theme.accentDark,
+              },
             ]}
             onPress={() => handleCategoryPress(null)}
           >
@@ -106,8 +134,10 @@ export function OrderCatalogHeader({
               key={category.id}
               style={[
                 styles.searchFilterButton,
-                selectedCategoryId === category.id &&
-                  styles.searchFilterButtonActive,
+                { backgroundColor: theme.accent },
+                selectedCategoryId === category.id && {
+                  backgroundColor: theme.accentDark,
+                },
               ]}
               onPress={() => handleCategoryPress(category.id)}
             >
@@ -128,17 +158,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     alignItems: "stretch",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#fff",
   },
   locationBar: {
     marginTop: 20,
     paddingHorizontal: 15,
-    borderBottomColor: "#e9ecef",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 8,
   },
   locationInfo: {
     flex: 1,
@@ -146,31 +172,24 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#0e5f00",
   },
   locationAddressText: {
     fontSize: 14,
-    fontWeight: "400",
-    color: "#666",
     marginTop: 2,
   },
   orderCountText: {
     fontSize: 14,
-    color: "#434242",
     fontWeight: "500",
   },
   actionContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-
     paddingHorizontal: 10,
   },
   searchInput: {
     width: "95%",
     marginTop: 12,
     height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
@@ -178,8 +197,6 @@ const styles = StyleSheet.create({
   filterContainer: {
     paddingTop: 10,
     paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
   },
   categoryScrollContainer: {
     gap: 10,
@@ -188,16 +205,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#7bf1a8",
     justifyContent: "center",
     alignItems: "center",
     minWidth: 60,
   },
-  searchFilterButtonActive: {
-    backgroundColor: "#5bb377",
-  },
   filterText: {
-    color: "#434242",
+    color: "#111111",
     fontSize: 12,
     fontWeight: "500",
   },

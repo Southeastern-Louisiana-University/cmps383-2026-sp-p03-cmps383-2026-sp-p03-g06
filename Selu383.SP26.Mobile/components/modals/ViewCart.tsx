@@ -1,3 +1,5 @@
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
@@ -9,9 +11,9 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { ThemedText } from "../themed-text";
-import { ThemedView } from "../themed-view";
 
 interface CartItemWithDetails {
   menuItemId: number;
@@ -25,9 +27,12 @@ interface ViewCartProps {
 }
 
 export function ViewCart({ onCheckout }: ViewCartProps) {
+  const { colorScheme } = useColorScheme();
+
+  const theme = getTheme(colorScheme);
+
   const {
     orderItems,
-    selectedLocationId,
     locationName,
     locationAddress,
     updateOrderItemQuantity,
@@ -67,11 +72,13 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
       const menuItem = menuItems.find(
         (item) => item.id === orderItem.menuItemId,
       );
+
       return {
         ...orderItem,
         menuItem,
       };
     });
+
     setCartItemsWithDetails(itemsWithDetails);
   };
 
@@ -118,68 +125,82 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
       return total + calculateItemTotal(item);
     }, 0);
   };
-  //PUT CHECKOUT IMPLEMETATION HERE, PLACEHOLDER
+
   const handleCheckout = () => {
     onCheckout();
   };
 
-  // const handleClearCart = () => {
-  //   Alert.alert(
-  //     "Clear Cart",
-  //     "Are you sure you want to remove all items from your cart?",
-  //     [
-  //       { text: "Cancel", style: "cancel" },
-  //       { text: "Clear", style: "destructive", onPress: clearOrder },
-  //     ],
-  //   );
-  // };
-
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedText style={styles.loadingText}>Loading cart...</ThemedText>
-      </ThemedView>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <ThemedText style={[styles.loadingText, { color: theme.mutedText }]}>
+          Loading cart...
+        </ThemedText>
+      </View>
     );
   }
 
   if (itemCount === 0) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.emptyCart}>
-          <ThemedText style={styles.emptyCartTitle}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={styles.emptyCart}>
+          <ThemedText style={[styles.emptyCartTitle, { color: theme.text }]}>
             Your cart is empty
           </ThemedText>
-          <ThemedText style={styles.emptyCartText}>
+
+          <ThemedText
+            style={[styles.emptyCartText, { color: theme.mutedText }]}
+          >
             Add some delicious items from our menu!
           </ThemedText>
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Your Order</ThemedText>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: theme.background,
+            borderBottomColor: theme.border,
+          },
+        ]}
+      >
+        <ThemedText style={[styles.headerTitle, { color: theme.text }]}>
+          Your Order
+        </ThemedText>
+
         {locationName ? (
-          <ThemedText style={styles.locationText}>{locationName}</ThemedText>
+          <ThemedText
+            style={[styles.locationText, { color: theme.accentDark }]}
+          >
+            {locationName}
+          </ThemedText>
         ) : null}
+
         {locationAddress ? (
-          <ThemedText style={styles.locationAddress}>
+          <ThemedText
+            style={[styles.locationAddress, { color: theme.accentDark }]}
+          >
             {locationAddress}
           </ThemedText>
         ) : null}
-        {/* <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
-          <ThemedText style={styles.clearButtonText}>Clear Cart</ThemedText>
-        </TouchableOpacity> */}
-      </ThemedView>
+      </View>
 
-      {/*Cart Items*/}
       <ScrollView style={styles.cartList} showsVerticalScrollIndicator={false}>
         {cartItemsWithDetails.map((item, index) => (
-          <ThemedView
+          <View
             key={`item-${item.menuItemId.toString()}-${index.toString()}`}
-            style={styles.cartItem}
+            style={[
+              styles.cartItem,
+              {
+                backgroundColor: theme.background,
+                borderColor: theme.background,
+              },
+            ]}
           >
             <Image
               source={{
@@ -188,19 +209,26 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
               style={styles.itemImage}
             />
 
-            <ThemedView style={styles.itemDetails}>
-              <ThemedText style={styles.itemName}>
+            <View style={styles.itemDetails}>
+              <ThemedText style={[styles.itemName, { color: theme.text }]}>
                 {item.menuItem?.name || "Unknown Item"}
               </ThemedText>
 
               {item.customizationJson ? (
-                <ThemedText style={styles.customization}>Customized</ThemedText>
+                <ThemedText
+                  style={[styles.customization, { color: theme.accentDark }]}
+                >
+                  Customized
+                </ThemedText>
               ) : null}
-            </ThemedView>
+            </View>
 
-            <ThemedView style={styles.quantityControls}>
+            <View style={styles.quantityControls}>
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={[
+                  styles.quantityButton,
+                  { backgroundColor: theme.accent },
+                ]}
                 onPress={() =>
                   handleQuantityChange(
                     item.menuItemId,
@@ -212,26 +240,31 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
                 <ThemedText style={styles.quantityButtonText}>-</ThemedText>
               </TouchableOpacity>
 
-              <ThemedText style={styles.quantity}>
+              <ThemedText style={[styles.quantity, { color: theme.text }]}>
                 {item.quantity.toString()}
               </ThemedText>
 
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={[
+                  styles.quantityButton,
+                  { backgroundColor: theme.accent },
+                ]}
                 onPress={() =>
                   handleQuantityChange(
                     item.menuItemId,
                     item.customizationJson,
-                    item.quantity - 1,
+                    item.quantity + 1,
                   )
                 }
               >
                 <ThemedText style={styles.quantityButtonText}>+</ThemedText>
               </TouchableOpacity>
-            </ThemedView>
+            </View>
 
-            <ThemedView style={styles.itemTotalContainer}>
-              <ThemedText style={styles.itemTotal}>
+            <View style={styles.itemTotalContainer}>
+              <ThemedText
+                style={[styles.itemTotal, { color: theme.accentDark }]}
+              >
                 ${(calculateItemTotal(item) || 0).toFixed(2)}
               </ThemedText>
 
@@ -243,60 +276,72 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
               >
                 <ThemedText style={styles.removeButtonText}>Remove</ThemedText>
               </TouchableOpacity>
-            </ThemedView>
-          </ThemedView>
+            </View>
+          </View>
         ))}
       </ScrollView>
 
-      {/*Order Summary*/}
-      <ThemedView style={styles.summary}>
-        <ThemedView style={styles.summaryRow}>
-          <ThemedText style={styles.summaryLabel}>
+      <View
+        style={[
+          styles.summary,
+          {
+            backgroundColor: theme.background,
+            borderTopColor: theme.border,
+          },
+        ]}
+      >
+        <View style={styles.summaryRow}>
+          <ThemedText style={[styles.summaryLabel, { color: theme.mutedText }]}>
             Items ({itemCount.toString()})
           </ThemedText>
-          <ThemedText style={styles.summaryValue}>
+
+          <ThemedText style={[styles.summaryValue, { color: theme.text }]}>
             ${(calculateOrderTotal() || 0).toFixed(2)}
           </ThemedText>
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.summaryRow}>
-          <ThemedText style={styles.summaryLabel}>Tax</ThemedText>
-          <ThemedText style={styles.summaryValue}>
+        <View style={styles.summaryRow}>
+          <ThemedText style={[styles.summaryLabel, { color: theme.mutedText }]}>
+            Tax
+          </ThemedText>
+
+          <ThemedText style={[styles.summaryValue, { color: theme.text }]}>
             ${((calculateOrderTotal() || 0) * 0.08).toFixed(2)}
           </ThemedText>
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-        <ThemedView style={styles.summaryRow}>
-          <ThemedText style={styles.totalLabel}>Total</ThemedText>
-          <ThemedText style={styles.totalValue}>
+        <View style={styles.summaryRow}>
+          <ThemedText style={[styles.totalLabel, { color: theme.text }]}>
+            Total
+          </ThemedText>
+
+          <ThemedText style={[styles.totalValue, { color: theme.accentDark }]}>
             ${((calculateOrderTotal() || 0) * 1.08).toFixed(2)}
           </ThemedText>
-        </ThemedView>
+        </View>
 
         <TouchableOpacity
-          style={styles.checkoutButton}
+          style={[styles.checkoutButton, { backgroundColor: theme.accent }]}
           onPress={handleCheckout}
         >
           <ThemedText style={styles.checkoutButtonText}>
             Proceed to Checkout
           </ThemedText>
         </TouchableOpacity>
-      </ThemedView>
-    </ThemedView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   headerTitle: {
     fontSize: 24,
@@ -305,12 +350,10 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 14,
-    color: "#0e5f00",
     fontWeight: "600",
   },
   locationAddress: {
     fontSize: 14,
-    color: "#0e5f00",
     fontWeight: "600",
   },
   clearButton: {
@@ -326,7 +369,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 50,
     fontSize: 16,
-    color: "#666",
   },
   emptyCart: {
     flex: 1,
@@ -338,12 +380,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#666",
   },
   emptyCartText: {
     fontSize: 16,
     textAlign: "center",
-    color: "#999",
   },
   cartList: {
     flex: 1,
@@ -355,6 +395,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 8,
     alignItems: "center",
+    borderWidth: 1,
   },
   itemImage: {
     width: 60,
@@ -373,18 +414,15 @@ const styles = StyleSheet.create({
   },
   itemDescription: {
     fontSize: 12,
-    color: "#666",
     marginBottom: 3,
   },
   customization: {
     fontSize: 11,
-    color: "#0e5f00",
     fontStyle: "italic",
     marginBottom: 3,
   },
   itemPrice: {
     fontSize: 14,
-    color: "#666",
   },
   quantityControls: {
     flexDirection: "row",
@@ -395,7 +433,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#7bf1a8",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -418,7 +455,6 @@ const styles = StyleSheet.create({
   itemTotal: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0e5f00",
     marginBottom: 8,
     textAlign: "right",
   },
@@ -434,8 +470,8 @@ const styles = StyleSheet.create({
   },
   summary: {
     padding: 20,
+    paddingBottom: 60,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
   },
   summaryRow: {
     flexDirection: "row",
@@ -444,7 +480,6 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: "#666",
   },
   summaryValue: {
     fontSize: 16,
@@ -452,7 +487,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#e0e0e0",
     marginVertical: 10,
   },
   totalLabel: {
@@ -462,10 +496,8 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0e5f00",
   },
   checkoutButton: {
-    backgroundColor: "#7bf1a8",
     padding: 15,
     borderRadius: 8,
     marginTop: 20,

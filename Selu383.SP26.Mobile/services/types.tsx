@@ -57,7 +57,17 @@ export interface RegisterDto {
 
 export interface OrderDto {
   id: number;
+  customerId?: number | null;
+  customerName?: string | null;
+  checkoutFirstName?: string | null;
+  checkoutLastName?: string | null;
+  checkoutEmail?: string | null;
+  checkoutPhoneNumber?: string | null;
   locationId: number;
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+  pickedUpAt?: string | null;
   orderItems: OrderItemsDto[];
 }
 
@@ -134,4 +144,21 @@ export interface PaymentSheetResponseDto {
   ephemeralKey: string;
   customer: string;
   publishableKey: string;
+}
+
+export interface ProfileDto {
+  id: string;
+  userName: string;
+  email?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  preferredLocationId?: number | null;
+  roles: string[];
+  orderCount: number;
+}
+
+export interface PickupTimeDto {
+  label: string;
+  time: string;
+  isAsap: boolean;
 }

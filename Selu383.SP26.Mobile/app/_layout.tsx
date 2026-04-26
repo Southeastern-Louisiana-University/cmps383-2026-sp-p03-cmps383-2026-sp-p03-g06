@@ -7,8 +7,11 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import {
+  ColorSchemeProvider,
+  useColorScheme,
+} from "@/contexts/ColorSchemeContext";
 import { OrderProvider } from "@/contexts/OrderContext";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import React from "react";
 
@@ -16,8 +19,8 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutContent() {
+  const { colorScheme } = useColorScheme();
 
   return (
     <StripeProvider
@@ -34,9 +37,17 @@ export default function RootLayout() {
               options={{ presentation: "modal", title: "Modal" }}
             />
           </Stack>
-          <StatusBar style="auto" />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         </ThemeProvider>
       </OrderProvider>
     </StripeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ColorSchemeProvider>
+      <RootLayoutContent />
+    </ColorSchemeProvider>
   );
 }

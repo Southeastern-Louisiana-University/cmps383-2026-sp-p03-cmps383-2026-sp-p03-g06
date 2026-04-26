@@ -1,8 +1,8 @@
 import { OrderCatalogHeader } from "@/components/headers/orderCatalog-header";
 import { ViewCart } from "@/components/modals/ViewCart";
-import { Checkout } from "@/components/modals/checkout";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { getMenuItems } from "@/services/apis";
 import { MenuItemDto } from "@/services/types";
@@ -16,15 +16,21 @@ import {
   Modal,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OrderCatalogScreen() {
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
+  const insets = useSafeAreaInsets();
+
   const [menuItems, setMenuItems] = useState<MenuItemDto[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+
   const { selectedLocationId, locationName, locationAddress, itemCount } =
     useOrder();
 
@@ -34,13 +40,6 @@ export default function OrderCatalogScreen() {
     }
   }, [selectedLocationId]);
 
-  const handleItemPress = (menuItem: MenuItemDto) => {
-    router.push({
-      pathname: "/itemCustomization",
-      params: { item: JSON.stringify(menuItem) },
-    });
-  };
-  //hydrate catalog
   useEffect(() => {
     fetchMenuItems();
   }, []);
@@ -48,82 +47,87 @@ export default function OrderCatalogScreen() {
   const fetchMenuItems = async () => {
     try {
       const items = await getMenuItems();
-      setMenuItems(items.filter((item) => item.isAvailable)); // Only show available items
+      setMenuItems(items.filter((item) => item.isAvailable));
     } catch (error) {
       console.error("Failed to fetch menu items:", error);
     } finally {
       setLoading(false);
     }
   };
-  //state for category filters in header
-  const handleCategoryChange = (categoryId: number | null) => {
-    setSelectedCategory(categoryId);
+
+  const handleItemPress = (menuItem: MenuItemDto) => {
+    router.push({
+      pathname: "/itemCustomization",
+      params: { item: JSON.stringify(menuItem) },
+    });
   };
-  //state for search filter in header
-  const handleSearchChange = (searchText: string) => {
-    setSearchQuery(searchText);
-  };
-  //filters the menu based on the filters in header, if no filters = all items show
+
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesCategory =
       selectedCategory === null || item.categoryId === selectedCategory;
+
     const matchesSearch =
       searchQuery === "" ||
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
     return matchesCategory && matchesSearch;
   });
-  //card renderer for the items
+
   const renderMenuItem = ({ item }: { item: MenuItemDto }) => (
     <TouchableOpacity
-      style={styles.cardContainer}
+      style={[
+        styles.cardContainer,
+        {
+          backgroundColor: theme.background,
+          borderColor: theme.background,
+        },
+      ]}
       onPress={() => handleItemPress(item)}
       activeOpacity={0.8}
     >
-      <ThemedView style={styles.imageContainer}>
+      <View style={styles.imageContainer}>
         <Image
           source={{
             uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           }}
           style={styles.itemImage}
         />
-      </ThemedView>
-      <ThemedText
-        style={styles.catalogItemText}
-        numberOfLines={2}
-        ellipsizeMode="tail"
-      >
+      </View>
+
+      <ThemedText style={[styles.catalogItemText, { color: theme.text }]}>
         {item.name || "Unknown Item"}
       </ThemedText>
-      {/* <ThemedText style={styles.itemPrice}>${item.price.toFixed(2)}</ThemedText>
-      {item.description && (
-        <ThemedText style={styles.itemDescription}>
-          {item.description}
-        </ThemedText>
-      )} */}
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <ThemedView style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#0e5f00" />
-        <ThemedText style={styles.loadingText}>
+      <View
+        style={[
+          styles.container,
+          styles.loadingContainer,
+          { backgroundColor: theme.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.accentDark} />
+        <ThemedText style={[styles.loadingText, { color: theme.mutedText }]}>
           Loading menu items...
         </ThemedText>
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <OrderCatalogHeader
-        onCategoryChange={handleCategoryChange}
-        onSearchChange={handleSearchChange}
+        onCategoryChange={setSelectedCategory}
+        onSearchChange={setSearchQuery}
         locationName={locationName}
         locationAddress={locationAddress}
         itemCount={itemCount}
       />
+
       <FlatList
         data={filteredMenuItems}
         renderItem={renderMenuItem}
@@ -134,10 +138,9 @@ export default function OrderCatalogScreen() {
         columnWrapperStyle={styles.row}
       />
 
-      {/* Floating View Cart Button */}
       {itemCount > 0 && (
         <TouchableOpacity
-          style={styles.viewCartButton}
+          style={[styles.viewCartButton, { backgroundColor: theme.accent }]}
           onPress={() => setShowCart(true)}
         >
           <ThemedText style={styles.viewCartButtonText}>
@@ -146,58 +149,49 @@ export default function OrderCatalogScreen() {
         </TouchableOpacity>
       )}
 
-      {/*cart modal controls*/}
       <Modal
         visible={showCart}
         animationType="slide"
         presentationStyle="pageSheet"
         onRequestClose={() => setShowCart(false)}
       >
-        <ThemedView style={styles.modalHeader}>
+        <View
+          style={[
+            styles.modalHeader,
+            {
+              backgroundColor: theme.background,
+              borderBottomColor: theme.border,
+              paddingTop: insets.top + 10,
+            },
+          ]}
+        >
           <TouchableOpacity
             onPress={() => setShowCart(false)}
-            style={styles.closeButton}
+            style={[
+              styles.closeButton,
+              { backgroundColor: theme.elevatedCard },
+            ]}
           >
-            <ThemedText style={styles.closeButtonText}>
-              <AntDesign name="close" size={24} color="black" />
-            </ThemedText>
+            <AntDesign name="close" size={24} color={theme.text} />
           </TouchableOpacity>
-        </ThemedView>
-        <ViewCart
-          onCheckout={() => {
-            setShowCart(false);
-            setShowCheckout(true);
-          }}
-        />
-      </Modal>
+        </View>
 
-      <Modal
-        visible={showCheckout}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowCheckout(false)}
-      >
-        <ThemedView style={styles.modalHeader}>
-          <TouchableOpacity
-            onPress={() => setShowCheckout(false)}
-            style={styles.closeButton}
-          >
-            <ThemedText style={styles.closeButtonText}>
-              <AntDesign name="close" size={24} color="black" />
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-
-        <Checkout />
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
+          <ViewCart
+            onCheckout={() => {
+              setShowCart(false);
+              router.push("/checkout");
+            }}
+          />
+        </View>
       </Modal>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   loadingContainer: {
     justifyContent: "center",
@@ -206,7 +200,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
   },
   listContainer: {
     paddingBottom: 20,
@@ -217,9 +210,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   cardContainer: {
-    backgroundColor: "#f8f9fa",
     borderRadius: 18,
-    borderColor: "#e9ecef",
     borderWidth: 1,
     width: 160,
     minHeight: 150,
@@ -247,25 +238,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     lineHeight: 18,
   },
-  itemPrice: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0e5f00",
-    marginBottom: 5,
-  },
-  itemDescription: {
-    textAlign: "center",
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 10,
-    flex: 1,
-  },
   viewCartButton: {
     position: "absolute",
     bottom: 30,
     right: 20,
-    backgroundColor: "#7bf1a8",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -285,21 +261,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     padding: 15,
     paddingTop: 20,
-    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
-  },
-  closeButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#666",
   },
 });

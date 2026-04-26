@@ -6,20 +6,26 @@ import { AccountHeader } from "@/components/headers/account-header";
 import { HomeHeader } from "@/components/headers/home-header";
 import { LocationSelectHeader } from "@/components/headers/location-select-header";
 import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
+
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: false,
+        tabBarInactiveTintColor: colorScheme === "dark" ? "#9ca3af" : "#6b7280",
         tabBarButton: HapticTab,
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colorScheme === "dark" ? "#121212" : "#ffffff",
+          borderTopColor: colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5",
+        },
       }}
     >
       <Tabs.Screen
@@ -36,6 +42,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="order"
         options={{
@@ -50,6 +57,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="rewards"
         options={{
@@ -63,6 +71,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="account"
         options={{
@@ -77,18 +86,21 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="login"
         options={{
           href: null,
         }}
       />
+
       <Tabs.Screen
         name="signUp"
         options={{
           href: null,
         }}
       />
+
       <Tabs.Screen
         name="orderCatalog"
         options={{

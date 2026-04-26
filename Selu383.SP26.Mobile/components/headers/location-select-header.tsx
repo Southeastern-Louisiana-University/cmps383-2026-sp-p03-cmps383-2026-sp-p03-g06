@@ -1,23 +1,28 @@
+import { getTheme } from "@/constants/theme";
+import { useColorScheme } from "@/contexts/ColorSchemeContext";
 import Fontisto from "@expo/vector-icons/Fontisto";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import SearchLocation from "../modals/SearchLocation";
 
 export function LocationSelectHeader() {
-  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const { colorScheme } = useColorScheme();
+  const theme = getTheme(colorScheme);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        },
+      ]}
+    >
       <View style={styles.actionContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            setShowModal(true);
-          }}
-        >
-          {/* PUT MODAL HERE FOR SEARCHING LOCATIONS */}
-          <Fontisto name="search" size={24} color="black" />
+        <TouchableOpacity onPress={() => setShowModal(true)}>
+          <Fontisto name="search" size={24} color={theme.icon} />
         </TouchableOpacity>
       </View>
 
@@ -32,8 +37,6 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     alignItems: "stretch",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#fff",
   },
   actionContainer: {
     flexDirection: "row",
