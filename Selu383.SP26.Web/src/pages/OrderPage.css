@@ -1,0 +1,10 @@
+.order-page {
+    padding: 20px;
+    padding-bottom: 80px;
+}
+
+.drink-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
