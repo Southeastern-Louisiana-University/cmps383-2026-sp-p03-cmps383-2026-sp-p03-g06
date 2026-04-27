@@ -148,78 +148,111 @@ export default function PreviousOrdersScreen() {
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {orders.map((order, index) => (
-                <View
-                  key={order.id?.toString() || index.toString()}
-                  style={[
-                    styles.orderCard,
-                    {
-                      backgroundColor: theme.elevatedCard,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <View style={styles.orderHeader}>
-                    <View>
-                      <ThemedText
-                        style={[styles.orderTitle, { color: theme.text }]}
-                      >
-                        Order #{order.id ?? index + 1}
-                      </ThemedText>
+              {orders.map((order, index) => {
+                const subtotal = Number(order.totalPrice) || 0;
+                const tax = Math.round(subtotal * 0.08 * 100) / 100;
+                const total = subtotal + tax;
 
-                      <ThemedText
-                        style={[styles.orderDate, { color: theme.mutedText }]}
-                      >
-                        {formatDate(order.createdAt)} •{" "}
-                        {formatTime(order.createdAt)}
-                      </ThemedText>
-                    </View>
-
-                    {order.status ? (
-                      <View
-                        style={[
-                          styles.statusBadge,
-                          {
-                            backgroundColor: theme.isDark
-                              ? "#1f3d2b"
-                              : "#d4edda",
-                          },
-                        ]}
-                      >
+                return (
+                  <View
+                    key={order.id?.toString() || index.toString()}
+                    style={[
+                      styles.orderCard,
+                      {
+                        backgroundColor: theme.elevatedCard,
+                        borderColor: theme.border,
+                      },
+                    ]}
+                  >
+                    <View style={styles.orderHeader}>
+                      <View>
                         <ThemedText
+                          style={[styles.orderTitle, { color: theme.text }]}
+                        >
+                          Order #{order.id ?? index + 1}
+                        </ThemedText>
+
+                        <ThemedText
+                          style={[styles.orderDate, { color: theme.mutedText }]}
+                        >
+                          {formatDate(order.createdAt)} •{" "}
+                          {formatTime(order.createdAt)}
+                        </ThemedText>
+                      </View>
+
+                      {order.status ? (
+                        <View
                           style={[
-                            styles.statusText,
+                            styles.statusBadge,
                             {
-                              color: theme.isDark
-                                ? theme.accent
-                                : theme.darkGreen,
+                              backgroundColor: theme.isDark
+                                ? "#1f3d2b"
+                                : "#d4edda",
                             },
                           ]}
                         >
-                          {order.status}
-                        </ThemedText>
-                      </View>
-                    ) : null}
-                  </View>
+                          <ThemedText
+                            style={[
+                              styles.statusText,
+                              {
+                                color: theme.isDark
+                                  ? theme.accent
+                                  : theme.darkGreen,
+                              },
+                            ]}
+                          >
+                            {order.status}
+                          </ThemedText>
+                        </View>
+                      ) : null}
+                    </View>
 
-                  <View
-                    style={[styles.divider, { backgroundColor: theme.border }]}
-                  />
+                    <View
+                      style={[
+                        styles.divider,
+                        { backgroundColor: theme.border },
+                      ]}
+                    />
 
-                  <View style={styles.orderRow}>
-                    <ThemedText
-                      style={[styles.orderLabel, { color: theme.softText }]}
-                    >
-                      Location ID
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.orderValue, { color: theme.text }]}
-                    >
-                      {order.locationId ?? "N/A"}
-                    </ThemedText>
-                  </View>
+                    <View style={styles.orderRow}>
+                      <ThemedText
+                        style={[styles.orderLabel, { color: theme.softText }]}
+                      >
+                        Location ID
+                      </ThemedText>
+                      <ThemedText
+                        style={[styles.orderValue, { color: theme.text }]}
+                      >
+                        {order.locationId ?? "N/A"}
+                      </ThemedText>
+                    </View>
 
-                  {order.totalPrice != null ? (
+                    <View style={styles.orderRow}>
+                      <ThemedText
+                        style={[styles.orderLabel, { color: theme.softText }]}
+                      >
+                        Subtotal
+                      </ThemedText>
+                      <ThemedText
+                        style={[styles.orderValue, { color: theme.text }]}
+                      >
+                        ${subtotal.toFixed(2)}
+                      </ThemedText>
+                    </View>
+
+                    <View style={styles.orderRow}>
+                      <ThemedText
+                        style={[styles.orderLabel, { color: theme.softText }]}
+                      >
+                        Tax
+                      </ThemedText>
+                      <ThemedText
+                        style={[styles.orderValue, { color: theme.text }]}
+                      >
+                        ${tax.toFixed(2)}
+                      </ThemedText>
+                    </View>
+
                     <View style={styles.orderRow}>
                       <ThemedText
                         style={[styles.orderLabel, { color: theme.softText }]}
@@ -236,12 +269,12 @@ export default function PreviousOrdersScreen() {
                           },
                         ]}
                       >
-                        ${order.totalPrice.toFixed(2)}
+                        ${total.toFixed(2)}
                       </ThemedText>
                     </View>
-                  ) : null}
-                </View>
-              ))}
+                  </View>
+                );
+              })}
             </ScrollView>
           )}
         </SafeAreaView>

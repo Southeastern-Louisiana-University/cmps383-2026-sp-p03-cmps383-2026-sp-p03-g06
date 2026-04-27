@@ -59,6 +59,8 @@ public class UsersController : ControllerBase
         {
             Id = newUser.Id,
             Roles = dto.Roles,
+            Email = newUser.Email,
+            PhoneNumber = newUser.PhoneNumber,
             UserName = newUser.UserName,
         });
     }
