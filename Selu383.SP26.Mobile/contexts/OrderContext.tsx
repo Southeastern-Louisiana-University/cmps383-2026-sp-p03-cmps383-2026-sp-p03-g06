@@ -1,4 +1,4 @@
-import { CreateOrderItemDto } from "@/services/types";
+import { CreateOrderItemDto, RewardOfferingDto } from "@/services/types";
 import React, { createContext, useCallback, useContext, useState } from "react";
 
 interface OrderContextData {
@@ -6,6 +6,11 @@ interface OrderContextData {
   orderItems: CreateOrderItemDto[];
   locationName: string | null;
   locationAddress: string | null;
+
+  selectedReward: RewardOfferingDto | null;
+  rewardedMenuItemId: number | null;
+  rewardedCustomizationJson: string | undefined;
+  setRewardedCustomizationJson: (customizationJson: string | undefined) => void;
 
   setLocation: (
     locationId: number,
@@ -23,6 +28,10 @@ interface OrderContextData {
     quantity: number,
   ) => void;
 
+  setSelectedReward: (reward: RewardOfferingDto | null) => void;
+  setRewardedMenuItemId: (menuItemId: number | null) => void;
+  clearSelectedReward: () => void;
+
   clearOrder: () => void;
 
   orderTotal: number;
@@ -35,9 +44,18 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(
     null,
   );
+  const [rewardedCustomizationJson, setRewardedCustomizationJson] = useState<
+    string | undefined
+  >(undefined);
   const [locationName, setLocationName] = useState<string | null>(null);
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<CreateOrderItemDto[]>([]);
+
+  const [selectedReward, setSelectedReward] =
+    useState<RewardOfferingDto | null>(null);
+  const [rewardedMenuItemId, setRewardedMenuItemId] = useState<number | null>(
+    null,
+  );
 
   const setLocation = useCallback(
     (locationId: number, name: string, address: string) => {
@@ -57,15 +75,19 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (existingItemIndex >= 0) {
-        //if items already exists in order, update quantity
         const updatedItems = [...currentItems];
         updatedItems[existingItemIndex].quantity += newItem.quantity;
         return updatedItems;
-      } else {
-        //adding new item to the array
-        return [...currentItems, newItem];
       }
+
+      return [...currentItems, newItem];
     });
+  }, []);
+
+  const clearSelectedReward = useCallback(() => {
+    setSelectedReward(null);
+    setRewardedMenuItemId(null);
+    setRewardedCustomizationJson(undefined);
   }, []);
 
   const removeOrderItem = useCallback(
@@ -79,8 +101,15 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
             ),
         ),
       );
+
+      if (
+        rewardedMenuItemId === menuItemId &&
+        rewardedCustomizationJson === customizationJson
+      ) {
+        clearSelectedReward();
+      }
     },
-    [],
+    [rewardedMenuItemId, rewardedCustomizationJson, clearSelectedReward],
   );
 
   const updateOrderItemQuantity = useCallback(
@@ -105,16 +134,19 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     },
     [removeOrderItem],
   );
+
   const clearOrder = useCallback(() => {
     setSelectedLocationId(null);
     setLocationName(null);
     setLocationAddress(null);
     setOrderItems([]);
+    setSelectedReward(null);
+    setRewardedMenuItemId(null);
+    setRewardedCustomizationJson(undefined);
   }, []);
 
-  //Computations for order total
-  //Will need to update
   const orderTotal = 0;
+
   const itemCount = orderItems.reduce(
     (total, item) => total + item.quantity,
     0,
@@ -125,10 +157,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     orderItems,
     locationName,
     locationAddress,
+    selectedReward,
+    rewardedMenuItemId,
+    rewardedCustomizationJson,
     setLocation,
     addOrderItem,
     removeOrderItem,
     updateOrderItemQuantity,
+    setSelectedReward,
+    setRewardedMenuItemId,
+    setRewardedCustomizationJson,
+    clearSelectedReward,
     clearOrder,
     orderTotal,
     itemCount,
@@ -143,8 +182,10 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
 export function useOrder() {
   const context = useContext(OrderContext);
+
   if (context === undefined) {
     throw new Error("useOrder must be used within an OrderProvider");
   }
+
   return context;
 }

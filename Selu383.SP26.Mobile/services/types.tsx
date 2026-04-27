@@ -5,6 +5,8 @@ export interface Location {
   tableCount: number;
   managerId?: number | null;
   hoursOfOperation?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 // Drink customization types
@@ -86,6 +88,7 @@ export interface MenuItemDto {
   price: number;
   isAvailable: boolean;
   categoryId: number;
+  imageUrl?: string | null;
 }
 
 export interface CategoryDto {
@@ -100,6 +103,8 @@ export interface CreateOrderDto {
   checkoutEmail: string;
   checkoutPhoneNumber: string;
   orderItems: CreateOrderItemDto[];
+  rewardOfferingId?: number;
+  rewardedMenuItemId?: number | null;
 }
 export interface CreateGuestOrderDto {
   checkoutFirstName: string;
@@ -108,6 +113,8 @@ export interface CreateGuestOrderDto {
   checkoutPhoneNumber: string;
   locationId: number;
   orderItems: CreateOrderItemDto[];
+  rewardOfferingId?: number;
+  rewardedMenuItemId?: number | null;
 }
 
 export interface CreateOrderItemDto {
@@ -137,6 +144,8 @@ export type CreatePaymentSheetDto = {
   checkoutLastName: string;
   checkoutEmail: string;
   checkoutPhoneNumber: string;
+  rewardOfferingId?: number;
+  rewardedMenuItemId?: number | null;
 };
 
 export interface PaymentSheetResponseDto {
@@ -161,4 +170,21 @@ export interface PickupTimeDto {
   label: string;
   time: string;
   isAsap: boolean;
+}
+
+export interface RedeemRewardDto {
+  rewardOfferingId: number;
+}
+
+export interface RewardRedemptionDto {
+  id: number;
+  rewardOfferingId: number;
+  rewardName: string;
+  pointsSpent: number;
+  redeemedAt: string;
+}
+
+export interface RedeemRewardResultDto {
+  remainingPoints: number;
+  redemption: RewardRedemptionDto;
 }

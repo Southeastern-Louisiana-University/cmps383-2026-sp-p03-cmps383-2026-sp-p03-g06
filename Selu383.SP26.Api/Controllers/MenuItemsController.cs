@@ -30,7 +30,8 @@ public class MenuItemsController(DataContext dataContext) : ControllerBase
                 Description = x.Description,
                 Price = x.Price,
                 IsAvailable = x.IsAvailable,
-                CategoryId = x.CategoryId
+                CategoryId = x.CategoryId,
+                ImageUrl = x.ImageUrl
             })
             .ToList();
 
@@ -55,7 +56,8 @@ public class MenuItemsController(DataContext dataContext) : ControllerBase
             Description = item.Description,
             Price = item.Price,
             IsAvailable = item.IsAvailable,
-            CategoryId = item.CategoryId
+            CategoryId = item.CategoryId,
+            ImageUrl = item.ImageUrl
         });
     }
 
@@ -93,7 +95,8 @@ public class MenuItemsController(DataContext dataContext) : ControllerBase
             Description = dto.Description,
             Price = dto.Price,
             IsAvailable = dto.IsAvailable,
-            CategoryId = dto.CategoryId
+            CategoryId = dto.CategoryId,
+            ImageUrl = dto.ImageUrl
         };
 
         dataContext.Set<MenuItem>().Add(item);
@@ -145,6 +148,7 @@ public class MenuItemsController(DataContext dataContext) : ControllerBase
         item.Price = dto.Price;
         item.IsAvailable = dto.IsAvailable;
         item.CategoryId = dto.CategoryId;
+        item.ImageUrl = dto.ImageUrl;
 
         dataContext.SaveChanges();
 

@@ -21,6 +21,8 @@ public class OrderDto
     public decimal TotalPrice { get; set; }
 
     public string Status { get; set; } = string.Empty;
+    public int? RewardOfferingId { get; set; }
+    public int? RewardedMenuItemId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

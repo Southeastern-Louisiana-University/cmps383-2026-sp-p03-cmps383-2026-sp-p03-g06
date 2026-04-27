@@ -34,6 +34,8 @@ export default function OrderCatalogScreen() {
   const { selectedLocationId, locationName, locationAddress, itemCount } =
     useOrder();
 
+  const FALLBACK_MENU_IMAGE =
+    "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   useEffect(() => {
     if (selectedLocationId === null) {
       router.push("/(tabs)/order");
@@ -89,7 +91,7 @@ export default function OrderCatalogScreen() {
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1637&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            uri: item.imageUrl || FALLBACK_MENU_IMAGE,
           }}
           style={styles.itemImage}
         />

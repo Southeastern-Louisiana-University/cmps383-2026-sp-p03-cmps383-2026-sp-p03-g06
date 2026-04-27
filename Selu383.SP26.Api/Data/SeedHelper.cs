@@ -86,33 +86,37 @@ public static class SeedHelper
 
     private static async Task AddLocations(DataContext dataContext)
     {
-        if (await dataContext.Set<Location>().AnyAsync())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<Location>().ToListAsync();
+        dataContext.Set<Location>().RemoveRange(existing);
 
 
         dataContext.Set<Location>().AddRange(
             new Location
             {
-                Name = "Location 1",
-                Address = "123 Main St",
+                Name = "University Ave",
+                Address = "14282 W University Ave Suite A, Hammond, LA 70401",
                 TableCount = 10,
-                HoursOfOperation = "Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:00 AM - 8:00 PM"
+                HoursOfOperation = "Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:00 AM - 8:00 PM",
+                Latitude = 30.5067,
+                Longitude = -90.4840
             },
             new Location
             {
-                Name = "Location 2",
-                Address = "456 Oak Ave",
+                Name = "Town & Country",
+                Address = "Town & Country Shopping Center, 2448 W Thomas St, Hammond, LA 70401",
                 TableCount = 20,
-                HoursOfOperation = "Mon-Sun: 6:00 AM - 10:00 PM"
+                HoursOfOperation = "Mon-Sun: 6:00 AM - 10:00 PM",
+                Latitude = 30.5049,
+                Longitude = -90.5006
             },
             new Location
             {
-                Name = "Location 3",
-                Address = "789 Pine Ln",
+                Name = "Railroad Ave",
+                Address = "1604 SW Railroad Ave, Hammond, LA 70403",
                 TableCount = 15,
-                HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed"
+                HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed",
+                Latitude = 30.4953,
+                Longitude = -90.4615
             }
         );
 
@@ -150,12 +154,12 @@ public static class SeedHelper
 
 
         dataContext.Set<MenuItem>().AddRange(
-            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = drinksId},
-            new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = drinksId },
-            new MenuItem {Name = "Roaring Frappe", Description = "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.", Price = 6.20m, IsAvailable = true, CategoryId = drinksId },
-            new MenuItem { Name = "Black & White Cold Brew", Description = "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk.", Price = 5.15m, IsAvailable = true, CategoryId = drinksId },
-            new MenuItem { Name = "Strawberry Limeade", Description = "Fresh lime juice blended with strawberry puree for a refreshing, tangy drink.", Price = 5.00m, IsAvailable = true, CategoryId = drinksId },
-            new MenuItem { Name = "Shaken Lemonade", Description = "Fresh lemon juice and simple syrup vigorously shaken for a bright, refreshing lemonade.", Price = 5.00m, IsAvailable = true, CategoryId = drinksId },
+            new MenuItem {Name = "Iced Latte", Description = "Expresso and milk served over ice for a refreshing coffee drink.", Price = 5.50m,IsAvailable = true, CategoryId = drinksId, ImageUrl ="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&fit=crop&auto=format" },
+            new MenuItem {Name = "Supernova", Description = "A unique coffee blend with a complex, balanced profile and subtle sweetness. Delicious as espresso or paired with milk.", Price = 7.95m, IsAvailable = true, CategoryId = drinksId, ImageUrl = "https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=400&fit=crop&auto=format" },
+            new MenuItem {Name = "Roaring Frappe", Description = "Cold brew, milk, and ice blended together with a signature syrup or flavor, topped with whipped cream.", Price = 6.20m, IsAvailable = true, CategoryId = drinksId, ImageUrl = "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&fit=crop&auto=format" },
+            new MenuItem { Name = "Black & White Cold Brew", Description = "Cold brew made with both dark and light roast beans, finished with a drizzle of condensed milk.", Price = 5.15m, IsAvailable = true, CategoryId = drinksId, ImageUrl = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&fit=crop&auto=format" },
+            new MenuItem { Name = "Strawberry Limeade", Description = "Fresh lime juice blended with strawberry puree for a refreshing, tangy drink.", Price = 5.00m, IsAvailable = true, CategoryId = drinksId, ImageUrl = "https://images.unsplash.com/photo-1497534446932-c925b458314e?w=400&fit=crop&auto=format" },
+            new MenuItem { Name = "Shaken Lemonade", Description = "Fresh lemon juice and simple syrup vigorously shaken for a bright, refreshing lemonade.", Price = 5.00m, IsAvailable = true, CategoryId = drinksId, ImageUrl = "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&fit=crop&auto=format" },
 
             new MenuItem { Name = "Mannino Honey Crepe", Description = "A sweet crepe drizzled with Mannino honey and topped with mixed berries.", Price = 10.00m, IsAvailable = true, CategoryId = sweetCrepesId },
             new MenuItem { Name = "Downtowner", Description = "Strawberries and bananas wrapped in a crepe, finished with Nutella and Hershey's chocolate sauce.", Price = 10.75m, IsAvailable = true, CategoryId = sweetCrepesId },

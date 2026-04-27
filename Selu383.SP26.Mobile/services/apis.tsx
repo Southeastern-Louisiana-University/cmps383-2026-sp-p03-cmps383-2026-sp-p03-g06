@@ -154,6 +154,8 @@ export async function createOrder(
     lastName: string;
     email: string;
     phoneNumber: string;
+    rewardOfferingId?: number;
+    rewardedMenuItemId?: number | null;
   },
 ) {
   try {
@@ -164,6 +166,8 @@ export async function createOrder(
       checkoutEmail: checkout.email,
       checkoutPhoneNumber: checkout.phoneNumber,
       orderItems,
+      rewardOfferingId: checkout.rewardOfferingId,
+      rewardedMenuItemId: checkout.rewardedMenuItemId,
     };
     const response = await fetch(`${API_BASE}/api/orders`, {
       method: "POST",
@@ -325,6 +329,38 @@ export async function getPickupTimes(locationId: number) {
 
   if (!response.ok) {
     throw new Error("Failed to load pickup times");
+  }
+
+  return response.json();
+}
+
+export async function redeemReward(rewardOfferingId: number) {
+  const response = await fetch(`${API_BASE}/api/rewards/redeem`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ rewardOfferingId }),
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || "Failed to redeem reward");
+  }
+
+  return JSON.parse(text);
+}
+
+export async function getMyRewardRedemptions() {
+  const response = await fetch(`${API_BASE}/api/rewards/redemptions/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load reward redemptions");
   }
 
   return response.json();
