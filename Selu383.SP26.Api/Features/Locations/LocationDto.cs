@@ -18,4 +18,6 @@ public class LocationDto
     public int? ManagerId { get; set; }
 
     public string? HoursOfOperation { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

@@ -16,4 +16,6 @@ public class Location
     public virtual User? Manager {  get; set; }
 
     public string? HoursOfOperation { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

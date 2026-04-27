@@ -10,6 +10,7 @@ import Fontisto from "@expo/vector-icons/Fontisto";
 import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TEST_MODE_BYPASS_CLOSED = false;
@@ -22,6 +23,32 @@ export default function OrderScreen() {
   const [showModal, setShowModal] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getInitialRegion = () => {
+    if (locations.length === 0) {
+      return {
+        latitude: 30.5,
+        longitude: -90.47,
+        latitudeDelta: 0.08,
+        longitudeDelta: 0.08,
+      };
+    }
+
+    const avgLat =
+      locations.reduce((sum, loc) => sum + (loc.latitude || 0), 0) /
+      locations.length;
+
+    const avgLng =
+      locations.reduce((sum, loc) => sum + (loc.longitude || 0), 0) /
+      locations.length;
+
+    return {
+      latitude: avgLat,
+      longitude: avgLng,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    };
+  };
 
   useEffect(() => {
     loadLocations();
@@ -152,9 +179,37 @@ export default function OrderScreen() {
               },
             ]}
           >
-            <ThemedText style={{ color: theme.mutedText }}>
-              Map temporarily disabled
-            </ThemedText>
+            <MapView style={styles.map} initialRegion={getInitialRegion()}>
+              {locations.map((location) => {
+                if (!location.latitude || !location.longitude) return null;
+
+                return (
+                  <Marker
+                    key={location.id}
+                    coordinate={{
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    }}
+                    title={location.name}
+                    description={location.address || "Coffee location"}
+                    onPress={() => {
+                      const isOpen = isLocationOpen(location.hoursOfOperation);
+                      const isSelectable = TEST_MODE_BYPASS_CLOSED || isOpen;
+
+                      if (!isSelectable) return;
+
+                      setLocation(
+                        location.id,
+                        location.name,
+                        location.address || "Unknown Location",
+                      );
+
+                      router.push("/(tabs)/orderCatalog");
+                    }}
+                  />
+                );
+              })}
+            </MapView>
           </View>
 
           <View
@@ -301,5 +356,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     padding: 20,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
   },
 });
