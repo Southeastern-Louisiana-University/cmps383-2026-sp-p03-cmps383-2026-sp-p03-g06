@@ -48,9 +48,9 @@ export default function AccountScreen() {
       setProfileLoading(true);
       const data = await getMyProfile();
 
-      setProfile(data);
       setEmail(data.email || "");
       setPhoneNumber(data.phoneNumber || "");
+      setProfile(data);
     } catch (error) {
       console.log("Failed to load profile:", error);
     } finally {
