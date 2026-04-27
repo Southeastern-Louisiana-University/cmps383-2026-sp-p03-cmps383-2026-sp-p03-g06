@@ -113,7 +113,6 @@ public class PaymentsController : ControllerBase
 
             if (isRewardedItem)
             {
-                // 1 free, rest paid
                 orderTotal += unitPrice * (itemDto.Quantity - 1);
             }
             else
@@ -122,7 +121,13 @@ public class PaymentsController : ControllerBase
             }
         }
 
-        var amountInCents = (long)(orderTotal * 100);
+        const decimal TaxRate = 0.08m;
+
+        var taxAmount = Math.Round(orderTotal * TaxRate, 2);
+        var finalTotal = orderTotal + taxAmount;
+
+        var amountInCents = (long)Math.Round(finalTotal * 100, 0);
+
 
         var customerService = new CustomerService();
         var customer = customerService.Create(new CustomerCreateOptions
@@ -150,12 +155,15 @@ public class PaymentsController : ControllerBase
                 Enabled = true
             },
             Metadata = new Dictionary<string, string>
-        {
-            { "locationId", dto.LocationId.ToString() },
-            { "checkoutEmail", dto.CheckoutEmail },
-            { "rewardOfferingId", dto.RewardOfferingId?.ToString() ?? string.Empty },
-            { "rewardedMenuItemId", dto.RewardedMenuItemId?.ToString() ?? string.Empty }
-        }
+            {
+                { "locationId", dto.LocationId.ToString() },
+                { "checkoutEmail", dto.CheckoutEmail },
+                { "subtotal", orderTotal.ToString("F2") },
+                { "taxAmount", taxAmount.ToString("F2") },
+                { "finalTotal", finalTotal.ToString("F2") },
+                { "rewardOfferingId", dto.RewardOfferingId?.ToString() ?? string.Empty },
+                { "rewardedMenuItemId", dto.RewardedMenuItemId?.ToString() ?? string.Empty }
+            }
         });
 
         return Ok(new

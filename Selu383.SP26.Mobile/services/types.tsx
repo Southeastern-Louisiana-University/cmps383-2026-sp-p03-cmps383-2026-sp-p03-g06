@@ -5,6 +5,8 @@ export interface Location {
   tableCount: number;
   managerId?: number | null;
   hoursOfOperation?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 // Drink customization types
