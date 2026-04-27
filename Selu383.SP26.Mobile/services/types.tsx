@@ -53,6 +53,8 @@ export interface LoginDto {
 }
 
 export interface RegisterDto {
+  email: string;
+  phoneNumber: string;
   userName: string;
   password: string;
 }
