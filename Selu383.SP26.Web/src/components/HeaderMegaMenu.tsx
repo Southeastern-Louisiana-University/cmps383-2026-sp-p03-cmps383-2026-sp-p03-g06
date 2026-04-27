@@ -1,38 +1,34 @@
+import Logo from '../assets/Caff-logo.png';
+
 import {
     IconChevronDown,
     IconCup,
-    IconFlame,
-    IconLeaf,
-    IconCookie,
-    IconSnowflake,
+    IconBurger,
+    IconCakeRoll,
+    IconBreadFilled,
 } from '@tabler/icons-react';
 import {
     Box,
-    Burger,
     Button,
     Center,
-    Collapse,
     Divider,
-    Drawer,
     Group,
     HoverCard,
-    ScrollArea,
     Text,
     ThemeIcon,
     UnstyledButton,
     Container,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import classes from './HeaderMegaMenu.module.scss';
 
 const menuCategories = [
-    { icon: IconFlame, title: 'Hot drinks', description: 'Espresso, lattes, cappuccinos and more' },
-    { icon: IconSnowflake, title: 'Cold drinks', description: 'Cold brew, iced lattes, refreshers' },
-    { icon: IconLeaf, title: 'Matcha & tea', description: 'Ceremonial matcha, chai, herbal teas' },
-    { icon: IconCookie, title: 'Food', description: 'Pastries, sandwiches, and snacks' },
-    { icon: IconCup, title: 'Seasonal', description: 'Limited time drinks and specials' },
+    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more', slug: 'Drinks' },
+    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite', slug: 'Sweet Crepes' },
+    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors', slug: 'Savory Crepes' },
+    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels', slug: 'Bagels' },
+
 ];
 
 export function HeaderMegaMenu() {
@@ -73,7 +69,7 @@ export function HeaderMegaMenu() {
         <UnstyledButton
             className={classes.subLink}
             key={item.title}
-            onClick={() => navigate('/order')}
+            onClick={() => navigate(`/order?category=${encodeURIComponent(item.slug)}`)}
         >
             <Group wrap="nowrap" align="flex-start">
                 <ThemeIcon size={34} variant="default" radius="md">

@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ProfilePage.css";
+import Logo from "../assets/Caff-logo.png";
 
 type Tab = "orders" | "payment";
 
@@ -299,9 +299,8 @@ export default function ProfilePage() {
                 <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row">
                     <div>
                         <div className="mb-2 flex items-center gap-2">
-                            <span className="font-semibold text-white">
-                                Caffeinated Lions
-                            </span>
+                            <img src={Logo} alt="Caffeinated Lions Logo" className="h-8 w-8 rounded-full object-cover" />
+                            <span className="font-semibold text-white">Caffeinated Lions</span>
                         </div>
                         <p className="text-sm text-white/60">
                             Handcrafted with care. Open daily 6am – 8pm.
