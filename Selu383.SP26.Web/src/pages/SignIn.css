@@ -1,0 +1,22 @@
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+
+  background: #7bf1a8;      /* your green */
+  color: #1a4731;           /* dark green text */
+
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  background: #5ce090;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+}
