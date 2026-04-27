@@ -8,7 +8,7 @@ import { Location } from "@/services/types";
 import { isLocationOpen } from "@/utils/hoursUtils";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import { router, Stack } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,32 +24,36 @@ export default function OrderScreen() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getInitialRegion = () => {
-    if (locations.length === 0) {
-      return {
-        latitude: 30.5,
-        longitude: -90.47,
-        latitudeDelta: 0.08,
-        longitudeDelta: 0.08,
-      };
-    }
+  const mapRef = useRef<MapView>(null);
 
-    const avgLat =
-      locations.reduce((sum, loc) => sum + (loc.latitude || 0), 0) /
-      locations.length;
+  const [region, setRegion] = useState({
+    latitude: 30.5,
+    longitude: -90.47,
+    latitudeDelta: 0.08,
+    longitudeDelta: 0.08,
+  });
 
-    const avgLng =
-      locations.reduce((sum, loc) => sum + (loc.longitude || 0), 0) /
-      locations.length;
-
-    return {
-      latitude: avgLat,
-      longitude: avgLng,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
+  const zoomIn = () => {
+    const newRegion = {
+      ...region,
+      latitudeDelta: region.latitudeDelta / 2,
+      longitudeDelta: region.longitudeDelta / 2,
     };
+
+    setRegion(newRegion);
+    mapRef.current?.animateToRegion(newRegion, 300);
   };
 
+  const zoomOut = () => {
+    const newRegion = {
+      ...region,
+      latitudeDelta: region.latitudeDelta * 2,
+      longitudeDelta: region.longitudeDelta * 2,
+    };
+
+    setRegion(newRegion);
+    mapRef.current?.animateToRegion(newRegion, 300);
+  };
   useEffect(() => {
     loadLocations();
   }, []);
@@ -179,16 +183,26 @@ export default function OrderScreen() {
               },
             ]}
           >
-            <MapView style={styles.map} initialRegion={getInitialRegion()}>
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              initialRegion={region}
+              onRegionChangeComplete={setRegion}
+              zoomEnabled={true}
+              scrollEnabled={true}
+            >
               {locations.map((location) => {
-                if (!location.latitude || !location.longitude) return null;
-
+                const latitude = Number(location.latitude);
+                const longitude = Number(location.longitude);
+                if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+                  return null;
+                }
                 return (
                   <Marker
                     key={location.id}
                     coordinate={{
-                      latitude: location.latitude,
-                      longitude: location.longitude,
+                      latitude,
+                      longitude,
                     }}
                     title={location.name}
                     description={location.address || "Coffee location"}
@@ -210,6 +224,15 @@ export default function OrderScreen() {
                 );
               })}
             </MapView>
+            <View style={styles.zoomControls}>
+              <TouchableOpacity style={styles.zoomButton} onPress={zoomIn}>
+                <ThemedText style={styles.zoomText}>+</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.zoomButton} onPress={zoomOut}>
+                <ThemedText style={styles.zoomText}>−</ThemedText>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View
@@ -360,5 +383,27 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  zoomControls: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+    gap: 10,
+  },
+
+  zoomButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  },
+
+  zoomText: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#111",
   },
 });

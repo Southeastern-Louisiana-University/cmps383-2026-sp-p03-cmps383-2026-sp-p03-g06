@@ -115,8 +115,8 @@ public static class SeedHelper
                 Address = "1604 SW Railroad Ave, Hammond, LA 70403",
                 TableCount = 15,
                 HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed",
-                Latitude = 30.4953,
-                Longitude = -90.4615
+                Latitude = 30.487408,
+                Longitude = -90.457450
             }
         );
 
