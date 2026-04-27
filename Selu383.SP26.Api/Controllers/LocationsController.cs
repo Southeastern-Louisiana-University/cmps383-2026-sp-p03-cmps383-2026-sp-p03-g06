@@ -24,6 +24,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
                 TableCount = x.TableCount,
                 ManagerId = x.ManagerId,
                 HoursOfOperation = x.HoursOfOperation,
+                Latitude = x.Latitude,
+                Longitude = x.Longitude
             });
     }
 
