@@ -20,7 +20,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.selu383.sp26.p03.g06"
+      "package": "com.selu383.sp26.p03.g06",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCZHDdyTEEc3A0JXwaM8DaPd6UCl_S_-6E"
+        }
+      }
     },
     "web": {
       "output": "static",

@@ -86,33 +86,37 @@ public static class SeedHelper
 
     private static async Task AddLocations(DataContext dataContext)
     {
-        if (await dataContext.Set<Location>().AnyAsync())
-        {
-            return;
-        }
+        var existing = await dataContext.Set<Location>().ToListAsync();
+        dataContext.Set<Location>().RemoveRange(existing);
 
 
         dataContext.Set<Location>().AddRange(
             new Location
             {
-                Name = "Location 1",
-                Address = "123 Main St",
+                Name = "University Ave",
+                Address = "14282 W University Ave Suite A, Hammond, LA 70401",
                 TableCount = 10,
-                HoursOfOperation = "Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:00 AM - 8:00 PM"
+                HoursOfOperation = "Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:00 AM - 8:00 PM",
+                Latitude = 30.5067,
+                Longitude = -90.4840
             },
             new Location
             {
-                Name = "Location 2",
-                Address = "456 Oak Ave",
+                Name = "Town & Country",
+                Address = "Town & Country Shopping Center, 2448 W Thomas St, Hammond, LA 70401",
                 TableCount = 20,
-                HoursOfOperation = "Mon-Sun: 6:00 AM - 10:00 PM"
+                HoursOfOperation = "Mon-Sun: 6:00 AM - 10:00 PM",
+                Latitude = 30.5049,
+                Longitude = -90.5006
             },
             new Location
             {
-                Name = "Location 3",
-                Address = "789 Pine Ln",
+                Name = "Railroad Ave",
+                Address = "1604 SW Railroad Ave, Hammond, LA 70403",
                 TableCount = 15,
-                HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed"
+                HoursOfOperation = "Mon-Thu: 7:00 AM - 8:00 PM | Fri-Sat: 7:00 AM - 10:00 PM | Sun: Closed",
+                Latitude = 30.4953,
+                Longitude = -90.4615
             }
         );
 

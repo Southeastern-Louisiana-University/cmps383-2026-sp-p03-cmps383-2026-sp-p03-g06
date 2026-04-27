@@ -84,6 +84,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const clearSelectedReward = useCallback(() => {
+    setSelectedReward(null);
+    setRewardedMenuItemId(null);
+    setRewardedCustomizationJson(undefined);
+  }, []);
+
   const removeOrderItem = useCallback(
     (menuItemId: number, customizationJson?: string) => {
       setOrderItems((currentItems) =>
@@ -96,13 +102,14 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         ),
       );
 
-      setRewardedMenuItemId((currentRewardedMenuItemId) =>
-        currentRewardedMenuItemId === menuItemId
-          ? null
-          : currentRewardedMenuItemId,
-      );
+      if (
+        rewardedMenuItemId === menuItemId &&
+        rewardedCustomizationJson === customizationJson
+      ) {
+        clearSelectedReward();
+      }
     },
-    [],
+    [rewardedMenuItemId, rewardedCustomizationJson, clearSelectedReward],
   );
 
   const updateOrderItemQuantity = useCallback(
@@ -127,12 +134,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     },
     [removeOrderItem],
   );
-
-  const clearSelectedReward = useCallback(() => {
-    setSelectedReward(null);
-    setRewardedMenuItemId(null);
-    setRewardedCustomizationJson(undefined);
-  }, []);
 
   const clearOrder = useCallback(() => {
     setSelectedLocationId(null);

@@ -24,6 +24,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
                 TableCount = x.TableCount,
                 ManagerId = x.ManagerId,
                 HoursOfOperation = x.HoursOfOperation,
+                Latitude = x.Latitude,
+                Longitude = x.Longitude
             });
     }
 
@@ -46,6 +48,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
             TableCount = result.TableCount,
             ManagerId = result.ManagerId,
             HoursOfOperation = result.HoursOfOperation,
+            Latitude = result.Latitude,
+            Longitude = result.Longitude
         });
     }
 
@@ -65,6 +69,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
             TableCount = dto.TableCount,
             ManagerId = dto.ManagerId,
             HoursOfOperation = dto.HoursOfOperation,
+            Latitude = dto.Latitude,
+            Longitude = dto.Longitude
         };
 
         dataContext.Set<Location>().Add(location);
@@ -102,6 +108,8 @@ public class LocationsController(DataContext dataContext) : ControllerBase
         location.TableCount = dto.TableCount;
         location.ManagerId = dto.ManagerId;
         location.HoursOfOperation = dto.HoursOfOperation;
+        location.Latitude = dto.Latitude;
+        location.Longitude = dto.Longitude;
 
         dataContext.SaveChanges();
 

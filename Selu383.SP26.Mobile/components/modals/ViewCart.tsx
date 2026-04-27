@@ -152,15 +152,23 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
   };
 
   const calculateItemTotal = (item: CartItemWithDetails): number => {
-    if (isRewardedCartItem(item)) {
-      return 0;
-    }
-
-    return calculateCartItemTotal({
+    const normalTotal = calculateCartItemTotal({
       basePrice: item.menuItem?.price || 0,
       quantity: item.quantity,
       customizationJson: item.customizationJson,
     });
+
+    if (!isRewardedCartItem(item)) {
+      return normalTotal;
+    }
+
+    const singleItemPrice = calculateCartItemTotal({
+      basePrice: item.menuItem?.price || 0,
+      quantity: 1,
+      customizationJson: item.customizationJson,
+    });
+
+    return Math.max(normalTotal - singleItemPrice, 0);
   };
 
   const calculateOrderTotal = (): number => {
@@ -182,6 +190,9 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
       </View>
     );
   }
+  const subtotal = calculateOrderTotal() || 0;
+  const tax = Math.round(subtotal * 0.08 * 100) / 100;
+  const total = subtotal + tax;
 
   if (itemCount === 0) {
     return (
@@ -327,8 +338,10 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
                   ]}
                 >
                   {isRewardedItem
-                    ? "Free"
-                    : `$${(calculateItemTotal(item) || 0).toFixed(2)}`}
+                    ? item.quantity > 1
+                      ? `${calculateItemTotal(item).toFixed(2)} \n 1 Free`
+                      : "Free"
+                    : `$${calculateItemTotal(item).toFixed(2)}`}
                 </ThemedText>
 
                 <TouchableOpacity
@@ -372,7 +385,7 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
           </ThemedText>
 
           <ThemedText style={[styles.summaryValue, { color: theme.text }]}>
-            ${((calculateOrderTotal() || 0) * 0.08).toFixed(2)}
+            ${tax.toFixed(2)}
           </ThemedText>
         </View>
 
@@ -384,7 +397,7 @@ export function ViewCart({ onCheckout }: ViewCartProps) {
           </ThemedText>
 
           <ThemedText style={[styles.totalValue, { color: theme.accentDark }]}>
-            ${((calculateOrderTotal() || 0) * 1.08).toFixed(2)}
+            ${total.toFixed(2)}
           </ThemedText>
         </View>
 
