@@ -322,7 +322,7 @@ export default function OrderPage() {
     const filtered = activeCategory === "All" ? menuItems : menuItems.filter(d => d.category === activeCategory);
 
     const handleAddClick = (item: MenuItem) => {
-        if (item.category === "Drinks") {
+        if (item.category === "Drinks" && !["Strawberry Limeade", "Shaken Lemonade"].includes(item.name)) {
             setModalItem(item);
         } else {
             setCart(prev => {
@@ -393,7 +393,7 @@ export default function OrderPage() {
             <div className="grid grid-cols-1 gap-5 px-6 pb-12 sm:grid-cols-2 md:px-12 lg:grid-cols-3 xl:grid-cols-4">
                 {filtered.map(item => (
                     <div key={item.name} className="flex flex-col overflow-hidden rounded-xl border border-[#e0e0e0] bg-white shadow-sm">
-                        <div className="h-40 w-full overflow-hidden bg-[#f0fdf4]">
+                        <div className="h-28 w-full overflow-hidden bg-[#f0fdf4]">
                             <img src={item.image} alt={item.name} className="h-full w-full object-cover"
                                 onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&fit=crop&auto=format"; }} />
                         </div>

@@ -25,10 +25,10 @@ import { useNavigate } from 'react-router-dom';
 import classes from './HeaderMegaMenu.module.scss';
 
 const menuCategories = [
-    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more', slug: 'drinks' },
-    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite', slug: 'sweet-crepes' },
-    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors', slug: 'savory-crepes' },
-    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels', slug: 'bagels' },
+    { icon: IconCup, title: 'Drinks', description: 'Coffee, lattes, juice and more', slug: 'Drinks' },
+    { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite', slug: 'Sweet Crepes' },
+    { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors', slug: 'Savory Crepes' },
+    { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels', slug: 'Bagels' },
 
 ];
 
@@ -40,7 +40,7 @@ export function HeaderMegaMenu() {
         <UnstyledButton
             className={classes.subLink}
             key={item.title}
-            onClick={() => navigate(`/order/${item.slug}`)}
+            onClick={() => navigate(`/order?category=${encodeURIComponent(item.slug)}`)}
         >
             <Group wrap="nowrap" align="flex-start">
                 <ThemeIcon size={34} variant="default" radius="md">
