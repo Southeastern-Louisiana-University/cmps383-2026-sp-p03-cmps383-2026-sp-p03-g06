@@ -7,11 +7,11 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,7 +32,15 @@ export default function PreviousOrdersScreen() {
       const data = await getMyOrders();
       console.log("MY ORDERS RESPONSE:", data);
 
-      setOrders(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else if (Array.isArray(data?.data)) {
+        setOrders(data.data);
+      } else if (Array.isArray(data?.orders)) {
+        setOrders(data.orders);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
       console.log("Failed to load previous orders:", error);
       setOrders([]);

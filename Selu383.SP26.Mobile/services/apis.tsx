@@ -290,6 +290,10 @@ export async function getMyOrders() {
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.log("GET MY ORDERS STATUS:", response.status);
+    console.log("GET MY ORDERS ERROR:", errorText);
+
     throw new Error("Failed to load previous orders");
   }
 
