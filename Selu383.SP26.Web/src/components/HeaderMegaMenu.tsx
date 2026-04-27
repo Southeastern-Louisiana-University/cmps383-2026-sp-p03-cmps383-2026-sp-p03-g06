@@ -7,7 +7,6 @@ import {
     IconSnowflake,
 } from '@tabler/icons-react';
 import {
-    Anchor,
     Box,
     Burger,
     Button,
@@ -21,11 +20,11 @@ import {
     Text,
     ThemeIcon,
     UnstyledButton,
-    useMantineTheme,
     Container,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import classes from './HeaderMegaMenu.module.scss';
 
 const menuCategories = [
@@ -39,8 +38,36 @@ const menuCategories = [
 export function HeaderMegaMenu() {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
-    const theme = useMantineTheme();
     const navigate = useNavigate();
+
+    const [user, setUser] = useState<{ name?: string; username?: string } | null>(null);
+    const [menuOpened, setMenuOpened] = useState(false);
+
+    useEffect(() => {
+        const syncUser = () => {
+            const storedUser = localStorage.getItem("user");
+            if (!storedUser) {
+                setUser(null);
+                return;
+            }
+
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch {
+                localStorage.removeItem("user");
+                setUser(null);
+            }
+        };
+
+        syncUser();
+        window.addEventListener("userChange", syncUser);
+        window.addEventListener("storage", syncUser);
+
+        return () => {
+            window.removeEventListener("userChange", syncUser);
+            window.removeEventListener("storage", syncUser);
+        };
+    }, []);
 
     const dropdownLinks = menuCategories.map((item) => (
         <UnstyledButton
@@ -61,124 +88,206 @@ export function HeaderMegaMenu() {
     ));
 
     return (
-        <Box style={{ width: '100%', margin: 0, padding: 0 }}>
+        <Box>
             <header className={classes.header}>
                 <Container fluid className={classes.inner}>
 
-                    {/* LEFT — Logo */}
-                    <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#7bf1a8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                    {/* LOGO */}
+                    <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            background: '#7bf1a8',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
                             ☕
                         </div>
-                        <span style={{ fontWeight: 600, fontSize: 16, color: '#1a4731' }}>Caffeinated Lions</span>
+                        <span style={{ fontWeight: 600, color: '#1a4731' }}>
+                            Caffeinated Lions
+                        </span>
                     </a>
 
-                    {/* CENTER — Nav */}
+                    {/* NAV */}
                     <div className={classes.nav}>
                         <a href="/" className={classes.link}>Home</a>
 
-                        {/* ORDER DROPDOWN */}
-                        <HoverCard width={480} position="bottom" radius="md" shadow="md" withinPortal>
+                        <HoverCard width={480} shadow="md">
                             <HoverCard.Target>
-                                <a className={classes.link} style={{ cursor: 'pointer' }}>
+                                <a className={classes.link}>
                                     <Center inline>
-                                        <Box component="span" mr={5}>Order</Box>
-                                        <IconChevronDown size={16} color={theme.colors.gray[6]} />
+                                        Order
+                                        <IconChevronDown size={16} />
                                     </Center>
                                 </a>
                             </HoverCard.Target>
 
-                            <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
-                                <Group justify="space-between" px="md" mb={4}>
+                            <HoverCard.Dropdown>
+                                <Group px="md">
                                     <Text fw={500}>Our menu</Text>
-                                    <Anchor href="/order" fz="xs" c="green">View full menu</Anchor>
                                 </Group>
 
-                                <Divider mb="sm" />
+                                <Divider my="sm" />
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, padding: '0 8px 8px' }}>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: 4
+                                }}>
                                     {dropdownLinks}
-                                </div>
-
-                                <div className={classes.dropdownFooter}>
-                                    <Group justify="space-between">
-                                        <div>
-                                            <Text fw={500} fz="sm">Ready to order?</Text>
-                                            <Text size="xs" c="dimmed">Skip the line, pick up in store</Text>
-                                        </div>
-                                        <Button
-                                            variant="filled"
-                                            color="green"
-                                            radius="xl"
-                                            onClick={() => navigate('/order')}
-                                            style={{ background: '#7bf1a8', color: '#1a4731' }}
-                                        >
-                                            Order now
-                                        </Button>
-                                    </Group>
                                 </div>
                             </HoverCard.Dropdown>
                         </HoverCard>
 
                         <a href="/rewards" className={classes.link}>Rewards</a>
-                        <a href="/profile" className={classes.link}>Profile</a>
+
+                        {user && <a href="/profile" className={classes.link}>Profile</a>}
                     </div>
 
-                    {/* RIGHT — Auth */}
-                    <Group visibleFrom="sm" className={classes.auth}>
-                        <Button variant="default" radius="xl">Log in</Button>
-                        <Button radius="xl" className={classes.join}>Sign up</Button>
+                    {/* AUTH */}
+                    <Group visibleFrom="sm">
+
+                        {user ? (
+                            <div style={{ position: "relative" }}>
+
+                                {/* GREEN USER BUTTON */}
+                                <Button
+                                    radius="xl"
+                                    onClick={() => setMenuOpened((o) => !o)}
+                                    style={{
+                                        background: "#7bf1a8",
+                                        color: "#1a4731",
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Hi, {user.username || user.name || "User"}
+                                </Button>
+
+                                {/* DROPDOWN */}
+                                {menuOpened && (
+                                    <div style={{
+                                        position: "absolute",
+                                        right: 0,
+                                        marginTop: 8,
+                                        background: "white",
+                                        borderRadius: 10,
+                                        boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                                        overflow: "hidden",
+                                        minWidth: 150
+                                    }}>
+
+                                        <button
+                                            onClick={() => {
+                                                setMenuOpened(false);
+                                                navigate("/profile");
+                                            }}
+                                            style={{
+                                                width: "100%",
+                                                padding: "10px",
+                                                textAlign: "left",
+                                                background: "white",
+                                                border: "none",
+                                                cursor: "pointer"
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                                        >
+                                            Profile
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                localStorage.clear();
+                                                window.dispatchEvent(new Event("userChange"));
+                                                navigate("/signin");
+                                            }}
+                                            style={{
+                                                width: "100%",
+                                                padding: "10px",
+                                                textAlign: "left",
+                                                background: "white",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: "#d9534f"
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = "#fff5f5"}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                                        >
+                                            Log out
+                                        </button>
+
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    radius="xl"
+                                    onClick={() => navigate("/signin")}
+                                    style={{
+                                        borderColor: "#7bf1a8",
+                                        color: "#1a4731"
+                                    }}
+                                >
+                                    Log in
+                                </Button>
+
+                                <Button
+                                    radius="xl"
+                                    onClick={() => navigate("/signup")}
+                                    style={{
+                                        background: "#7bf1a8",
+                                        color: "#1a4731"
+                                    }}
+                                >
+                                    Sign up
+                                </Button>
+                            </>
+                        )}
                     </Group>
 
-                    {/* MOBILE BURGER */}
-                    <Burger
-                        opened={drawerOpened}
-                        onClick={toggleDrawer}
-                        hiddenFrom="sm"
-                        aria-label="Toggle navigation"
-                    />
+                    <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
                 </Container>
             </header>
 
-            {/* MOBILE DRAWER */}
-            <Drawer
-                opened={drawerOpened}
-                onClose={closeDrawer}
-                size="100%"
-                padding="md"
-                title="Caffeinated Lions"
-                hiddenFrom="sm"
-                zIndex={1000000}
-            >
-                <ScrollArea h="calc(100vh - 80px)" mx="-md">
-                    <Divider my="sm" />
+            {/* MOBILE */}
+            <Drawer opened={drawerOpened} onClose={closeDrawer}>
+                <ScrollArea>
 
                     <a href="/" className={classes.link}>Home</a>
 
-                    <UnstyledButton className={classes.link} onClick={toggleLinks}>
-                        <Center inline>
-                            <Box component="span" mr={5}>Order</Box>
-                            <IconChevronDown size={16} color={theme.colors.gray[6]} />
-                        </Center>
+                    <UnstyledButton onClick={toggleLinks}>
+                        Order
                     </UnstyledButton>
 
                     <Collapse expanded={linksOpened}>
                         {menuCategories.map((item) => (
-                            <a key={item.title} href="/order" className={classes.link} style={{ paddingLeft: 32, fontSize: 14 }}>
-                                {item.title}
-                            </a>
+                            <a key={item.title} href="/order">{item.title}</a>
                         ))}
                     </Collapse>
 
-                    <a href="/rewards" className={classes.link}>Rewards</a>
-                    <a href="/profile" className={classes.link}>Profile</a>
+                    <a href="/rewards">Rewards</a>
 
-                    <Divider my="sm" />
-
-                    <Group justify="center" grow pb="xl" px="md">
-                        <Button variant="default" radius="xl">Log in</Button>
-                        <Button radius="xl" className={classes.join}>Sign up</Button>
-                    </Group>
+                    {user ? (
+                        <Button
+                            color="red"
+                            onClick={() => {
+                                localStorage.clear();
+                                window.dispatchEvent(new Event("userChange"));
+                                navigate("/signin");
+                            }}
+                        >
+                            Log out
+                        </Button>
+                    ) : (
+                        <>
+                            <Button onClick={() => navigate("/signin")}>Log in</Button>
+                            <Button onClick={() => navigate("/signup")}>Sign up</Button>
+                        </>
+                    )}
                 </ScrollArea>
             </Drawer>
         </Box>
