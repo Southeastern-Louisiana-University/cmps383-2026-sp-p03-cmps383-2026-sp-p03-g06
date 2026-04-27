@@ -78,10 +78,17 @@ public class AuthenticationController : ControllerBase
         {
             return BadRequest("Username already exists");
         }
+        var existingEmail = await userManager.FindByEmailAsync(dto.Email);
+        if (existingEmail != null)
+        {
+            return BadRequest("Email already exists");
+        }
 
         // Create new user
         var newUser = new User
         {
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber,
             UserName = dto.UserName
         };
 

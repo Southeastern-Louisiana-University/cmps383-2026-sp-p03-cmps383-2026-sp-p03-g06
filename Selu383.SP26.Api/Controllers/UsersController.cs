@@ -1,12 +1,13 @@
-using System.Transactions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Data;
 using Selu383.SP26.Api.Extensions;
 using Selu383.SP26.Api.Features.Auth;
 using Selu383.SP26.Api.Features.Locations;
 using Selu383.SP26.Api.Features.Orders;
+using System.Transactions;
 
 namespace Selu383.SP26.Api.Controllers;
 
@@ -58,6 +59,8 @@ public class UsersController : ControllerBase
         {
             Id = newUser.Id,
             Roles = dto.Roles,
+            Email = newUser.Email,
+            PhoneNumber = newUser.PhoneNumber,
             UserName = newUser.UserName,
         });
     }
@@ -96,10 +99,21 @@ public class UsersController : ControllerBase
     public ActionResult<IEnumerable<OrderDto>> GetMyOrders()
     {
         var userId = User.GetCurrentUserId();
-        
+
+        var allOrders = dataContext.Set<Order>().ToList();
+
+        Console.WriteLine($"Current User ID: {userId}");
+
+        foreach (var order in allOrders)
+        {
+            Console.WriteLine($"Order ID: {order.Id}, CustomerId: {order.CustomerId}");
+        }
+
         var orders = dataContext.Set<Order>()
+            .Include(x => x.OrderItems)
             .Where(x => x.CustomerId == userId)
             .OrderByDescending(x => x.CreatedAt)
+            .ToList()
             .Select(x => MapOrderToDto(x))
             .ToList();
 
@@ -174,7 +188,7 @@ public class UsersController : ControllerBase
             Status = order.Status,
             CreatedAt = order.CreatedAt,
             PickedUpAt = order.PickedUpAt,
-            OrderItems = order.OrderItems.Select(x => new OrderItemDto
+            OrderItems = order.OrderItems?.Select(x => new OrderItemDto
             {
                 Id = x.Id,
                 MenuItemId = x.MenuItemId,
@@ -182,7 +196,7 @@ public class UsersController : ControllerBase
                 UnitPrice = x.UnitPrice,
                 TotalPrice = x.TotalPrice,
                 CustomizationJson = x.CustomizationJson
-            }).ToList()
+            }).ToList() ?? new List<OrderItemDto>()
         };
     }
 }
