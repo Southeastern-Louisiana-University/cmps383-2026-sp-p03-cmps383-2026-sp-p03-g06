@@ -10,14 +10,15 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpScreen() {
   const { colorScheme } = useColorScheme();
   const theme = getTheme(colorScheme);
-
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +39,23 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
-    if (!userName.trim() || !password.trim()) {
+    if (
+      !userName.trim() ||
+      !password.trim() ||
+      !email.trim() ||
+      !phoneNumber.trim()
+    ) {
       Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert("Invalid Email", "Please enter a valid email address");
+      return;
+    }
+    if (phoneNumber.replace(/\D/g, "").length < 10) {
+      Alert.alert("Invalid Phone", "Please enter a valid phone number");
       return;
     }
 
@@ -55,6 +71,8 @@ export default function SignUpScreen() {
     setIsLoading(true);
     try {
       const registerData: RegisterDto = {
+        email: email.trim(),
+        phoneNumber: phoneNumber.trim(),
         userName: userName.trim(),
         password: password,
       };
@@ -89,7 +107,37 @@ export default function SignUpScreen() {
         <ThemedText style={[styles.signInHeader, { color: theme.text }]}>
           Start claiming rewards now!
         </ThemedText>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
+          placeholder="Email"
+          placeholderTextColor={theme.mutedText}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
 
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+              color: theme.text,
+            },
+          ]}
+          placeholder="Phone Number"
+          placeholderTextColor={theme.mutedText}
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
         <TextInput
           style={[
             styles.input,
