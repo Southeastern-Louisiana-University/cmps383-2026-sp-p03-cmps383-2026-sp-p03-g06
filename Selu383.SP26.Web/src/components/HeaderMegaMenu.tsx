@@ -1,5 +1,4 @@
-import Logo from '../assets/Caff-logo.png';
-
+import { useDisclosure } from '@mantine/hooks';
 import {
     IconChevronDown,
     IconCup,
@@ -9,6 +8,7 @@ import {
 } from '@tabler/icons-react';
 import {
     Box,
+    Burger,
     Button,
     Center,
     Divider,
@@ -28,12 +28,10 @@ const menuCategories = [
     { icon: IconCakeRoll, title: 'Sweet Crepes', description: 'Untamed sweetness in every bite', slug: 'Sweet Crepes' },
     { icon: IconBreadFilled, title: 'Savory Crepes', description: 'Fuel your hunt with bold, savory flavors', slug: 'Savory Crepes' },
     { icon: IconBurger, title: 'Bagels', description: 'Come take a bite of our freshly baked bagels', slug: 'Bagels' },
-
 ];
 
 export function HeaderMegaMenu() {
-    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-    const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
+    const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(false);
     const navigate = useNavigate();
 
     const [user, setUser] = useState<{ name?: string; username?: string } | null>(null);
@@ -42,11 +40,7 @@ export function HeaderMegaMenu() {
     useEffect(() => {
         const syncUser = () => {
             const storedUser = localStorage.getItem("user");
-            if (!storedUser) {
-                setUser(null);
-                return;
-            }
-
+            if (!storedUser) { setUser(null); return; }
             try {
                 setUser(JSON.parse(storedUser));
             } catch {
@@ -58,7 +52,6 @@ export function HeaderMegaMenu() {
         syncUser();
         window.addEventListener("userChange", syncUser);
         window.addEventListener("storage", syncUser);
-
         return () => {
             window.removeEventListener("userChange", syncUser);
             window.removeEventListener("storage", syncUser);
@@ -91,19 +84,12 @@ export function HeaderMegaMenu() {
                     {/* LOGO */}
                     <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            background: '#7bf1a8',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
+                            width: 32, height: 32, borderRadius: '50%', background: '#7bf1a8',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
                             ☕
                         </div>
-                        <span style={{ fontWeight: 600, color: '#1a4731' }}>
-                            Caffeinated Lions
-                        </span>
+                        <span style={{ fontWeight: 600, color: '#1a4731' }}>Caffeinated Lions</span>
                     </a>
 
                     {/* NAV */}
@@ -119,126 +105,62 @@ export function HeaderMegaMenu() {
                                     </Center>
                                 </a>
                             </HoverCard.Target>
-
                             <HoverCard.Dropdown>
                                 <Group px="md">
                                     <Text fw={500}>Our menu</Text>
                                 </Group>
-
                                 <Divider my="sm" />
-
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '1fr 1fr',
-                                    gap: 4
-                                }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
                                     {dropdownLinks}
                                 </div>
                             </HoverCard.Dropdown>
                         </HoverCard>
 
                         <a href="/rewards" className={classes.link}>Rewards</a>
-
                         {user && <a href="/profile" className={classes.link}>Profile</a>}
                     </div>
 
                     {/* AUTH */}
                     <Group visibleFrom="sm">
-
                         {user ? (
                             <div style={{ position: "relative" }}>
-
-                                {/* GREEN USER BUTTON */}
                                 <Button
                                     radius="xl"
                                     onClick={() => setMenuOpened((o) => !o)}
-                                    style={{
-                                        background: "#7bf1a8",
-                                        color: "#1a4731",
-                                        fontWeight: 600
-                                    }}
+                                    style={{ background: "#7bf1a8", color: "#1a4731", fontWeight: 600 }}
                                 >
                                     Hi, {user.username || user.name || "User"}
                                 </Button>
-
-                                {/* DROPDOWN */}
                                 {menuOpened && (
                                     <div style={{
-                                        position: "absolute",
-                                        right: 0,
-                                        marginTop: 8,
-                                        background: "white",
-                                        borderRadius: 10,
+                                        position: "absolute", right: 0, marginTop: 8,
+                                        background: "white", borderRadius: 10,
                                         boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-                                        overflow: "hidden",
-                                        minWidth: 150
+                                        overflow: "hidden", minWidth: 150
                                     }}>
-
                                         <button
-                                            onClick={() => {
-                                                setMenuOpened(false);
-                                                navigate("/profile");
-                                            }}
-                                            style={{
-                                                width: "100%",
-                                                padding: "10px",
-                                                textAlign: "left",
-                                                background: "white",
-                                                border: "none",
-                                                cursor: "pointer"
-                                            }}
+                                            onClick={() => { setMenuOpened(false); navigate("/profile"); }}
+                                            style={{ width: "100%", padding: "10px", textAlign: "left", background: "white", border: "none", cursor: "pointer" }}
                                             onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"}
                                             onMouseLeave={(e) => e.currentTarget.style.background = "white"}
-                                        >
-                                            Profile
-                                        </button>
-
+                                        >Profile</button>
                                         <button
-                                            onClick={() => {
-                                                localStorage.clear();
-                                                window.dispatchEvent(new Event("userChange"));
-                                                navigate("/signin");
-                                            }}
-                                            style={{
-                                                width: "100%",
-                                                padding: "10px",
-                                                textAlign: "left",
-                                                background: "white",
-                                                border: "none",
-                                                cursor: "pointer",
-                                                color: "#d9534f"
-                                            }}
+                                            onClick={() => { localStorage.clear(); window.dispatchEvent(new Event("userChange")); navigate("/signin"); }}
+                                            style={{ width: "100%", padding: "10px", textAlign: "left", background: "white", border: "none", cursor: "pointer", color: "#d9534f" }}
                                             onMouseEnter={(e) => e.currentTarget.style.background = "#fff5f5"}
                                             onMouseLeave={(e) => e.currentTarget.style.background = "white"}
-                                        >
-                                            Log out
-                                        </button>
-
+                                        >Log out</button>
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <>
-                                <Button
-                                    variant="outline"
-                                    radius="xl"
-                                    onClick={() => navigate("/signin")}
-                                    style={{
-                                        borderColor: "#7bf1a8",
-                                        color: "#1a4731"
-                                    }}
-                                >
+                                <Button variant="outline" radius="xl" onClick={() => navigate("/signin")}
+                                    style={{ borderColor: "#7bf1a8", color: "#1a4731" }}>
                                     Log in
                                 </Button>
-
-                                <Button
-                                    radius="xl"
-                                    onClick={() => navigate("/signup")}
-                                    style={{
-                                        background: "#7bf1a8",
-                                        color: "#1a4731"
-                                    }}
-                                >
+                                <Button radius="xl" onClick={() => navigate("/signup")}
+                                    style={{ background: "#7bf1a8", color: "#1a4731" }}>
                                     Sign up
                                 </Button>
                             </>
@@ -248,44 +170,6 @@ export function HeaderMegaMenu() {
                     <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
                 </Container>
             </header>
-
-            {/* MOBILE */}
-            <Drawer opened={drawerOpened} onClose={closeDrawer}>
-                <ScrollArea>
-
-                    <a href="/" className={classes.link}>Home</a>
-
-                    <UnstyledButton onClick={toggleLinks}>
-                        Order
-                    </UnstyledButton>
-
-                    <Collapse expanded={linksOpened}>
-                        {menuCategories.map((item) => (
-                            <a key={item.title} href="/order">{item.title}</a>
-                        ))}
-                    </Collapse>
-
-                    <a href="/rewards">Rewards</a>
-
-                    {user ? (
-                        <Button
-                            color="red"
-                            onClick={() => {
-                                localStorage.clear();
-                                window.dispatchEvent(new Event("userChange"));
-                                navigate("/signin");
-                            }}
-                        >
-                            Log out
-                        </Button>
-                    ) : (
-                        <>
-                            <Button onClick={() => navigate("/signin")}>Log in</Button>
-                            <Button onClick={() => navigate("/signup")}>Sign up</Button>
-                        </>
-                    )}
-                </ScrollArea>
-            </Drawer>
         </Box>
     );
 }
